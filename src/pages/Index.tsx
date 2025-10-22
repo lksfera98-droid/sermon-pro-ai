@@ -6,7 +6,7 @@ import { SermonDisplay } from "@/components/SermonDisplay";
 import { TranslatorSection } from "@/components/TranslatorSection";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { ExternalLink, BookOpen, Book, Menu, X } from "lucide-react";
+import { ExternalLink, BookOpen, Book, Menu, X, Home } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
@@ -135,9 +135,19 @@ const Index = () => {
           
           {currentView === "new-sermon" && (
             <div className="space-y-6 md:space-y-8">
-              <div>
-                <h1 className="text-2xl md:text-3xl font-bold text-foreground mb-2">Criar Novo Sermão</h1>
-                <p className="text-sm md:text-base text-muted-foreground">Preencha os dados abaixo para gerar seu sermão</p>
+              <div className="flex items-center justify-between">
+                <div className="flex-1">
+                  <h1 className="text-2xl md:text-3xl font-bold text-foreground mb-2">Criar Novo Sermão</h1>
+                  <p className="text-sm md:text-base text-muted-foreground">Preencha os dados abaixo para gerar seu sermão</p>
+                </div>
+                <Button
+                  onClick={() => setCurrentView("dashboard")}
+                  variant="outline"
+                  className="gap-2"
+                >
+                  <Home className="h-4 w-4" />
+                  <span className="hidden md:inline">Início</span>
+                </Button>
               </div>
               
               <SermonForm onGenerate={handleGenerate} isLoading={isLoading} />
@@ -150,15 +160,40 @@ const Index = () => {
             </div>
           )}
           
-          {currentView === "translator" && <TranslatorSection />}
+          {currentView === "translator" && (
+            <div className="space-y-6 md:space-y-8">
+              <div className="flex items-center justify-between mb-4">
+                <h1 className="text-2xl md:text-3xl font-bold text-foreground">Tradutor Bíblico</h1>
+                <Button
+                  onClick={() => setCurrentView("dashboard")}
+                  variant="outline"
+                  className="gap-2"
+                >
+                  <Home className="h-4 w-4" />
+                  <span className="hidden md:inline">Início</span>
+                </Button>
+              </div>
+              <TranslatorSection />
+            </div>
+          )}
           
           {currentView === "bible-studies" && (
             <div className="space-y-6 md:space-y-8">
-              <div>
-                <h1 className="text-2xl md:text-3xl font-bold text-foreground mb-2">Estudos Bíblicos</h1>
-                <p className="text-sm md:text-base text-muted-foreground">
-                  Acesse uma coleção completa de estudos bíblicos para enriquecer suas pregações
-                </p>
+              <div className="flex items-center justify-between">
+                <div className="flex-1">
+                  <h1 className="text-2xl md:text-3xl font-bold text-foreground mb-2">Estudos Bíblicos</h1>
+                  <p className="text-sm md:text-base text-muted-foreground">
+                    Acesse uma coleção completa de estudos bíblicos para enriquecer suas pregações
+                  </p>
+                </div>
+                <Button
+                  onClick={() => setCurrentView("dashboard")}
+                  variant="outline"
+                  className="gap-2 ml-4"
+                >
+                  <Home className="h-4 w-4" />
+                  <span className="hidden md:inline">Início</span>
+                </Button>
               </div>
               <ResourceCard
                 title="Estudos Bíblicos"
@@ -171,11 +206,21 @@ const Index = () => {
           
           {currentView === "dictionaries" && (
             <div className="space-y-6 md:space-y-8">
-              <div>
-                <h1 className="text-2xl md:text-3xl font-bold text-foreground mb-2">Dicionários Bíblicos</h1>
-                <p className="text-sm md:text-base text-muted-foreground">
-                  Consulte dicionários bíblicos para aprofundar seu conhecimento teológico
-                </p>
+              <div className="flex items-center justify-between">
+                <div className="flex-1">
+                  <h1 className="text-2xl md:text-3xl font-bold text-foreground mb-2">Dicionários Bíblicos</h1>
+                  <p className="text-sm md:text-base text-muted-foreground">
+                    Consulte dicionários bíblicos para aprofundar seu conhecimento teológico
+                  </p>
+                </div>
+                <Button
+                  onClick={() => setCurrentView("dashboard")}
+                  variant="outline"
+                  className="gap-2 ml-4"
+                >
+                  <Home className="h-4 w-4" />
+                  <span className="hidden md:inline">Início</span>
+                </Button>
               </div>
               <ResourceCard
                 title="Dicionários Bíblicos"
@@ -188,11 +233,21 @@ const Index = () => {
           
           {currentView === "study-bibles" && (
             <div className="space-y-6 md:space-y-8">
-              <div>
-                <h1 className="text-2xl md:text-3xl font-bold text-foreground mb-2">Bíblias de Estudo</h1>
-                <p className="text-sm md:text-base text-muted-foreground">
-                  Baixe diferentes versões de Bíblias de estudo para suas pesquisas
-                </p>
+              <div className="flex items-center justify-between">
+                <div className="flex-1">
+                  <h1 className="text-2xl md:text-3xl font-bold text-foreground mb-2">Bíblias de Estudo</h1>
+                  <p className="text-sm md:text-base text-muted-foreground">
+                    Baixe diferentes versões de Bíblias de estudo para suas pesquisas
+                  </p>
+                </div>
+                <Button
+                  onClick={() => setCurrentView("dashboard")}
+                  variant="outline"
+                  className="gap-2 ml-4"
+                >
+                  <Home className="h-4 w-4" />
+                  <span className="hidden md:inline">Início</span>
+                </Button>
               </div>
               <ResourceCard
                 title="Bíblias de Estudo"

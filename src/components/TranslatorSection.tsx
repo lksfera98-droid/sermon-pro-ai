@@ -48,14 +48,6 @@ export const TranslatorSection = () => {
 
   return (
     <div className="space-y-6 md:space-y-8">
-      {/* Header */}
-      <div>
-        <h1 className="text-2xl md:text-3xl font-bold text-foreground mb-2">Tradutor Bíblico</h1>
-        <p className="text-sm md:text-base text-muted-foreground">
-          Traduza palavras para Hebraico, Grego e Aramaico
-        </p>
-      </div>
-
       {/* Translation Form */}
       <Card className="p-4 md:p-6">
         <form onSubmit={handleTranslate} className="space-y-4">

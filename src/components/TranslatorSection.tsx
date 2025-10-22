@@ -6,8 +6,10 @@ import { Label } from "@/components/ui/label";
 import { Loader2, Languages } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export const TranslatorSection = () => {
+  const { t } = useLanguage();
   const [word, setWord] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [translation, setTranslation] = useState<{
@@ -37,10 +39,10 @@ export const TranslatorSection = () => {
       }
 
       setTranslation(data);
-      toast.success("Tradução obtida com sucesso!");
+      toast.success(t('translate') + "!");
     } catch (error) {
       console.error('Erro ao traduzir palavra:', error);
-      toast.error("Erro ao traduzir palavra. Tente novamente.");
+      toast.error(t('translate'));
     } finally {
       setIsLoading(false);
     }
@@ -53,7 +55,7 @@ export const TranslatorSection = () => {
         <form onSubmit={handleTranslate} className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="word" className="text-sm md:text-base font-semibold">
-              Palavra ou Nome
+              {t('wordOrName')}
             </Label>
             <div className="flex gap-2">
               <Input
@@ -73,7 +75,7 @@ export const TranslatorSection = () => {
                 ) : (
                   <>
                     <Languages className="mr-2 h-5 w-5" />
-                    <span className="hidden md:inline">Traduzir</span>
+                    <span className="hidden md:inline">{t('translate')}</span>
                   </>
                 )}
               </Button>
@@ -85,26 +87,26 @@ export const TranslatorSection = () => {
       {/* Translation Results */}
       {translation && (
         <div className="space-y-4 md:space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
-          <h2 className="text-xl md:text-2xl font-bold text-primary">Resultado da Tradução</h2>
+          <h2 className="text-xl md:text-2xl font-bold text-primary">{t('translationResult')}</h2>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
             {translation.hebrew && (
               <Card className="p-4 md:p-6">
-                <h3 className="text-lg md:text-xl font-bold text-primary mb-3">Hebraico</h3>
+                <h3 className="text-lg md:text-xl font-bold text-primary mb-3">{t('hebrew')}</h3>
                 <p className="text-xl md:text-2xl font-semibold text-foreground">{translation.hebrew}</p>
               </Card>
             )}
             
             {translation.greek && (
               <Card className="p-4 md:p-6">
-                <h3 className="text-lg md:text-xl font-bold text-primary mb-3">Grego</h3>
+                <h3 className="text-lg md:text-xl font-bold text-primary mb-3">{t('greek')}</h3>
                 <p className="text-xl md:text-2xl font-semibold text-foreground">{translation.greek}</p>
               </Card>
             )}
             
             {translation.aramaic && (
               <Card className="p-4 md:p-6">
-                <h3 className="text-lg md:text-xl font-bold text-primary mb-3">Aramaico</h3>
+                <h3 className="text-lg md:text-xl font-bold text-primary mb-3">{t('aramaic')}</h3>
                 <p className="text-xl md:text-2xl font-semibold text-foreground">{translation.aramaic}</p>
               </Card>
             )}
@@ -112,7 +114,7 @@ export const TranslatorSection = () => {
 
           {translation.etymology && (
             <Card className="p-4 md:p-6">
-              <h3 className="text-lg md:text-xl font-bold text-primary mb-3">Etimologia</h3>
+              <h3 className="text-lg md:text-xl font-bold text-primary mb-3">{t('etymology')}</h3>
               <p className="text-sm md:text-base text-foreground leading-relaxed whitespace-pre-wrap">
                 {translation.etymology}
               </p>
@@ -121,7 +123,7 @@ export const TranslatorSection = () => {
 
           {translation.history && (
             <Card className="p-4 md:p-6">
-              <h3 className="text-lg md:text-xl font-bold text-primary mb-3">História da Palavra</h3>
+              <h3 className="text-lg md:text-xl font-bold text-primary mb-3">{t('wordHistory')}</h3>
               <p className="text-sm md:text-base text-foreground leading-relaxed whitespace-pre-wrap">
                 {translation.history}
               </p>

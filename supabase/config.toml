@@ -5,3 +5,6 @@ verify_jwt = false
 
 [functions.translate-word]
 verify_jwt = false
+
+[functions.search-verses]
+verify_jwt = false

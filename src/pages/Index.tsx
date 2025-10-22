@@ -112,7 +112,7 @@ const Index = () => {
             <div className="flex items-center justify-between">
               <div className="flex-1">
                 <h1 className="text-2xl md:text-3xl font-bold text-foreground mb-2">{t('createSermon')}</h1>
-                <p className="text-sm md:text-base text-muted-foreground">Preencha os dados abaixo para gerar seu sermão</p>
+                <p className="text-sm md:text-base text-muted-foreground">{t('fillDataBelow')}</p>
               </div>
               <Button
                 onClick={() => setCurrentView("dashboard")}

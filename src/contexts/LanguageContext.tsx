@@ -218,6 +218,11 @@ const translations: Translations = {
     pt: 'Crie seu primeiro sermão para começar!',
     en: 'Create your first sermon to get started!',
     es: '¡Crea tu primer sermón para empezar!'
+  },
+  fillDataBelow: {
+    pt: 'Preencha os dados abaixo para gerar seu sermão',
+    en: 'Fill in the data below to generate your sermon',
+    es: 'Completa los datos a continuación para generar tu sermón'
   }
 };
 

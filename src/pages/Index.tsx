@@ -35,7 +35,7 @@ const Index = () => {
     }
   }, [recentSermons]);
 
-  const handleGenerate = async (data: { tema: string; versiculo: string; tempo: number }) => {
+  const handleGenerate = async (data: { tema: string; versiculo: string; tempo: number; language: string }) => {
     setIsLoading(true);
     setSermon(null);
 

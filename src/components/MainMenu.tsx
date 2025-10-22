@@ -14,6 +14,7 @@ import { useState } from "react";
 import { usePWAInstall } from "@/hooks/usePWAInstall";
 import { toast } from "sonner";
 import { useLanguage } from "@/contexts/LanguageContext";
+import preacherLogo from "@/assets/preacher-logo.png";
 
 type View = "dashboard" | "new-sermon" | "translator" | "bible-studies" | "dictionaries" | "study-bibles";
 
@@ -63,13 +64,27 @@ export const MainMenu = ({ onNavigate }: MainMenuProps) => {
   return (
     <div className="min-h-screen w-full flex flex-col items-center justify-center p-4 bg-background">
       <div className="w-full max-w-md space-y-6">
-        {/* Header with Language Selector */}
+        {/* Header with Logo and Language Selector */}
         <div className="text-center space-y-4">
+          {/* Logo Image */}
+          <div className="flex justify-center mb-4">
+            <img 
+              src={preacherLogo} 
+              alt="App do Pregador" 
+              className="w-48 h-48 object-contain rounded-lg"
+            />
+          </div>
+          
           <h1 className="text-3xl md:text-4xl font-bold text-primary">
-            ✝️ {t('welcome')}
+            {t('welcome')}
           </h1>
           <p className="text-sm md:text-base text-muted-foreground">
             {t('welcomeSubtitle')}
+          </p>
+          
+          {/* Choose Language Prompt */}
+          <p className="text-sm font-semibold text-primary">
+            {t('chooseLanguage')}
           </p>
           
           {/* Language Selector */}
@@ -113,20 +128,18 @@ export const MainMenu = ({ onNavigate }: MainMenuProps) => {
               📱 {t('installApp')}
             </h2>
             
-            <div className="space-y-2">
-              {isInstallable && (
-                <Button
-                  onClick={handleAndroidInstall}
-                  className="w-full h-12 text-base bg-green-600 hover:bg-green-700 text-white"
-                >
-                  <Smartphone className="mr-2 h-5 w-5" />
-                  📲 {t('installAndroid')}
-                </Button>
-              )}
+            <div className="space-y-3">
+              <Button
+                onClick={handleAndroidInstall}
+                className="w-full h-14 text-base bg-green-600 hover:bg-green-700 text-white font-semibold"
+              >
+                <Smartphone className="mr-2 h-5 w-5" />
+                📲 {t('installAndroid')}
+              </Button>
 
               <Button
                 onClick={() => setShowIOSInstructions(true)}
-                className="w-full h-12 text-base bg-blue-600 hover:bg-blue-700 text-white"
+                className="w-full h-14 text-base bg-blue-600 hover:bg-blue-700 text-white font-semibold"
               >
                 <Apple className="mr-2 h-5 w-5" />
                 🍎 {t('installIPhone')}

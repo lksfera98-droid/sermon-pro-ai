@@ -13,14 +13,19 @@ interface Translations {
 const translations: Translations = {
   // Welcome
   welcome: {
-    pt: 'Bem-vindo ao SermonPro!',
-    en: 'Welcome to SermonPro!',
-    es: '¡Bienvenido a SermonPro!'
+    pt: 'Bem-vindo ao App do Pregador',
+    en: 'Welcome to the Preacher App',
+    es: 'Bienvenido a la App del Predicador'
   },
   welcomeSubtitle: {
     pt: 'Seu assistente completo para criação de sermões bíblicos',
     en: 'Your complete assistant for creating biblical sermons',
     es: 'Tu asistente completo para crear sermones bíblicos'
+  },
+  chooseLanguage: {
+    pt: 'Clique abaixo e escolha o melhor idioma para você',
+    en: 'Click below and choose the best language for you',
+    es: 'Haz clic abajo y elige el mejor idioma para ti'
   },
   // Menu items
   mainMenu: {
@@ -121,6 +126,11 @@ const translations: Translations = {
     pt: 'Baixar',
     en: 'Download',
     es: 'Descargar'
+  },
+  downloadPDF: {
+    pt: 'Baixar PDF',
+    en: 'Download PDF',
+    es: 'Descargar PDF'
   },
   yourSermon: {
     pt: 'Seu Sermão',

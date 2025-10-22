@@ -1,8 +1,10 @@
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Copy, Check, Download } from "lucide-react";
+import { Copy, Check, Download, FileText } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
+import { useLanguage } from "@/contexts/LanguageContext";
+import jsPDF from "jspdf";
 
 interface SermonDisplayProps {
   content: string;
@@ -11,15 +13,16 @@ interface SermonDisplayProps {
 
 export const SermonDisplay = ({ content, title }: SermonDisplayProps) => {
   const [copied, setCopied] = useState(false);
+  const { t } = useLanguage();
 
   const handleCopy = async () => {
     try {
       await navigator.clipboard.writeText(content);
       setCopied(true);
-      toast.success("Sermão copiado para a área de transferência!");
+      toast.success(t('copied'));
       setTimeout(() => setCopied(false), 2000);
     } catch (err) {
-      toast.error("Erro ao copiar o sermão");
+      toast.error("Erro ao copiar");
     }
   };
 
@@ -33,7 +36,28 @@ export const SermonDisplay = ({ content, title }: SermonDisplayProps) => {
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
-    toast.success("Sermão baixado com sucesso!");
+    toast.success(t('download') + " ✅");
+  };
+
+  const handleDownloadPDF = () => {
+    const doc = new jsPDF();
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const margin = 15;
+    const maxWidth = pageWidth - (margin * 2);
+    
+    // Add title
+    doc.setFontSize(18);
+    const titleText = title || t('yourSermon');
+    doc.text(titleText, margin, 20);
+    
+    // Add content
+    doc.setFontSize(11);
+    const lines = doc.splitTextToSize(content, maxWidth);
+    doc.text(lines, margin, 35);
+    
+    // Save PDF
+    doc.save(`${title || "sermon"}.pdf`);
+    toast.success(t('downloadPDF') + " ✅");
   };
 
   // Format sermon content with bold and colored highlights
@@ -102,8 +126,8 @@ export const SermonDisplay = ({ content, title }: SermonDisplayProps) => {
   return (
     <div className="space-y-4 md:space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
       <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-3">
-        <h2 className="text-xl md:text-2xl font-bold text-primary">Seu Sermão</h2>
-        <div className="flex gap-2">
+        <h2 className="text-xl md:text-2xl font-bold text-primary">{t('yourSermon')}</h2>
+        <div className="flex flex-wrap gap-2">
           <Button
             onClick={handleCopy}
             variant="outline"
@@ -113,22 +137,31 @@ export const SermonDisplay = ({ content, title }: SermonDisplayProps) => {
             {copied ? (
               <>
                 <Check className="h-4 w-4" />
-                <span className="hidden md:inline">Copiado!</span>
+                <span className="hidden md:inline">{t('copied')}</span>
               </>
             ) : (
               <>
                 <Copy className="h-4 w-4" />
-                <span className="hidden md:inline">Copiar</span>
+                <span className="hidden md:inline">{t('copy')}</span>
               </>
             )}
           </Button>
           <Button
+            onClick={handleDownloadPDF}
+            className="gap-2 flex-1 md:flex-initial h-10 md:h-9 bg-red-600 hover:bg-red-700"
+            size="sm"
+          >
+            <FileText className="h-4 w-4" />
+            <span className="hidden md:inline">{t('downloadPDF')}</span>
+          </Button>
+          <Button
             onClick={handleDownload}
+            variant="outline"
             className="gap-2 flex-1 md:flex-initial h-10 md:h-9"
             size="sm"
           >
             <Download className="h-4 w-4" />
-            <span className="hidden md:inline">Baixar</span>
+            <span className="hidden md:inline">{t('download')}</span>
           </Button>
         </div>
       </div>

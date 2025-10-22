@@ -22,62 +22,85 @@ serve(async (req) => {
       throw new Error('OPENAI_API_KEY não configurada');
     }
 
+    // Determine the level of detail based on sermon duration
+    let detailLevel = "básico";
+    let numberOfPoints = 3;
+    let additionalInstructions = "";
+    let maxTokens = 2000;
+    
+    if (tempo <= 20) {
+      detailLevel = "conciso";
+      numberOfPoints = 3;
+      additionalInstructions = "Mantenha as explicações objetivas e diretas.";
+      maxTokens = 1500;
+    } else if (tempo <= 40) {
+      detailLevel = "moderado";
+      numberOfPoints = 3;
+      additionalInstructions = "Inclua explicações teológicas e aplicações práticas.";
+      maxTokens = 2500;
+    } else if (tempo <= 60) {
+      detailLevel = "detalhado";
+      numberOfPoints = 4;
+      additionalInstructions = "Inclua explicações teológicas aprofundadas, múltiplas ilustrações e aplicações práticas detalhadas.";
+      maxTokens = 3500;
+    } else {
+      detailLevel = "muito detalhado";
+      numberOfPoints = 5;
+      additionalInstructions = "Crie um sermão EXTENSO e PROFUNDO com análise exegética completa, múltiplas ilustrações, contexto histórico-cultural, aplicações práticas detalhadas para diferentes grupos (jovens, adultos, idosos), e sub-pontos para cada ponto principal.";
+      maxTokens = 4000;
+    }
+
     const prompt = `
-Você é um assistente de teologia cristã chamado SermonPro, especializado em criação de esboços bíblicos prontos para pregação. Seu objetivo é transformar um tema ou versículo fornecido por um pregador cristão em um sermão completo, claro, profundo e bem estruturado.
+Você é SermonPro, um assistente especializado em criar sermões bíblicos completos e estruturados para pregadores cristãos.
+
+### DADOS DO SERMÃO:
+- Tema: ${tema}
+- Versículo base: ${versiculo || 'Escolha um versículo apropriado'}
+- Tempo de pregação: ${tempo} minutos
+- Nível de detalhe: ${detailLevel}
+
+### INSTRUÇÕES:
+${additionalInstructions}
 
 ### FORMATO DE SAÍDA OBRIGATÓRIO:
 
-TÍTULO DO SERMÃO (em maiúsculas)
+TÍTULO DO SERMÃO (em maiúsculas e negrito)
 
-**Texto Base:** [Citação bíblica completa]
+**Texto Base:** [Citação bíblica completa entre aspas]
 
 **INTRODUÇÃO**
-[Contextualização que prepare a audiência - 2-3 parágrafos]
+${tempo > 40 ? '[2-3 parágrafos com contextualização histórica e cultural]' : '[1-2 parágrafos de contextualização]'}
+${tempo > 60 ? '- Inclua uma segunda ilustração impactante' : ''}
 
 **DESENVOLVIMENTO**
 
-**1. [Primeiro Ponto Principal]**
-   - Explicação bíblica
-   - Aplicação prática
-   - Conexão com o cotidiano
-
-**2. [Segundo Ponto Principal]**
-   - Explicação bíblica
-   - Aplicação prática
-   - Conexão com o cotidiano
-
-**3. [Terceiro Ponto Principal]**
-   - Explicação bíblica
-   - Aplicação prática
-   - Conexão com o cotidiano
+${Array.from({ length: numberOfPoints }, (_, i) => `
+**${i + 1}. [Título do Ponto Principal em Negrito]**
+   - Explicação ${tempo > 40 ? 'teológica e exegética' : 'bíblica clara'}
+   - ${tempo > 60 ? '3-4' : tempo > 40 ? '2-3' : '1-2'} citações bíblicas entre "aspas"
+   - Aplicação prática ${tempo > 60 ? 'para diferentes públicos' : ''}
+   - ${tempo > 40 ? '2 ilustrações ou exemplos' : '1 ilustração'}
+   ${tempo > 60 ? '- Sub-pontos para aprofundar' : ''}
+`).join('\n')}
 
 **CONCLUSÃO**
-[Recapitulação dos pontos e apelo espiritual]
+[Recapitulação dos pontos principais]
+${tempo > 40 ? '[Apelo específico e personalizado]' : '[Apelo ou desafio]'}
+${tempo > 60 ? '[Ilustração final impactante]' : ''}
+[Mensagem de esperança]
 
 **ORAÇÃO FINAL**
-[Sugestão de oração para encerrar]
+[${tempo > 40 ? 'Oração detalhada e temática' : 'Oração relacionada ao tema'}]
 
----
+### REGRAS DE FORMATAÇÃO:
+- Use **negrito** para todos os títulos de seções e pontos principais
+- Coloque TODAS as citações bíblicas entre "aspas"
+- Destaque palavras-chave importantes com **negrito**
+- Mantenha parágrafos ${tempo > 60 ? 'bem desenvolvidos mas organizados' : 'curtos e objetivos'}
+- Seja profundo, inspirador e prático
+- O sermão deve tocar o coração e transformar vidas
 
-### Adapte o conteúdo de acordo com o tempo informado:
-- Menos de 15 minutos: linguagem direta, explicações concisas
-- 15-30 minutos: desenvolva com exemplos e referências bíblicas
-- Mais de 30 minutos: aprofunde com interpretações teológicas e aplicações pastorais
-
-### Dados fornecidos:
-- Tema: ${tema}
-- Versículo base: ${versiculo || 'Nenhum especificado'}
-- Tempo de pregação: ${tempo} minutos
-
-### REGRAS IMPORTANTES:
-- Use **negrito** para títulos, pontos principais e palavras-chave importantes
-- Destaque citações bíblicas entre aspas
-- Seja fiel às Escrituras
-- Linguagem clara e acessível
-- Estrutura lógica e fácil de seguir
-- Se houver versículo, centralize o sermão nele
-
-Gere o sermão completo agora.
+Gere o sermão completo agora seguindo EXATAMENTE este formato.
 `;
 
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
@@ -91,7 +114,7 @@ Gere o sermão completo agora.
         messages: [
           {
             role: 'system',
-            content: 'Você é SermonPro, um assistente especializado em gerar sermões bíblicos para pregadores cristãos.'
+            content: 'Você é SermonPro, um assistente especializado em gerar sermões bíblicos completos, estruturados e inspiradores para pregadores cristãos.'
           },
           {
             role: 'user',
@@ -99,7 +122,7 @@ Gere o sermão completo agora.
           }
         ],
         temperature: 0.7,
-        max_tokens: 3000
+        max_tokens: maxTokens
       }),
     });
 

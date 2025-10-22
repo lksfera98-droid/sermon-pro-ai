@@ -100,39 +100,41 @@ export const SermonDisplay = ({ content, title }: SermonDisplayProps) => {
   };
 
   return (
-    <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
-      <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold text-primary">Seu Sermão</h2>
+    <div className="space-y-4 md:space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
+      <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-3">
+        <h2 className="text-xl md:text-2xl font-bold text-primary">Seu Sermão</h2>
         <div className="flex gap-2">
           <Button
             onClick={handleCopy}
             variant="outline"
-            className="gap-2"
+            className="gap-2 flex-1 md:flex-initial h-10 md:h-9"
+            size="sm"
           >
             {copied ? (
               <>
                 <Check className="h-4 w-4" />
-                Copiado!
+                <span className="hidden md:inline">Copiado!</span>
               </>
             ) : (
               <>
                 <Copy className="h-4 w-4" />
-                Copiar
+                <span className="hidden md:inline">Copiar</span>
               </>
             )}
           </Button>
           <Button
             onClick={handleDownload}
-            className="gap-2"
+            className="gap-2 flex-1 md:flex-initial h-10 md:h-9"
+            size="sm"
           >
             <Download className="h-4 w-4" />
-            Baixar Sermão
+            <span className="hidden md:inline">Baixar</span>
           </Button>
         </div>
       </div>
 
-      <Card className="p-8 bg-card shadow-lg">
-        <div className="space-y-1">
+      <Card className="p-4 md:p-8 bg-card shadow-lg">
+        <div className="space-y-1 text-sm md:text-base">
           {formatSermon(content)}
         </div>
       </Card>

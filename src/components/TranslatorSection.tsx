@@ -18,7 +18,8 @@ export const TranslatorSection = () => {
     history?: string;
   } | null>(null);
 
-  const handleTranslate = async () => {
+  const handleTranslate = async (e?: React.FormEvent) => {
+    e?.preventDefault();
     if (!word.trim()) return;
 
     setIsLoading(true);
@@ -46,20 +47,20 @@ export const TranslatorSection = () => {
   };
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6 md:space-y-8">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-bold text-foreground mb-2">Tradutor Bíblico</h1>
-        <p className="text-muted-foreground">
+        <h1 className="text-2xl md:text-3xl font-bold text-foreground mb-2">Tradutor Bíblico</h1>
+        <p className="text-sm md:text-base text-muted-foreground">
           Traduza palavras para Hebraico, Grego e Aramaico
         </p>
       </div>
 
       {/* Translation Form */}
-      <Card className="p-6">
-        <div className="space-y-4">
+      <Card className="p-4 md:p-6">
+        <form onSubmit={handleTranslate} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="word" className="text-lg font-semibold">
+            <Label htmlFor="word" className="text-sm md:text-base font-semibold">
               Palavra ou Nome
             </Label>
             <div className="flex gap-2">
@@ -68,70 +69,68 @@ export const TranslatorSection = () => {
                 placeholder="Ex: Amor, Jesus, Fé..."
                 value={word}
                 onChange={(e) => setWord(e.target.value)}
-                onKeyPress={(e) => e.key === 'Enter' && handleTranslate()}
-                className="text-lg py-6"
+                className="h-10 md:h-12 text-base"
               />
               <Button
-                onClick={handleTranslate}
+                type="submit"
                 disabled={isLoading || !word.trim()}
-                className="px-8"
-                size="lg"
+                className="px-6 md:px-8 h-10 md:h-12"
               >
                 {isLoading ? (
                   <Loader2 className="h-5 w-5 animate-spin" />
                 ) : (
                   <>
                     <Languages className="mr-2 h-5 w-5" />
-                    Traduzir
+                    <span className="hidden md:inline">Traduzir</span>
                   </>
                 )}
               </Button>
             </div>
           </div>
-        </div>
+        </form>
       </Card>
 
       {/* Translation Results */}
       {translation && (
-        <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
-          <h2 className="text-2xl font-bold text-primary">Resultado da Tradução</h2>
+        <div className="space-y-4 md:space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
+          <h2 className="text-xl md:text-2xl font-bold text-primary">Resultado da Tradução</h2>
           
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
             {translation.hebrew && (
-              <Card className="p-6">
-                <h3 className="text-xl font-bold text-primary mb-3">Hebraico</h3>
-                <p className="text-2xl font-semibold text-foreground">{translation.hebrew}</p>
+              <Card className="p-4 md:p-6">
+                <h3 className="text-lg md:text-xl font-bold text-primary mb-3">Hebraico</h3>
+                <p className="text-xl md:text-2xl font-semibold text-foreground">{translation.hebrew}</p>
               </Card>
             )}
             
             {translation.greek && (
-              <Card className="p-6">
-                <h3 className="text-xl font-bold text-primary mb-3">Grego</h3>
-                <p className="text-2xl font-semibold text-foreground">{translation.greek}</p>
+              <Card className="p-4 md:p-6">
+                <h3 className="text-lg md:text-xl font-bold text-primary mb-3">Grego</h3>
+                <p className="text-xl md:text-2xl font-semibold text-foreground">{translation.greek}</p>
               </Card>
             )}
             
             {translation.aramaic && (
-              <Card className="p-6">
-                <h3 className="text-xl font-bold text-primary mb-3">Aramaico</h3>
-                <p className="text-2xl font-semibold text-foreground">{translation.aramaic}</p>
+              <Card className="p-4 md:p-6">
+                <h3 className="text-lg md:text-xl font-bold text-primary mb-3">Aramaico</h3>
+                <p className="text-xl md:text-2xl font-semibold text-foreground">{translation.aramaic}</p>
               </Card>
             )}
           </div>
 
           {translation.etymology && (
-            <Card className="p-6">
-              <h3 className="text-xl font-bold text-primary mb-3">Etimologia</h3>
-              <p className="text-foreground leading-relaxed whitespace-pre-wrap">
+            <Card className="p-4 md:p-6">
+              <h3 className="text-lg md:text-xl font-bold text-primary mb-3">Etimologia</h3>
+              <p className="text-sm md:text-base text-foreground leading-relaxed whitespace-pre-wrap">
                 {translation.etymology}
               </p>
             </Card>
           )}
 
           {translation.history && (
-            <Card className="p-6">
-              <h3 className="text-xl font-bold text-primary mb-3">História da Palavra</h3>
-              <p className="text-foreground leading-relaxed whitespace-pre-wrap">
+            <Card className="p-4 md:p-6">
+              <h3 className="text-lg md:text-xl font-bold text-primary mb-3">História da Palavra</h3>
+              <p className="text-sm md:text-base text-foreground leading-relaxed whitespace-pre-wrap">
                 {translation.history}
               </p>
             </Card>

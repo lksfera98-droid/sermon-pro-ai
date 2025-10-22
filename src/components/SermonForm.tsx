@@ -3,7 +3,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
-import { Loader2 } from "lucide-react";
+import { Card } from "@/components/ui/card";
+import { Loader2, Sparkles } from "lucide-react";
 
 interface SermonFormProps {
   onGenerate: (data: { tema: string; versiculo: string; tempo: number }) => void;
@@ -13,80 +14,76 @@ interface SermonFormProps {
 export const SermonForm = ({ onGenerate, isLoading }: SermonFormProps) => {
   const [tema, setTema] = useState("");
   const [versiculo, setVersiculo] = useState("");
-  const [tempo, setTempo] = useState([30]);
+  const [tempo, setTempo] = useState(30);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!tema.trim()) return;
-    onGenerate({ tema, versiculo, tempo: tempo[0] });
+    onGenerate({ tema, versiculo, tempo });
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6 max-w-2xl mx-auto">
-      <div className="space-y-2">
-        <Label htmlFor="tema" className="text-lg font-semibold">
-          Tema do Sermão *
-        </Label>
-        <Input
-          id="tema"
-          placeholder="Ex: Fé em tempos difíceis"
-          value={tema}
-          onChange={(e) => setTema(e.target.value)}
-          required
-          className="text-lg py-6"
-        />
-      </div>
+    <Card className="p-4 md:p-8 shadow-lg">
+      <form onSubmit={handleSubmit} className="space-y-4 md:space-y-6">
+        <div className="space-y-2">
+          <Label htmlFor="tema" className="text-sm md:text-base">Tema do Sermão *</Label>
+          <Input
+            id="tema"
+            value={tema}
+            onChange={(e) => setTema(e.target.value)}
+            placeholder="Ex: O Amor de Deus"
+            required
+            className="h-10 md:h-11 text-base"
+          />
+        </div>
 
-      <div className="space-y-2">
-        <Label htmlFor="versiculo" className="text-lg font-semibold">
-          Versículo Base (opcional)
-        </Label>
-        <Input
-          id="versiculo"
-          placeholder="Ex: Hebreus 11:1"
-          value={versiculo}
-          onChange={(e) => setVersiculo(e.target.value)}
-          className="text-lg py-6"
-        />
-      </div>
+        <div className="space-y-2">
+          <Label htmlFor="versiculo" className="text-sm md:text-base">Versículo Base (Opcional)</Label>
+          <Input
+            id="versiculo"
+            value={versiculo}
+            onChange={(e) => setVersiculo(e.target.value)}
+            placeholder="Ex: João 3:16"
+            className="h-10 md:h-11 text-base"
+          />
+        </div>
 
-      <div className="space-y-4">
-        <div className="flex justify-between items-center">
-          <Label className="text-lg font-semibold">
-            Tempo de Pregação
+        <div className="space-y-2">
+          <Label htmlFor="tempo" className="text-sm md:text-base">
+            Tempo do Sermão: {tempo}+ minutos
           </Label>
-          <span className="text-2xl font-bold text-primary">
-            {tempo[0]} min
-          </span>
+          <Slider
+            id="tempo"
+            min={10}
+            max={120}
+            step={5}
+            value={[tempo]}
+            onValueChange={(value) => setTempo(value[0])}
+            className="w-full touch-none"
+          />
+          <p className="text-xs md:text-sm text-muted-foreground">
+            Arraste para ajustar a duração desejada (quanto mais tempo, mais detalhado será o sermão)
+          </p>
         </div>
-        <Slider
-          value={tempo}
-          onValueChange={setTempo}
-          min={10}
-          max={60}
-          step={5}
-          className="w-full"
-        />
-        <div className="flex justify-between text-sm text-muted-foreground">
-          <span>10 min</span>
-          <span>60 min</span>
-        </div>
-      </div>
 
-      <Button
-        type="submit"
-        disabled={isLoading || !tema.trim()}
-        className="w-full py-6 text-lg font-semibold"
-      >
-        {isLoading ? (
-          <>
-            <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-            Gerando Sermão...
-          </>
-        ) : (
-          "Gerar Sermão"
-        )}
-      </Button>
-    </form>
+        <Button 
+          type="submit" 
+          className="w-full h-12 md:h-14 text-base md:text-lg"
+          disabled={isLoading}
+        >
+          {isLoading ? (
+            <>
+              <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+              Gerando Sermão...
+            </>
+          ) : (
+            <>
+              <Sparkles className="mr-2 h-5 w-5" />
+              Gerar Sermão
+            </>
+          )}
+        </Button>
+      </form>
+    </Card>
   );
 };

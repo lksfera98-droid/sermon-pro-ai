@@ -1,14 +1,14 @@
 import { useState, useEffect } from "react";
-import { Sidebar } from "@/components/Sidebar";
-import { Dashboard } from "@/components/Dashboard";
+import { MainMenu } from "@/components/MainMenu";
 import { SermonForm } from "@/components/SermonForm";
 import { SermonDisplay } from "@/components/SermonDisplay";
 import { TranslatorSection } from "@/components/TranslatorSection";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { ExternalLink, BookOpen, Book, Menu, X, Home } from "lucide-react";
+import { ExternalLink, BookOpen, Book, Home } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 type View = "dashboard" | "new-sermon" | "translator" | "bible-studies" | "dictionaries" | "study-bibles";
 
@@ -18,7 +18,7 @@ const Index = () => {
   const [currentSermonTitle, setCurrentSermonTitle] = useState<string>("");
   const [currentView, setCurrentView] = useState<View>("dashboard");
   const [recentSermons, setRecentSermons] = useState<Array<{ title: string; date: string; content: string }>>([]);
-  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
+  const { t } = useLanguage();
 
   // Load sermons from localStorage on mount
   useEffect(() => {
@@ -53,7 +53,7 @@ const Index = () => {
       setSermon(result.sermao);
       
       // Add to recent sermons
-      const title = data.tema || "Novo Sermão";
+      const title = data.tema || t('createSermon');
       setCurrentSermonTitle(title);
       const newSermon = {
         title,
@@ -62,7 +62,7 @@ const Index = () => {
       };
       setRecentSermons(prev => [newSermon, ...prev]);
       
-      toast.success("Sermão gerado com sucesso!");
+      toast.success(t('generateSermon') + "!");
     } catch (error) {
       console.error('Erro ao gerar sermão:', error);
       toast.error("Erro ao gerar sermão. Tente novamente.");
@@ -92,7 +92,7 @@ const Index = () => {
           className="block"
         >
           <Button className="w-full gap-2">
-            Acessar Recursos
+            {t('accessResources')}
             <ExternalLink className="h-4 w-4" />
           </Button>
         </a>
@@ -101,164 +101,145 @@ const Index = () => {
   );
 
   return (
-    <div className="flex min-h-screen bg-background">
-      <Sidebar 
-        currentView={currentView} 
-        onViewChange={setCurrentView}
-        isMobileOpen={isMobileSidebarOpen}
-        onMobileClose={() => setIsMobileSidebarOpen(false)}
-      />
+    <div className="min-h-screen bg-background">
+      {currentView === "dashboard" && (
+        <MainMenu onNavigate={setCurrentView} />
+      )}
       
-      <main className="flex-1 md:ml-64 w-full">
-        {/* Mobile Header */}
-        <div className="md:hidden fixed top-0 left-0 right-0 h-14 bg-card border-b z-30 flex items-center px-4">
-          <button
-            onClick={() => setIsMobileSidebarOpen(!isMobileSidebarOpen)}
-            className="p-2 hover:bg-accent rounded-lg"
-          >
-            {isMobileSidebarOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-          </button>
-          <h1 className="ml-3 text-lg font-bold text-primary">SermonPro</h1>
+      {currentView === "new-sermon" && (
+        <div className="p-4 md:p-8">
+          <div className="max-w-4xl mx-auto space-y-6 md:space-y-8">
+            <div className="flex items-center justify-between">
+              <div className="flex-1">
+                <h1 className="text-2xl md:text-3xl font-bold text-foreground mb-2">{t('createSermon')}</h1>
+                <p className="text-sm md:text-base text-muted-foreground">Preencha os dados abaixo para gerar seu sermão</p>
+              </div>
+              <Button
+                onClick={() => setCurrentView("dashboard")}
+                variant="outline"
+                className="gap-2"
+              >
+                <Home className="h-4 w-4" />
+                <span className="hidden md:inline">{t('home')}</span>
+              </Button>
+            </div>
+            
+            <SermonForm onGenerate={handleGenerate} isLoading={isLoading} />
+            
+            {sermon && (
+              <div className="mt-6 md:mt-8">
+                <SermonDisplay content={sermon} title={currentSermonTitle} />
+              </div>
+            )}
+          </div>
         </div>
-
-        <div className="p-4 md:p-8 pt-16 md:pt-8">
-          {currentView === "dashboard" && (
-            <Dashboard 
-              recentSermons={recentSermons} 
-              onNewSermon={() => setCurrentView("new-sermon")}
-              onViewSermon={(content) => {
-                setSermon(content);
-                setCurrentView("new-sermon");
-              }}
+      )}
+      
+      {currentView === "translator" && (
+        <div className="p-4 md:p-8">
+          <div className="max-w-4xl mx-auto space-y-6 md:space-y-8">
+            <div className="flex items-center justify-between mb-4">
+              <h1 className="text-2xl md:text-3xl font-bold text-foreground">{t('bibleTranslator')}</h1>
+              <Button
+                onClick={() => setCurrentView("dashboard")}
+                variant="outline"
+                className="gap-2"
+              >
+                <Home className="h-4 w-4" />
+                <span className="hidden md:inline">{t('home')}</span>
+              </Button>
+            </div>
+            <TranslatorSection />
+          </div>
+        </div>
+      )}
+      
+      {currentView === "bible-studies" && (
+        <div className="p-4 md:p-8">
+          <div className="max-w-4xl mx-auto space-y-6 md:space-y-8">
+            <div className="flex items-center justify-between">
+              <div className="flex-1">
+                <h1 className="text-2xl md:text-3xl font-bold text-foreground mb-2">{t('bibleStudies')}</h1>
+                <p className="text-sm md:text-base text-muted-foreground">
+                  {t('bibleStudiesDesc')}
+                </p>
+              </div>
+              <Button
+                onClick={() => setCurrentView("dashboard")}
+                variant="outline"
+                className="gap-2 ml-4"
+              >
+                <Home className="h-4 w-4" />
+                <span className="hidden md:inline">{t('home')}</span>
+              </Button>
+            </div>
+            <ResourceCard
+              title={t('bibleStudies')}
+              description={t('bibleStudiesDesc')}
+              icon={BookOpen}
+              url="https://drive.google.com/drive/folders/1flw4GiezzOKyj_mk4jwZ7KUopT2w4xSs?usp=drive_link"
             />
-          )}
-          
-          {currentView === "new-sermon" && (
-            <div className="space-y-6 md:space-y-8">
-              <div className="flex items-center justify-between">
-                <div className="flex-1">
-                  <h1 className="text-2xl md:text-3xl font-bold text-foreground mb-2">Criar Novo Sermão</h1>
-                  <p className="text-sm md:text-base text-muted-foreground">Preencha os dados abaixo para gerar seu sermão</p>
-                </div>
-                <Button
-                  onClick={() => setCurrentView("dashboard")}
-                  variant="outline"
-                  className="gap-2"
-                >
-                  <Home className="h-4 w-4" />
-                  <span className="hidden md:inline">Início</span>
-                </Button>
-              </div>
-              
-              <SermonForm onGenerate={handleGenerate} isLoading={isLoading} />
-              
-              {sermon && (
-                <div className="mt-6 md:mt-8">
-                  <SermonDisplay content={sermon} title={currentSermonTitle} />
-                </div>
-              )}
-            </div>
-          )}
-          
-          {currentView === "translator" && (
-            <div className="space-y-6 md:space-y-8">
-              <div className="flex items-center justify-between mb-4">
-                <h1 className="text-2xl md:text-3xl font-bold text-foreground">Tradutor Bíblico</h1>
-                <Button
-                  onClick={() => setCurrentView("dashboard")}
-                  variant="outline"
-                  className="gap-2"
-                >
-                  <Home className="h-4 w-4" />
-                  <span className="hidden md:inline">Início</span>
-                </Button>
-              </div>
-              <TranslatorSection />
-            </div>
-          )}
-          
-          {currentView === "bible-studies" && (
-            <div className="space-y-6 md:space-y-8">
-              <div className="flex items-center justify-between">
-                <div className="flex-1">
-                  <h1 className="text-2xl md:text-3xl font-bold text-foreground mb-2">Estudos Bíblicos</h1>
-                  <p className="text-sm md:text-base text-muted-foreground">
-                    Acesse uma coleção completa de estudos bíblicos para enriquecer suas pregações
-                  </p>
-                </div>
-                <Button
-                  onClick={() => setCurrentView("dashboard")}
-                  variant="outline"
-                  className="gap-2 ml-4"
-                >
-                  <Home className="h-4 w-4" />
-                  <span className="hidden md:inline">Início</span>
-                </Button>
-              </div>
-              <ResourceCard
-                title="Estudos Bíblicos"
-                description="Acesse uma coleção completa de estudos bíblicos para enriquecer suas pregações"
-                icon={BookOpen}
-                url="https://drive.google.com/drive/folders/1flw4GiezzOKyj_mk4jwZ7KUopT2w4xSs?usp=drive_link"
-              />
-            </div>
-          )}
-          
-          {currentView === "dictionaries" && (
-            <div className="space-y-6 md:space-y-8">
-              <div className="flex items-center justify-between">
-                <div className="flex-1">
-                  <h1 className="text-2xl md:text-3xl font-bold text-foreground mb-2">Dicionários Bíblicos</h1>
-                  <p className="text-sm md:text-base text-muted-foreground">
-                    Consulte dicionários bíblicos para aprofundar seu conhecimento teológico
-                  </p>
-                </div>
-                <Button
-                  onClick={() => setCurrentView("dashboard")}
-                  variant="outline"
-                  className="gap-2 ml-4"
-                >
-                  <Home className="h-4 w-4" />
-                  <span className="hidden md:inline">Início</span>
-                </Button>
-              </div>
-              <ResourceCard
-                title="Dicionários Bíblicos"
-                description="Consulte dicionários bíblicos para aprofundar seu conhecimento teológico"
-                icon={Book}
-                url="https://drive.google.com/drive/folders/1yQeQCGOoySz7Qerxn5Msj0YTJnir1kQC?usp=drive_link"
-              />
-            </div>
-          )}
-          
-          {currentView === "study-bibles" && (
-            <div className="space-y-6 md:space-y-8">
-              <div className="flex items-center justify-between">
-                <div className="flex-1">
-                  <h1 className="text-2xl md:text-3xl font-bold text-foreground mb-2">Bíblias de Estudo</h1>
-                  <p className="text-sm md:text-base text-muted-foreground">
-                    Baixe diferentes versões de Bíblias de estudo para suas pesquisas
-                  </p>
-                </div>
-                <Button
-                  onClick={() => setCurrentView("dashboard")}
-                  variant="outline"
-                  className="gap-2 ml-4"
-                >
-                  <Home className="h-4 w-4" />
-                  <span className="hidden md:inline">Início</span>
-                </Button>
-              </div>
-              <ResourceCard
-                title="Bíblias de Estudo"
-                description="Baixe diferentes versões de Bíblias de estudo para suas pesquisas"
-                icon={Book}
-                url="https://drive.google.com/drive/folders/1s4N47PQQz3Z335Kb7vLDgrmo5Udpj5-C?usp=drive_link"
-              />
-            </div>
-          )}
+          </div>
         </div>
-      </main>
+      )}
+      
+      {currentView === "dictionaries" && (
+        <div className="p-4 md:p-8">
+          <div className="max-w-4xl mx-auto space-y-6 md:space-y-8">
+            <div className="flex items-center justify-between">
+              <div className="flex-1">
+                <h1 className="text-2xl md:text-3xl font-bold text-foreground mb-2">{t('bibleDictionaries')}</h1>
+                <p className="text-sm md:text-base text-muted-foreground">
+                  {t('dictionariesDesc')}
+                </p>
+              </div>
+              <Button
+                onClick={() => setCurrentView("dashboard")}
+                variant="outline"
+                className="gap-2 ml-4"
+              >
+                <Home className="h-4 w-4" />
+                <span className="hidden md:inline">{t('home')}</span>
+              </Button>
+            </div>
+            <ResourceCard
+              title={t('bibleDictionaries')}
+              description={t('dictionariesDesc')}
+              icon={Book}
+              url="https://drive.google.com/drive/folders/1yQeQCGOoySz7Qerxn5Msj0YTJnir1kQC?usp=drive_link"
+            />
+          </div>
+        </div>
+      )}
+      
+      {currentView === "study-bibles" && (
+        <div className="p-4 md:p-8">
+          <div className="max-w-4xl mx-auto space-y-6 md:space-y-8">
+            <div className="flex items-center justify-between">
+              <div className="flex-1">
+                <h1 className="text-2xl md:text-3xl font-bold text-foreground mb-2">{t('studyBibles')}</h1>
+                <p className="text-sm md:text-base text-muted-foreground">
+                  {t('studyBiblesDesc')}
+                </p>
+              </div>
+              <Button
+                onClick={() => setCurrentView("dashboard")}
+                variant="outline"
+                className="gap-2 ml-4"
+              >
+                <Home className="h-4 w-4" />
+                <span className="hidden md:inline">{t('home')}</span>
+              </Button>
+            </div>
+            <ResourceCard
+              title={t('studyBibles')}
+              description={t('studyBiblesDesc')}
+              icon={Book}
+              url="https://drive.google.com/drive/folders/1s4N47PQQz3Z335Kb7vLDgrmo5Udpj5-C?usp=drive_link"
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 };

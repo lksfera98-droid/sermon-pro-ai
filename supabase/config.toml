@@ -1,1 +1,4 @@
 project_id = "wskgiipqjtptptinnodb"
+
+[functions.generate-sermon]
+verify_jwt = false

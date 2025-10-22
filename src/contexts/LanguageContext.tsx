@@ -223,6 +223,61 @@ const translations: Translations = {
     pt: 'Preencha os dados abaixo para gerar seu sermão',
     en: 'Fill in the data below to generate your sermon',
     es: 'Completa los datos a continuación para generar tu sermón'
+  },
+  mySermons: {
+    pt: 'Seus Sermões Criados',
+    en: 'Your Created Sermons',
+    es: 'Tus Sermones Creados'
+  },
+  deleteSermon: {
+    pt: 'Apagar',
+    en: 'Delete',
+    es: 'Eliminar'
+  },
+  noSavedSermons: {
+    pt: 'Nenhum sermão salvo ainda',
+    en: 'No saved sermons yet',
+    es: 'Ningún sermón guardado aún'
+  },
+  verseSearch: {
+    pt: 'Pesquisar Versículos',
+    en: 'Search Bible Verses',
+    es: 'Buscar Versículos'
+  },
+  searchWord: {
+    pt: 'Digite uma palavra (ex: amor)',
+    en: 'Enter a word (ex: love)',
+    es: 'Escribe una palabra (ej: amor)'
+  },
+  search: {
+    pt: 'Pesquisar',
+    en: 'Search',
+    es: 'Buscar'
+  },
+  searching: {
+    pt: 'Pesquisando...',
+    en: 'Searching...',
+    es: 'Buscando...'
+  },
+  verseResults: {
+    pt: 'Versículos e Referências',
+    en: 'Verses and References',
+    es: 'Versículos y Referencias'
+  },
+  copyAction: {
+    pt: 'Copiar Texto',
+    en: 'Copy Text',
+    es: 'Copiar Texto'
+  },
+  downloadAction: {
+    pt: 'Baixar TXT',
+    en: 'Download TXT',
+    es: 'Descargar TXT'
+  },
+  downloadPDFAction: {
+    pt: 'Baixar PDF',
+    en: 'Download PDF',
+    es: 'Descargar PDF'
   }
 };
 

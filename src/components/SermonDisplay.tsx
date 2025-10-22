@@ -128,41 +128,50 @@ export const SermonDisplay = ({ content, title }: SermonDisplayProps) => {
       <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-3">
         <h2 className="text-xl md:text-2xl font-bold text-primary">{t('yourSermon')}</h2>
         <div className="flex flex-wrap gap-2">
-          <Button
-            onClick={handleCopy}
-            variant="outline"
-            className="gap-2 flex-1 md:flex-initial h-10 md:h-9"
-            size="sm"
-          >
-            {copied ? (
-              <>
-                <Check className="h-4 w-4" />
-                <span className="hidden md:inline">{t('copied')}</span>
-              </>
-            ) : (
-              <>
-                <Copy className="h-4 w-4" />
-                <span className="hidden md:inline">{t('copy')}</span>
-              </>
-            )}
-          </Button>
-          <Button
-            onClick={handleDownloadPDF}
-            className="gap-2 flex-1 md:flex-initial h-10 md:h-9 bg-red-600 hover:bg-red-700"
-            size="sm"
-          >
-            <FileText className="h-4 w-4" />
-            <span className="hidden md:inline">{t('downloadPDF')}</span>
-          </Button>
-          <Button
-            onClick={handleDownload}
-            variant="outline"
-            className="gap-2 flex-1 md:flex-initial h-10 md:h-9"
-            size="sm"
-          >
-            <Download className="h-4 w-4" />
-            <span className="hidden md:inline">{t('download')}</span>
-          </Button>
+          <div className="flex flex-col items-center gap-1">
+            <span className="text-xs font-semibold text-muted-foreground">{t('copyAction')}</span>
+            <Button
+              onClick={handleCopy}
+              variant="outline"
+              className="gap-2 flex-1 md:flex-initial h-10 md:h-9"
+              size="sm"
+            >
+              {copied ? (
+                <>
+                  <Check className="h-4 w-4" />
+                  <span className="hidden md:inline">{t('copied')}</span>
+                </>
+              ) : (
+                <>
+                  <Copy className="h-4 w-4" />
+                  <span className="hidden md:inline">{t('copy')}</span>
+                </>
+              )}
+            </Button>
+          </div>
+          <div className="flex flex-col items-center gap-1">
+            <span className="text-xs font-semibold text-muted-foreground">{t('downloadPDFAction')}</span>
+            <Button
+              onClick={handleDownloadPDF}
+              className="gap-2 flex-1 md:flex-initial h-10 md:h-9 bg-red-600 hover:bg-red-700"
+              size="sm"
+            >
+              <FileText className="h-4 w-4" />
+              <span className="hidden md:inline">{t('downloadPDF')}</span>
+            </Button>
+          </div>
+          <div className="flex flex-col items-center gap-1">
+            <span className="text-xs font-semibold text-muted-foreground">{t('downloadAction')}</span>
+            <Button
+              onClick={handleDownload}
+              variant="outline"
+              className="gap-2 flex-1 md:flex-initial h-10 md:h-9"
+              size="sm"
+            >
+              <Download className="h-4 w-4" />
+              <span className="hidden md:inline">{t('download')}</span>
+            </Button>
+          </div>
         </div>
       </div>
 

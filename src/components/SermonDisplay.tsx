@@ -1,14 +1,15 @@
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Copy, Check } from "lucide-react";
+import { Copy, Check, Download } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
 interface SermonDisplayProps {
   content: string;
+  title?: string;
 }
 
-export const SermonDisplay = ({ content }: SermonDisplayProps) => {
+export const SermonDisplay = ({ content, title }: SermonDisplayProps) => {
   const [copied, setCopied] = useState(false);
 
   const handleCopy = async () => {
@@ -20,6 +21,19 @@ export const SermonDisplay = ({ content }: SermonDisplayProps) => {
     } catch (err) {
       toast.error("Erro ao copiar o sermão");
     }
+  };
+
+  const handleDownload = () => {
+    const blob = new Blob([content], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${title || 'sermao'}.txt`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    toast.success("Sermão baixado com sucesso!");
   };
 
   // Format sermon content with bold and colored highlights
@@ -89,23 +103,32 @@ export const SermonDisplay = ({ content }: SermonDisplayProps) => {
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold text-primary">Seu Sermão</h2>
-        <Button
-          onClick={handleCopy}
-          variant="outline"
-          className="gap-2"
-        >
-          {copied ? (
-            <>
-              <Check className="h-4 w-4" />
-              Copiado!
-            </>
-          ) : (
-            <>
-              <Copy className="h-4 w-4" />
-              Copiar Sermão
-            </>
-          )}
-        </Button>
+        <div className="flex gap-2">
+          <Button
+            onClick={handleCopy}
+            variant="outline"
+            className="gap-2"
+          >
+            {copied ? (
+              <>
+                <Check className="h-4 w-4" />
+                Copiado!
+              </>
+            ) : (
+              <>
+                <Copy className="h-4 w-4" />
+                Copiar
+              </>
+            )}
+          </Button>
+          <Button
+            onClick={handleDownload}
+            className="gap-2"
+          >
+            <Download className="h-4 w-4" />
+            Baixar Sermão
+          </Button>
+        </div>
       </div>
 
       <Card className="p-8 bg-card shadow-lg">

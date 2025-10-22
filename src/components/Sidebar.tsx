@@ -1,7 +1,8 @@
-import { BookOpen, LayoutDashboard, FileText, Library } from "lucide-react";
+import { BookOpen, LayoutDashboard, FileText, Library, Languages } from "lucide-react";
 import { cn } from "@/lib/utils";
+import logo from "@/assets/logo.png";
 
-type View = "dashboard" | "new-sermon" | "resources";
+type View = "dashboard" | "new-sermon" | "resources" | "translator";
 
 interface SidebarProps {
   currentView: View;
@@ -13,6 +14,7 @@ export const Sidebar = ({ currentView, onViewChange }: SidebarProps) => {
     { id: "dashboard" as View, label: "Dashboard", icon: LayoutDashboard },
     { id: "new-sermon" as View, label: "Novo Sermão", icon: FileText },
     { id: "resources" as View, label: "Recursos", icon: Library },
+    { id: "translator" as View, label: "Tradutor Bíblico", icon: Languages },
   ];
 
   return (
@@ -20,9 +22,7 @@ export const Sidebar = ({ currentView, onViewChange }: SidebarProps) => {
       {/* Logo */}
       <div className="p-6 border-b">
         <div className="flex items-center gap-3">
-          <div className="p-2 bg-primary rounded-lg">
-            <BookOpen className="h-6 w-6 text-primary-foreground" />
-          </div>
+          <img src={logo} alt="SermonPro" className="w-12 h-12 rounded-lg object-cover" />
           <h1 className="text-2xl font-bold text-primary">SermonPro</h1>
         </div>
       </div>

@@ -35,18 +35,6 @@ export const Dashboard = ({ recentSermons, onNewSermon, onViewSermon }: Dashboar
               </p>
             </div>
           </Card>
-
-          <Card className="p-6 cursor-pointer hover:shadow-lg transition-shadow border-2 hover:border-primary">
-            <div className="flex flex-col items-center text-center space-y-3">
-              <div className="p-3 bg-primary/10 rounded-full">
-                <MessageSquare className="h-8 w-8 text-primary" />
-              </div>
-              <h3 className="font-semibold text-lg">Chat com IA</h3>
-              <p className="text-sm text-muted-foreground">
-                Converse com nosso assistente de IA
-              </p>
-            </div>
-          </Card>
         </div>
       </div>
 

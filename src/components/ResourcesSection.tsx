@@ -55,13 +55,17 @@ export const ResourcesSection = () => {
                   </p>
                 </div>
 
-                <Button 
-                  className="w-full gap-2" 
-                  onClick={() => window.open(resource.url, '_blank')}
+                <a 
+                  href={resource.url} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="block"
                 >
-                  Acessar Recursos
-                  <ExternalLink className="h-4 w-4" />
-                </Button>
+                  <Button className="w-full gap-2">
+                    Acessar Recursos
+                    <ExternalLink className="h-4 w-4" />
+                  </Button>
+                </a>
               </div>
             </Card>
           );

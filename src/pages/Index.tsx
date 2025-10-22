@@ -1,19 +1,36 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Sidebar } from "@/components/Sidebar";
 import { Dashboard } from "@/components/Dashboard";
 import { SermonForm } from "@/components/SermonForm";
 import { SermonDisplay } from "@/components/SermonDisplay";
 import { ResourcesSection } from "@/components/ResourcesSection";
+import { TranslatorSection } from "@/components/TranslatorSection";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
-type View = "dashboard" | "new-sermon" | "resources";
+type View = "dashboard" | "new-sermon" | "resources" | "translator";
 
 const Index = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [sermon, setSermon] = useState<string | null>(null);
+  const [currentSermonTitle, setCurrentSermonTitle] = useState<string>("");
   const [currentView, setCurrentView] = useState<View>("dashboard");
   const [recentSermons, setRecentSermons] = useState<Array<{ title: string; date: string; content: string }>>([]);
+
+  // Load sermons from localStorage on mount
+  useEffect(() => {
+    const saved = localStorage.getItem('sermons');
+    if (saved) {
+      setRecentSermons(JSON.parse(saved));
+    }
+  }, []);
+
+  // Save sermons to localStorage whenever they change
+  useEffect(() => {
+    if (recentSermons.length > 0) {
+      localStorage.setItem('sermons', JSON.stringify(recentSermons));
+    }
+  }, [recentSermons]);
 
   const handleGenerate = async (data: { tema: string; versiculo: string; tempo: number }) => {
     setIsLoading(true);
@@ -34,12 +51,13 @@ const Index = () => {
       
       // Add to recent sermons
       const title = data.tema || "Novo Sermão";
+      setCurrentSermonTitle(title);
       const newSermon = {
         title,
         date: new Date().toLocaleDateString('pt-BR'),
         content: result.sermao
       };
-      setRecentSermons(prev => [newSermon, ...prev.slice(0, 9)]);
+      setRecentSermons(prev => [newSermon, ...prev]);
       
       toast.success("Sermão gerado com sucesso!");
     } catch (error) {
@@ -78,13 +96,15 @@ const Index = () => {
               
               {sermon && (
                 <div className="mt-8">
-                  <SermonDisplay content={sermon} />
+                  <SermonDisplay content={sermon} title={currentSermonTitle} />
                 </div>
               )}
             </div>
           )}
           
           {currentView === "resources" && <ResourcesSection />}
+          
+          {currentView === "translator" && <TranslatorSection />}
         </div>
       </main>
     </div>

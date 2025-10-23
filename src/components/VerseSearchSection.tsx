@@ -22,16 +22,36 @@ export const VerseSearchSection = () => {
   const [word, setWord] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [verses, setVerses] = useState<Verse[]>([]);
+  const [introText, setIntroText] = useState<string>("");
   const [openVerses, setOpenVerses] = useState<Set<number>>(new Set());
   const { language, t } = useLanguage();
 
-  const parseVerses = (text: string): Verse[] => {
+  const parseVerses = (text: string): { verses: Verse[], intro: string } => {
     const parsed: Verse[] = [];
+    let intro = '';
+    
+    // Extract intro text (everything before the first verse)
+    const introMatch = text.match(/^([\s\S]*?)(?=\*\*\[|^\d+\.\s*\*\*)/m);
+    if (introMatch) {
+      intro = introMatch[1].trim();
+    }
     
     // Split by double newlines to get blocks
     const blocks = text.split(/\n\n+/).filter(block => block.trim());
     
     for (const block of blocks) {
+      // Skip intro blocks
+      if (block.includes('Como um especialista') || 
+          block.includes('grande satisfação') ||
+          block.includes('Aqui estão') ||
+          block.includes('Versículos Bíblicos sobre') ||
+          block.includes('As a biblical expert') ||
+          block.includes('Bible Verses about') ||
+          block.includes('Como experto bíblico') ||
+          block.includes('Versículos Bíblicos sobre')) {
+        continue;
+      }
+      
       let reference = '';
       let verseText = '';
       let explanation = '';
@@ -57,20 +77,24 @@ export const VerseSearchSection = () => {
       // If we have at least a reference and text, add to results
       if (reference && verseText) {
         parsed.push({ reference, text: verseText, explanation });
-      } else if (block.trim() && block.length > 20) {
+      } else if (block.trim() && block.length > 20 && !block.includes('especialista')) {
         // Fallback: treat entire block as a verse with some basic parsing
         const lines = block.split('\n').filter(l => l.trim());
         if (lines.length > 0) {
-          parsed.push({
-            reference: lines[0].replace(/[*#]/g, '').trim(),
-            text: lines.slice(1).join(' ').replace(/[*"]/g, '').trim(),
-            explanation: ''
-          });
+          const potentialRef = lines[0].replace(/[*#]/g, '').trim();
+          // Only add if it looks like a verse reference
+          if (potentialRef.match(/\d+:\d+/)) {
+            parsed.push({
+              reference: potentialRef,
+              text: lines.slice(1).join(' ').replace(/[*"]/g, '').trim(),
+              explanation: ''
+            });
+          }
         }
       }
     }
     
-    return parsed;
+    return { verses: parsed, intro };
   };
 
   const handleSearch = async () => {
@@ -81,6 +105,7 @@ export const VerseSearchSection = () => {
 
     setIsLoading(true);
     setVerses([]);
+    setIntroText("");
     setOpenVerses(new Set());
 
     try {
@@ -94,8 +119,9 @@ export const VerseSearchSection = () => {
         throw new Error(data.error);
       }
 
-      const parsedVerses = parseVerses(data.verses);
+      const { verses: parsedVerses, intro } = parseVerses(data.verses);
       setVerses(parsedVerses);
+      setIntroText(intro);
       toast.success(t('search') + "!");
     } catch (error) {
       console.error('Erro ao pesquisar versículos:', error);
@@ -141,6 +167,14 @@ export const VerseSearchSection = () => {
           </Button>
         </div>
       </Card>
+
+      {introText && verses.length > 0 && (
+        <Card className="p-4 bg-muted/50 border-primary/20">
+          <p className="text-sm md:text-base text-muted-foreground leading-relaxed whitespace-pre-wrap">
+            {introText}
+          </p>
+        </Card>
+      )}
 
       {verses.length > 0 && (
         <div className="space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-700">

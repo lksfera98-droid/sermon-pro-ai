@@ -24,39 +24,65 @@ serve(async (req) => {
     }
 
     const promptTemplates = {
-      pt: `Você é um especialista em Bíblia Sagrada. Pesquise e forneça os melhores versículos bíblicos relacionados à palavra: "${word}".
+      pt: `Você é um especialista bíblico. Encontre e liste O MÁXIMO POSSÍVEL de versículos relevantes da Bíblia sobre "${word}".
 
-Forneça:
-1. 5-8 versículos mais relevantes sobre este tema
-2. Para cada versículo, inclua a referência completa (Livro capítulo:versículo)
-3. O texto completo do versículo
-4. Uma breve explicação (1-2 frases) de como esse versículo se relaciona com a palavra
+INSTRUÇÕES CRÍTICAS:
+- Liste PELO MENOS 30-50 versículos variados de TODOS os livros bíblicos possíveis (Antigo e Novo Testamento)
+- Quanto mais versículos, melhor! O objetivo é fornecer uma lista COMPLETA e EXAUSTIVA
+- Cubra diferentes aspectos e contextos da palavra pesquisada
+- NÃO limite a apenas alguns versículos - liste TODOS os versículos importantes
 
-Organize a resposta de forma clara e estruturada.`,
-      en: `You are a Bible expert. Search and provide the best Bible verses related to the word: "${word}".
+Para cada versículo, forneça EXATAMENTE neste formato (sem texto introdutório):
 
-Provide:
-1. 5-8 most relevant verses about this topic
-2. For each verse, include the complete reference (Book chapter:verse)
-3. The full text of the verse
-4. A brief explanation (1-2 sentences) of how this verse relates to the word
+**[Livro Capítulo:Versículo]**
+"[Texto completo do versículo]"
+*Explicação:* [Breve explicação - 1-2 frases]
 
-Organize the response in a clear and structured way.`,
-      es: `Eres un experto en la Biblia. Busca y proporciona los mejores versículos bíblicos relacionados con la palabra: "${word}".
+Separe cada versículo com uma linha em branco.
+Organize começando com Antigo Testamento, depois Novo Testamento.
+NÃO inclua frases como "Com certeza!" ou "Aqui estão X versículos" - vá direto aos versículos.`,
+      
+      en: `You are a biblical expert. Find and list AS MANY relevant Bible verses as possible about "${word}".
 
-Proporciona:
-1. 5-8 versículos más relevantes sobre este tema
-2. Para cada versículo, incluye la referencia completa (Libro capítulo:versículo)
-3. El texto completo del versículo
-4. Una breve explicación (1-2 oraciones) de cómo este versículo se relaciona con la palabra
+CRITICAL INSTRUCTIONS:
+- List AT LEAST 30-50 varied verses from ALL possible biblical books (Old and New Testament)
+- The more verses, the better! The goal is to provide a COMPLETE and EXHAUSTIVE list
+- Cover different aspects and contexts of the searched word
+- DO NOT limit to just a few verses - list ALL important verses
 
-Organiza la respuesta de forma clara y estructurada.`
+For each verse, provide in EXACTLY this format (without introductory text):
+
+**[Book Chapter:Verse]**
+"[Full text of the verse]"
+*Explanation:* [Brief explanation - 1-2 sentences]
+
+Separate each verse with a blank line.
+Organize starting with Old Testament, then New Testament.
+DO NOT include phrases like "Certainly!" or "Here are X verses" - go straight to the verses.`,
+      
+      es: `Eres un experto bíblico. Encuentra y enumera EL MÁXIMO POSIBLE de versículos relevantes de la Biblia sobre "${word}".
+
+INSTRUCCIONES CRÍTICAS:
+- Enumera AL MENOS 30-50 versículos variados de TODOS los libros bíblicos posibles (Antiguo y Nuevo Testamento)
+- ¡Cuantos más versículos, mejor! El objetivo es proporcionar una lista COMPLETA y EXHAUSTIVA
+- Cubre diferentes aspectos y contextos de la palabra buscada
+- NO te limites a solo algunos versículos - enumera TODOS los versículos importantes
+
+Para cada versículo, proporciona EXACTAMENTE en este formato (sin texto introductorio):
+
+**[Libro Capítulo:Versículo]**
+"[Texto completo del versículo]"
+*Explicación:* [Breve explicación - 1-2 frases]
+
+Separa cada versículo con una línea en blanco.
+Organiza comenzando con Antiguo Testamento, luego Nuevo Testamento.
+NO incluyas frases como "¡Por supuesto!" o "Aquí están X versículos" - ve directo a los versículos.`
     };
 
     const systemMessages = {
-      pt: 'Você é um especialista em estudos bíblicos com profundo conhecimento das Escrituras Sagradas em português.',
-      en: 'You are a Bible study expert with deep knowledge of the Holy Scriptures in English.',
-      es: 'Eres un experto en estudios bíblicos con profundo conocimiento de las Sagradas Escrituras en español.'
+      pt: 'Você é um especialista em estudos bíblicos. Forneça o máximo de versículos possíveis sem textos introdutórios.',
+      en: 'You are a Bible study expert. Provide as many verses as possible without introductory text.',
+      es: 'Eres un experto en estudios bíblicos. Proporciona el máximo de versículos posibles sin textos introductorios.'
     };
 
     const prompt = promptTemplates[language as keyof typeof promptTemplates] || promptTemplates.pt;

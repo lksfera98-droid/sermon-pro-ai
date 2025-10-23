@@ -95,8 +95,8 @@ const Index = () => {
                 className="gap-2"
               >
                 <Home className="h-4 w-4" />
+                {t('home')}
               </Button>
-              <span className="text-xs text-center mt-1">{t('home')}</span>
             </div>
             
             <SermonForm onGenerate={handleGenerate} isLoading={isLoading} />

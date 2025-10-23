@@ -5,13 +5,53 @@ import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { Search } from "lucide-react";
+import { Search, ChevronDown, ChevronUp } from "lucide-react";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
+
+interface Verse {
+  reference: string;
+  text: string;
+  explanation: string;
+}
 
 export const VerseSearchSection = () => {
   const [word, setWord] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [results, setResults] = useState<string | null>(null);
+  const [verses, setVerses] = useState<Verse[]>([]);
+  const [openVerses, setOpenVerses] = useState<Set<number>>(new Set());
   const { language, t } = useLanguage();
+
+  const parseVerses = (text: string): Verse[] => {
+    const parsed: Verse[] = [];
+    const blocks = text.split('\n\n').filter(block => block.trim());
+    
+    blocks.forEach(block => {
+      const lines = block.split('\n');
+      let reference = '';
+      let verseText = '';
+      let explanation = '';
+      
+      lines.forEach(line => {
+        if (line.match(/^\*\*\[.*\]\*\*$/)) {
+          reference = line.replace(/^\*\*\[|\]\*\*$/g, '');
+        } else if (line.startsWith('"') || line.startsWith('>')) {
+          verseText = line.replace(/^["'>]\s*|["']$/g, '');
+        } else if (line.startsWith('*Explicação:') || line.startsWith('*Explanation:') || line.startsWith('*Explicación:')) {
+          explanation = line.replace(/^\*[^:]+:\*\s*/, '');
+        }
+      });
+      
+      if (reference && verseText) {
+        parsed.push({ reference, text: verseText, explanation });
+      }
+    });
+    
+    return parsed;
+  };
 
   const handleSearch = async () => {
     if (!word.trim()) {
@@ -20,7 +60,8 @@ export const VerseSearchSection = () => {
     }
 
     setIsLoading(true);
-    setResults(null);
+    setVerses([]);
+    setOpenVerses(new Set());
 
     try {
       const { data, error } = await supabase.functions.invoke('search-verses', {
@@ -33,7 +74,8 @@ export const VerseSearchSection = () => {
         throw new Error(data.error);
       }
 
-      setResults(data.verses);
+      const parsedVerses = parseVerses(data.verses);
+      setVerses(parsedVerses);
       toast.success(t('search') + "!");
     } catch (error) {
       console.error('Erro ao pesquisar versículos:', error);
@@ -41,6 +83,16 @@ export const VerseSearchSection = () => {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const toggleVerse = (index: number) => {
+    const newOpenVerses = new Set(openVerses);
+    if (newOpenVerses.has(index)) {
+      newOpenVerses.delete(index);
+    } else {
+      newOpenVerses.add(index);
+    }
+    setOpenVerses(newOpenVerses);
   };
 
   return (
@@ -70,14 +122,53 @@ export const VerseSearchSection = () => {
         </div>
       </Card>
 
-      {results && (
+      {verses.length > 0 && (
         <div className="space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-700">
           <h2 className="text-xl md:text-2xl font-bold text-primary">{t('verseResults')}</h2>
-          <Card className="p-6 bg-card shadow-lg">
-            <div className="space-y-4 text-sm md:text-base whitespace-pre-wrap">
-              {results}
-            </div>
-          </Card>
+          <div className="space-y-3">
+            {verses.map((verse, index) => (
+              <Collapsible
+                key={index}
+                open={openVerses.has(index)}
+                onOpenChange={() => toggleVerse(index)}
+              >
+                <Card className="overflow-hidden">
+                  <CollapsibleTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      className="w-full justify-between p-4 h-auto hover:bg-accent"
+                    >
+                      <span className="text-left font-bold text-primary">
+                        {verse.reference}
+                      </span>
+                      {openVerses.has(index) ? (
+                        <ChevronUp className="h-5 w-5 text-primary" />
+                      ) : (
+                        <ChevronDown className="h-5 w-5 text-primary" />
+                      )}
+                    </Button>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent>
+                    <div className="px-4 pb-4 space-y-3">
+                      <p className="text-sm md:text-base italic text-foreground leading-relaxed">
+                        "{verse.text}"
+                      </p>
+                      {verse.explanation && (
+                        <div className="pt-2 border-t border-border">
+                          <p className="text-xs md:text-sm text-muted-foreground">
+                            <span className="font-semibold text-primary">
+                              {language === 'pt' ? 'Explicação: ' : language === 'en' ? 'Explanation: ' : 'Explicación: '}
+                            </span>
+                            {verse.explanation}
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  </CollapsibleContent>
+                </Card>
+              </Collapsible>
+            ))}
+          </div>
         </div>
       )}
     </div>

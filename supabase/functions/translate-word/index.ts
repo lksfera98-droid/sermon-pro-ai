@@ -27,31 +27,46 @@ Você é um especialista em línguas bíblicas (Hebraico, Grego e Aramaico) e et
 
 Palavra/Nome para traduzir: "${word}"
 
+**INSTRUÇÕES CRÍTICAS**: 
+- Você DEVE fornecer tradução nas TRÊS línguas (Hebraico, Grego e Aramaico) - TODAS são OBRIGATÓRIAS
+- Mesmo que a palavra tenha origem em apenas uma língua, mostre como ela aparece ou é transliterada nas outras
+- NUNCA deixe nenhum dos três campos vazios
+- A etimologia DEVE ter no mínimo 150 palavras
+- A história DEVE ter no mínimo 200 palavras
+
 Forneça as seguintes informações:
 
-1. **Tradução em Hebraico**: Se a palavra tem equivalente ou origem hebraica, forneça a palavra em caracteres hebraicos.
+1. **Tradução em Hebraico** (OBRIGATÓRIO): Forneça a palavra em caracteres hebraicos com transliteração. Se não há equivalente direto, forneça a transliteração ou termo relacionado.
 
-2. **Tradução em Grego**: Se a palavra tem equivalente ou origem grega (especialmente do grego koiné do Novo Testamento), forneça a palavra em caracteres gregos.
+2. **Tradução em Grego** (OBRIGATÓRIO): Forneça a palavra em caracteres gregos (especialmente do grego koiné do Novo Testamento) com transliteração. Se não há equivalente direto, forneça a transliteração ou termo relacionado.
 
-3. **Tradução em Aramaico**: Se a palavra tem equivalente ou origem aramaica, forneça a palavra em caracteres aramaicos.
+3. **Tradução em Aramaico** (OBRIGATÓRIO): Forneça a palavra em caracteres aramaicos com transliteração. Se não há equivalente direto, forneça a transliteração ou termo relacionado.
 
-4. **Etimologia**: Explique a origem e formação da palavra, suas raízes linguísticas e significados primários.
+4. **Etimologia** (MÍNIMO 150 PALAVRAS): Explique detalhadamente:
+   - As raízes da palavra e seus significados
+   - Como a palavra foi formada
+   - Evolução da palavra através de diferentes períodos
+   - Palavras relacionadas na mesma família linguística
+   - Conexões linguísticas entre as línguas
 
-5. **História da Palavra**: Descreva como a palavra foi usada ao longo da história bíblica, seu contexto cultural e teológico, e sua evolução de significado.
+5. **História da Palavra** (MÍNIMO 200 PALAVRAS): Descreva de forma abrangente:
+   - Primeiro uso conhecido nos textos bíblicos
+   - Como o significado evoluiu ao longo do tempo
+   - Significado cultural nos tempos bíblicos
+   - Exemplos de uso no Antigo e Novo Testamento
+   - Como diferentes autores bíblicos usaram a palavra
+   - Entendimento acadêmico moderno
 
-**IMPORTANTE**: 
-- Se a palavra não tem tradução direta em alguma língua, explique isso brevemente nesse campo
-- Seja preciso e acadêmico, mas acessível
-- Use transliterações quando necessário para clareza
-- Retorne a resposta em formato JSON com as chaves: hebrew, greek, aramaic, etymology, history
+Retorne a resposta em formato JSON com as chaves: hebrew, greek, aramaic, etymology, history.
+TODOS os campos são OBRIGATÓRIOS. Forneça conteúdo rico e educacional.
 
 Exemplo de formato:
 {
-  "hebrew": "אַהֲבָה (ahavah)",
-  "greek": "ἀγάπη (agape)",
-  "aramaic": "חוּבָּא (khubba)",
-  "etymology": "A palavra 'amor' tem raízes profundas nas línguas semíticas...",
-  "history": "No contexto bíblico, o conceito de amor evoluiu..."
+  "hebrew": "אַהֲבָה (ahavah) - forma hebraica",
+  "greek": "ἀγάπη (agape) - forma grega",
+  "aramaic": "חוּבָּא (khubba) - forma aramaica",
+  "etymology": "A palavra 'amor' tem raízes profundas nas línguas semíticas... [continuar com pelo menos 150 palavras]",
+  "history": "No contexto bíblico, o conceito de amor evoluiu... [continuar com pelo menos 200 palavras]"
 }
 `;
 

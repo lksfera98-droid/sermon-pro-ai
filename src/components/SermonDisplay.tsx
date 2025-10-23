@@ -41,22 +41,94 @@ export const SermonDisplay = ({ content, title }: SermonDisplayProps) => {
 
   const handleDownloadPDF = () => {
     const doc = new jsPDF();
+    
     const pageWidth = doc.internal.pageSize.getWidth();
-    const margin = 15;
+    const pageHeight = doc.internal.pageSize.getHeight();
+    const margin = 20;
     const maxWidth = pageWidth - (margin * 2);
+    let yPosition = margin;
     
-    // Add title
-    doc.setFontSize(18);
-    const titleText = title || t('yourSermon');
-    doc.text(titleText, margin, 20);
+    const addNewPageIfNeeded = (requiredSpace: number) => {
+      if (yPosition + requiredSpace > pageHeight - margin) {
+        doc.addPage();
+        yPosition = margin;
+      }
+    };
     
-    // Add content
-    doc.setFontSize(11);
-    const lines = doc.splitTextToSize(content, maxWidth);
-    doc.text(lines, margin, 35);
+    // Add title if provided
+    if (title) {
+      doc.setFontSize(20);
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(139, 69, 19); // Brown color
+      doc.text(title, margin, yPosition);
+      yPosition += 15;
+    }
     
-    // Save PDF
-    doc.save(`${title || "sermon"}.pdf`);
+    // Process content line by line
+    const lines = content.split('\n');
+    
+    lines.forEach((line) => {
+      addNewPageIfNeeded(15);
+      
+      // Main title (ALL CAPS)
+      if (line === line.toUpperCase() && line.trim() && !line.startsWith('*')) {
+        doc.setFontSize(16);
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(139, 69, 19); // Brown color
+        const wrappedLines = doc.splitTextToSize(line, maxWidth);
+        wrappedLines.forEach((wrappedLine: string) => {
+          addNewPageIfNeeded(10);
+          doc.text(wrappedLine, margin, yPosition);
+          yPosition += 10;
+        });
+        yPosition += 5;
+      }
+      // Section headers (starts with uppercase and ends with :)
+      else if (line.match(/^[A-ZÁÉÍÓÚÂÊÔÃÕ][^:]*:$/)) {
+        doc.setFontSize(14);
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(139, 69, 19); // Brown color
+        const wrappedLines = doc.splitTextToSize(line, maxWidth);
+        wrappedLines.forEach((wrappedLine: string) => {
+          addNewPageIfNeeded(9);
+          doc.text(wrappedLine, margin, yPosition);
+          yPosition += 9;
+        });
+        yPosition += 3;
+      }
+      // Numbered points or highlighted text
+      else if (line.match(/^\d+\./) || line.includes('**')) {
+        doc.setFontSize(12);
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(0, 0, 0);
+        const cleanLine = line.replace(/\*\*/g, '');
+        const wrappedLines = doc.splitTextToSize(cleanLine, maxWidth);
+        wrappedLines.forEach((wrappedLine: string) => {
+          addNewPageIfNeeded(8);
+          doc.text(wrappedLine, margin, yPosition);
+          yPosition += 8;
+        });
+      }
+      // Regular text
+      else if (line.trim()) {
+        doc.setFontSize(12);
+        doc.setFont('helvetica', 'normal');
+        doc.setTextColor(0, 0, 0);
+        const wrappedLines = doc.splitTextToSize(line, maxWidth);
+        wrappedLines.forEach((wrappedLine: string) => {
+          addNewPageIfNeeded(7);
+          doc.text(wrappedLine, margin, yPosition);
+          yPosition += 7;
+        });
+      }
+      // Empty line
+      else {
+        yPosition += 5;
+      }
+    });
+    
+    // Save the PDF
+    doc.save(`${title || 'sermon'}.pdf`);
     toast.success(t('downloadPDF') + " ✅");
   };
 

@@ -27,28 +27,48 @@ export const VerseSearchSection = () => {
 
   const parseVerses = (text: string): Verse[] => {
     const parsed: Verse[] = [];
-    const blocks = text.split('\n\n').filter(block => block.trim());
     
-    blocks.forEach(block => {
-      const lines = block.split('\n');
+    // Split by double newlines to get blocks
+    const blocks = text.split(/\n\n+/).filter(block => block.trim());
+    
+    for (const block of blocks) {
       let reference = '';
       let verseText = '';
       let explanation = '';
       
-      lines.forEach(line => {
-        if (line.match(/^\*\*\[.*\]\*\*$/)) {
-          reference = line.replace(/^\*\*\[|\]\*\*$/g, '');
-        } else if (line.startsWith('"') || line.startsWith('>')) {
-          verseText = line.replace(/^["'>]\s*|["']$/g, '');
-        } else if (line.startsWith('*Explicação:') || line.startsWith('*Explanation:') || line.startsWith('*Explicación:')) {
-          explanation = line.replace(/^\*[^:]+:\*\s*/, '');
-        }
-      });
+      // Try to extract reference (look for patterns like **[Book 1:1]** or just Book 1:1)
+      const refMatch = block.match(/\*\*\[([^\]]+)\]\*\*|^\d+\.\s*\*\*([^*]+)\*\*|^([A-Za-zÀ-ÿ\s]+\d+:\d+[^"\n]*)/m);
+      if (refMatch) {
+        reference = (refMatch[1] || refMatch[2] || refMatch[3] || '').trim();
+      }
       
+      // Extract verse text (text in quotes or after >)
+      const verseMatch = block.match(/[">]\s*[""]?([^"""\n]+)[""]?/);
+      if (verseMatch) {
+        verseText = verseMatch[1].trim();
+      }
+      
+      // Extract explanation
+      const explMatch = block.match(/\*(?:Explicação|Explanation|Explicación):\*?\s*(.+)/s);
+      if (explMatch) {
+        explanation = explMatch[1].trim();
+      }
+      
+      // If we have at least a reference and text, add to results
       if (reference && verseText) {
         parsed.push({ reference, text: verseText, explanation });
+      } else if (block.trim() && block.length > 20) {
+        // Fallback: treat entire block as a verse with some basic parsing
+        const lines = block.split('\n').filter(l => l.trim());
+        if (lines.length > 0) {
+          parsed.push({
+            reference: lines[0].replace(/[*#]/g, '').trim(),
+            text: lines.slice(1).join(' ').replace(/[*"]/g, '').trim(),
+            explanation: ''
+          });
+        }
       }
-    });
+    }
     
     return parsed;
   };

@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Loader2, LogIn, UserPlus } from "lucide-react";
@@ -16,11 +17,13 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import type { Session, User } from '@supabase/supabase-js';
+import sermonLogo from "@/assets/sermon-logo.png";
 
 const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [rememberMe, setRememberMe] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [session, setSession] = useState<Session | null>(null);
   const [user, setUser] = useState<User | null>(null);
@@ -28,6 +31,17 @@ const Auth = () => {
   const { t, language, setLanguage } = useLanguage();
 
   useEffect(() => {
+    // Load saved credentials if remember me was checked
+    const savedEmail = localStorage.getItem('rememberedEmail');
+    const savedPassword = localStorage.getItem('rememberedPassword');
+    const savedRemember = localStorage.getItem('rememberMe') === 'true';
+    
+    if (savedRemember && savedEmail && savedPassword) {
+      setEmail(savedEmail);
+      setPassword(savedPassword);
+      setRememberMe(true);
+    }
+
     // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
@@ -52,6 +66,19 @@ const Auth = () => {
 
     return () => subscription.unsubscribe();
   }, [navigate]);
+
+  const handleRememberMe = (checked: boolean) => {
+    setRememberMe(checked);
+    if (checked) {
+      localStorage.setItem('rememberedEmail', email);
+      localStorage.setItem('rememberedPassword', password);
+      localStorage.setItem('rememberMe', 'true');
+    } else {
+      localStorage.removeItem('rememberedEmail');
+      localStorage.removeItem('rememberedPassword');
+      localStorage.removeItem('rememberMe');
+    }
+  };
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -113,6 +140,13 @@ const Auth = () => {
         }
       } else {
         toast.success(language === 'pt' ? "Login realizado com sucesso!" : language === 'en' ? "Login successful!" : "¡Inicio de sesión exitoso!");
+        
+        // Save credentials if remember me is checked
+        if (rememberMe) {
+          localStorage.setItem('rememberedEmail', email);
+          localStorage.setItem('rememberedPassword', password);
+          localStorage.setItem('rememberMe', 'true');
+        }
       }
     } catch (error: any) {
       toast.error(error.message);
@@ -125,6 +159,7 @@ const Auth = () => {
     <div className="min-h-screen bg-gradient-to-br from-primary/5 via-background to-primary/10 flex items-center justify-center p-4">
       <Card className="w-full max-w-md p-8 shadow-xl">
         <div className="text-center mb-8">
+          <img src={sermonLogo} alt="Sermon Logo" className="w-32 h-32 mx-auto mb-4" />
           <h1 className="text-3xl font-bold text-primary mb-2">
             {language === 'pt' ? 'Gerador de Sermões' : language === 'en' ? 'Sermon Generator' : 'Generador de Sermones'}
           </h1>
@@ -155,12 +190,22 @@ const Auth = () => {
 
         <form onSubmit={isLogin ? handleSignIn : handleSignUp} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
+            <Label htmlFor="email">
+              {isLogin 
+                ? "Email"
+                : (language === 'pt' ? 'Crie a conta com seu melhor email' : language === 'en' ? 'Create account with your best email' : 'Crea la cuenta con tu mejor correo')
+              }
+            </Label>
             <Input
               id="email"
               type="email"
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              onChange={(e) => {
+                setEmail(e.target.value);
+                if (rememberMe) {
+                  localStorage.setItem('rememberedEmail', e.target.value);
+                }
+              }}
               placeholder="seu@email.com"
               disabled={isLoading}
               required
@@ -169,18 +214,42 @@ const Auth = () => {
 
           <div className="space-y-2">
             <Label htmlFor="password">
-              {language === 'pt' ? 'Senha' : language === 'en' ? 'Password' : 'Contraseña'}
+              {isLogin 
+                ? (language === 'pt' ? 'Senha' : language === 'en' ? 'Password' : 'Contraseña')
+                : (language === 'pt' ? 'Crie uma senha' : language === 'en' ? 'Create a password' : 'Crea una contraseña')
+              }
             </Label>
             <Input
               id="password"
               type="password"
               value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              onChange={(e) => {
+                setPassword(e.target.value);
+                if (rememberMe) {
+                  localStorage.setItem('rememberedPassword', e.target.value);
+                }
+              }}
               placeholder="••••••••"
               disabled={isLoading}
               required
             />
           </div>
+
+          {isLogin && (
+            <div className="flex items-center space-x-2">
+              <Checkbox 
+                id="remember" 
+                checked={rememberMe}
+                onCheckedChange={handleRememberMe}
+              />
+              <Label 
+                htmlFor="remember" 
+                className="text-sm cursor-pointer"
+              >
+                {language === 'pt' ? 'Lembrar email e senha' : language === 'en' ? 'Remember email and password' : 'Recordar correo y contraseña'}
+              </Label>
+            </div>
+          )}
 
           <Button type="submit" className="w-full" disabled={isLoading}>
             {isLoading ? (
@@ -206,10 +275,12 @@ const Auth = () => {
           <button
             onClick={() => {
               setIsLogin(!isLogin);
-              setEmail("");
-              setPassword("");
+              if (!rememberMe) {
+                setEmail("");
+                setPassword("");
+              }
             }}
-            className="text-sm text-primary hover:underline"
+            className="text-sm text-primary hover:underline font-semibold"
             disabled={isLoading}
           >
             {isLogin 

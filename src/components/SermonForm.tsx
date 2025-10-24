@@ -80,7 +80,7 @@ export const SermonForm = ({ onGenerate, isLoading }: SermonFormProps) => {
           {isLoading ? (
             <>
               <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-              {t('generating')}
+              {language === 'pt' ? 'Gerando sermão...' : language === 'en' ? 'Generating sermon...' : 'Generando sermón...'}
             </>
           ) : (
             <>

@@ -162,8 +162,17 @@ export const VerseSearchSection = () => {
             disabled={isLoading}
             className="w-full gap-2"
           >
-            <Search className="h-4 w-4" />
-            {isLoading ? t('searching') : t('search')}
+            {isLoading ? (
+              <>
+                <Search className="h-4 w-4 animate-pulse" />
+                {language === 'pt' ? 'Buscando versículos...' : language === 'en' ? 'Searching verses...' : 'Buscando versículos...'}
+              </>
+            ) : (
+              <>
+                <Search className="h-4 w-4" />
+                {t('search')}
+              </>
+            )}
           </Button>
         </div>
       </Card>

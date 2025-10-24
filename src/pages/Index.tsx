@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { MainMenu } from "@/components/MainMenu";
 import { SermonForm } from "@/components/SermonForm";
 import { SermonDisplay } from "@/components/SermonDisplay";
@@ -6,10 +7,11 @@ import { TranslatorSection } from "@/components/TranslatorSection";
 import { VerseSearchSection } from "@/components/VerseSearchSection";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Home, Trash2 } from "lucide-react";
+import { Home, Trash2, LogOut } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useLanguage } from "@/contexts/LanguageContext";
+import type { Session, User } from '@supabase/supabase-js';
 
 type View = "dashboard" | "new-sermon" | "translator" | "my-sermons" | "verse-search";
 
@@ -19,7 +21,37 @@ const Index = () => {
   const [currentSermonTitle, setCurrentSermonTitle] = useState<string>("");
   const [currentView, setCurrentView] = useState<View>("dashboard");
   const [recentSermons, setRecentSermons] = useState<Array<{ title: string; date: string; content: string }>>([]);
+  const [session, setSession] = useState<Session | null>(null);
+  const [user, setUser] = useState<User | null>(null);
   const { t } = useLanguage();
+  const navigate = useNavigate();
+
+  // Check authentication
+  useEffect(() => {
+    // Set up auth state listener FIRST
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        setSession(session);
+        setUser(session?.user ?? null);
+        
+        if (!session) {
+          navigate("/auth");
+        }
+      }
+    );
+
+    // THEN check for existing session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      setUser(session?.user ?? null);
+      
+      if (!session) {
+        navigate("/auth");
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, [navigate]);
 
   // Load sermons from localStorage on mount
   useEffect(() => {
@@ -33,6 +65,16 @@ const Index = () => {
   useEffect(() => {
     localStorage.setItem('sermons', JSON.stringify(recentSermons));
   }, [recentSermons]);
+
+  const handleLogout = async () => {
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+      navigate("/auth");
+    } catch (error: any) {
+      toast.error(error.message);
+    }
+  };
 
   const handleDeleteSermon = (index: number) => {
     setRecentSermons(prev => prev.filter((_, i) => i !== index));
@@ -78,7 +120,19 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-background">
       {currentView === "dashboard" && (
-        <MainMenu onNavigate={setCurrentView} />
+        <>
+          <div className="p-4 flex justify-end">
+            <Button
+              onClick={handleLogout}
+              variant="outline"
+              className="gap-2"
+            >
+              <LogOut className="h-4 w-4" />
+              {t('logout')}
+            </Button>
+          </div>
+          <MainMenu onNavigate={setCurrentView} />
+        </>
       )}
       
       {currentView === "new-sermon" && (

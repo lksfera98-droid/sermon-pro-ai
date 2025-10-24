@@ -9,7 +9,7 @@ import { toast } from "sonner";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 export const TranslatorSection = () => {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const [word, setWord] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [translation, setTranslation] = useState<{
@@ -42,10 +42,10 @@ export const TranslatorSection = () => {
       }
 
       setTranslation(data);
-      toast.success(t('translate') + "!");
+      toast.success(language === 'pt' ? "Tradução concluída!" : language === 'en' ? "Translation completed!" : "¡Traducción completada!");
     } catch (error) {
       console.error('Erro ao traduzir palavra:', error);
-      toast.error(t('translate'));
+      toast.error(language === 'pt' ? "Erro ao traduzir" : language === 'en' ? "Translation error" : "Error al traducir");
     } finally {
       setIsLoading(false);
     }
@@ -74,7 +74,12 @@ export const TranslatorSection = () => {
                 className="px-6 md:px-8 h-10 md:h-12"
               >
                 {isLoading ? (
-                  <Loader2 className="h-5 w-5 animate-spin" />
+                  <>
+                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                    <span className="hidden md:inline">
+                      {language === 'pt' ? 'Traduzindo...' : language === 'en' ? 'Translating...' : 'Traduciendo...'}
+                    </span>
+                  </>
                 ) : (
                   <>
                     <Languages className="mr-2 h-5 w-5" />

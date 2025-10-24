@@ -278,6 +278,11 @@ const translations: Translations = {
     pt: 'Baixar PDF',
     en: 'Download PDF',
     es: 'Descargar PDF'
+  },
+  logout: {
+    pt: 'Sair',
+    en: 'Logout',
+    es: 'Cerrar Sesión'
   }
 };
 

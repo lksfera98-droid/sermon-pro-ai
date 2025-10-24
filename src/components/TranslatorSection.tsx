@@ -29,7 +29,10 @@ export const TranslatorSection = () => {
 
     try {
       const { data, error } = await supabase.functions.invoke('translate-word', {
-        body: { word: word.trim() }
+        body: { 
+          word: word.trim(),
+          language: localStorage.getItem('language') || 'pt'
+        }
       });
 
       if (error) throw error;

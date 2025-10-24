@@ -12,9 +12,9 @@ serve(async (req) => {
   }
 
   try {
-    const { word } = await req.json();
+    const { word, language = 'pt' } = await req.json();
     
-    console.log('Traduzindo palavra:', word);
+    console.log('Traduzindo palavra:', word, 'idioma:', language);
 
     const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
     
@@ -22,52 +22,83 @@ serve(async (req) => {
       throw new Error('OPENAI_API_KEY não configurada');
     }
 
+    const languageInstructions = {
+      pt: {
+        instruction: 'Responda em PORTUGUÊS BRASILEIRO.',
+        example: {
+          hebrew: "אַהֲבָה (ahavah) - forma hebraica",
+          greek: "ἀγάπη (agape) - forma grega",
+          aramaic: "חוּבָּא (khubba) - forma aramaica",
+          etymology: "A palavra 'amor' tem raízes profundas nas línguas semíticas... [continuar com pelo menos 150 palavras]",
+          history: "No contexto bíblico, o conceito de amor evoluiu... [continuar com pelo menos 200 palavras]"
+        }
+      },
+      en: {
+        instruction: 'Respond in ENGLISH.',
+        example: {
+          hebrew: "אַהֲבָה (ahavah) - Hebrew form",
+          greek: "ἀγάπη (agape) - Greek form",
+          aramaic: "חוּבָּא (khubba) - Aramaic form",
+          etymology: "The word 'love' has deep roots in Semitic languages... [continue with at least 150 words]",
+          history: "In the biblical context, the concept of love evolved... [continue with at least 200 words]"
+        }
+      },
+      es: {
+        instruction: 'Responda en ESPAÑOL.',
+        example: {
+          hebrew: "אַהֲבָה (ahavah) - forma hebrea",
+          greek: "ἀγάπη (agape) - forma griega",
+          aramaic: "חוּבָּא (khubba) - forma aramea",
+          etymology: "La palabra 'amor' tiene raíces profundas en las lenguas semíticas... [continuar con al menos 150 palabras]",
+          history: "En el contexto bíblico, el concepto de amor evolucionó... [continuar con al menos 200 palabras]"
+        }
+      }
+    };
+
+    const langConfig = languageInstructions[language as keyof typeof languageInstructions] || languageInstructions.pt;
+
     const prompt = `
-Você é um especialista em línguas bíblicas (Hebraico, Grego e Aramaico) e etimologia bíblica.
+You are an expert in biblical languages (Hebrew, Greek, and Aramaic) and biblical etymology.
 
-Palavra/Nome para traduzir: "${word}"
+${langConfig.instruction}
 
-**INSTRUÇÕES CRÍTICAS**: 
-- Você DEVE fornecer tradução nas TRÊS línguas (Hebraico, Grego e Aramaico) - TODAS são OBRIGATÓRIAS
-- Mesmo que a palavra tenha origem em apenas uma língua, mostre como ela aparece ou é transliterada nas outras
-- NUNCA deixe nenhum dos três campos vazios
-- A etimologia DEVE ter no mínimo 150 palavras
-- A história DEVE ter no mínimo 200 palavras
+Word/Name to translate: "${word}"
 
-Forneça as seguintes informações:
+**CRITICAL INSTRUCTIONS**: 
+- You MUST provide translation in ALL THREE languages (Hebrew, Greek, and Aramaic) - ALL are MANDATORY
+- Even if the word originates in only one language, show how it appears or is transliterated in the others
+- NEVER leave any of the three fields empty
+- Etymology MUST have at least 150 words
+- History MUST have at least 200 words
 
-1. **Tradução em Hebraico** (OBRIGATÓRIO): Forneça a palavra em caracteres hebraicos com transliteração. Se não há equivalente direto, forneça a transliteração ou termo relacionado.
+Provide the following information:
 
-2. **Tradução em Grego** (OBRIGATÓRIO): Forneça a palavra em caracteres gregos (especialmente do grego koiné do Novo Testamento) com transliteração. Se não há equivalente direto, forneça a transliteração ou termo relacionado.
+1. **Hebrew Translation** (MANDATORY): Provide the word in Hebrew characters with transliteration. If there's no direct equivalent, provide the transliteration or related term.
 
-3. **Tradução em Aramaico** (OBRIGATÓRIO): Forneça a palavra em caracteres aramaicos com transliteração. Se não há equivalente direto, forneça a transliteração ou termo relacionado.
+2. **Greek Translation** (MANDATORY): Provide the word in Greek characters (especially Koine Greek from the New Testament) with transliteration. If there's no direct equivalent, provide the transliteration or related term.
 
-4. **Etimologia** (MÍNIMO 150 PALAVRAS): Explique detalhadamente:
-   - As raízes da palavra e seus significados
-   - Como a palavra foi formada
-   - Evolução da palavra através de diferentes períodos
-   - Palavras relacionadas na mesma família linguística
-   - Conexões linguísticas entre as línguas
+3. **Aramaic Translation** (MANDATORY): Provide the word in Aramaic characters with transliteration. If there's no direct equivalent, provide the transliteration or related term.
 
-5. **História da Palavra** (MÍNIMO 200 PALAVRAS): Descreva de forma abrangente:
-   - Primeiro uso conhecido nos textos bíblicos
-   - Como o significado evoluiu ao longo do tempo
-   - Significado cultural nos tempos bíblicos
-   - Exemplos de uso no Antigo e Novo Testamento
-   - Como diferentes autores bíblicos usaram a palavra
-   - Entendimento acadêmico moderno
+4. **Etymology** (MINIMUM 150 WORDS): Explain in detail:
+   - The roots of the word and their meanings
+   - How the word was formed
+   - Evolution of the word through different periods
+   - Related words in the same linguistic family
+   - Linguistic connections between languages
 
-Retorne a resposta em formato JSON com as chaves: hebrew, greek, aramaic, etymology, history.
-TODOS os campos são OBRIGATÓRIOS. Forneça conteúdo rico e educacional.
+5. **Word History** (MINIMUM 200 WORDS): Describe comprehensively:
+   - First known use in biblical texts
+   - How the meaning evolved over time
+   - Cultural significance in biblical times
+   - Examples of use in the Old and New Testament
+   - How different biblical authors used the word
+   - Modern scholarly understanding
 
-Exemplo de formato:
-{
-  "hebrew": "אַהֲבָה (ahavah) - forma hebraica",
-  "greek": "ἀγάπη (agape) - forma grega",
-  "aramaic": "חוּבָּא (khubba) - forma aramaica",
-  "etymology": "A palavra 'amor' tem raízes profundas nas línguas semíticas... [continuar com pelo menos 150 palavras]",
-  "history": "No contexto bíblico, o conceito de amor evoluiu... [continuar com pelo menos 200 palavras]"
-}
+Return the response in JSON format with keys: hebrew, greek, aramaic, etymology, history.
+ALL fields are MANDATORY. Provide rich and educational content.
+
+Example format:
+${JSON.stringify(langConfig.example, null, 2)}
 `;
 
     const response = await fetch('https://api.openai.com/v1/chat/completions', {

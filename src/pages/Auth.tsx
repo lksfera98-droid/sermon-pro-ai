@@ -173,8 +173,10 @@ const Auth = () => {
 
         {/* Language Selector */}
         <div className="mb-6">
-          <div className="mb-3 text-xs text-muted-foreground text-center space-y-0.5">
-            <p>🇧🇷 Português | 🇺🇸 English | 🇪🇸 Español</p>
+          <div className="mb-3 text-center space-y-1">
+            <p className="text-sm text-foreground">🇧🇷 Selecione seu idioma abaixo</p>
+            <p className="text-sm text-foreground">🇺🇸 Select your language below</p>
+            <p className="text-sm text-foreground">🇪🇸 Seleccione su idioma a continuación</p>
           </div>
           <Label className="mb-2 block">
             {language === 'pt' ? 'Idioma' : language === 'en' ? 'Language' : 'Idioma'}

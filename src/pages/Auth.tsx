@@ -285,7 +285,7 @@ const Auth = () => {
                 setPassword("");
               }
             }}
-            className="text-sm text-primary hover:underline font-semibold"
+            className="text-sm text-foreground hover:underline font-bold"
             disabled={isLoading}
           >
             {isLogin 

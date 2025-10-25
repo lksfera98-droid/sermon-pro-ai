@@ -31,7 +31,7 @@ export const TranslatorSection = () => {
       const { data, error } = await supabase.functions.invoke('translate-word', {
         body: { 
           word: word.trim(),
-          language: localStorage.getItem('language') || 'pt'
+          language
         }
       });
 

@@ -173,7 +173,7 @@ const Auth = () => {
 
         {/* Language Selector */}
         <div className="mb-6">
-          <div className="mb-3 text-center space-y-1">
+          <div className="mb-3 space-y-1">
             <p className="text-sm text-foreground">🇧🇷 Selecione seu idioma abaixo</p>
             <p className="text-sm text-foreground">🇺🇸 Select your language below</p>
             <p className="text-sm text-foreground">🇪🇸 Seleccione su idioma a continuación</p>

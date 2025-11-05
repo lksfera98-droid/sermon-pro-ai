@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { LoadingProgress } from "@/components/LoadingProgress";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -142,7 +143,17 @@ export const VerseSearchSection = () => {
   };
 
   return (
-    <div className="space-y-6">
+    <>
+      {isLoading && (
+        <LoadingProgress 
+          message={
+            language === "pt" ? "Buscando versículos..." :
+            language === "en" ? "Searching verses..." :
+            "Buscando versículos..."
+          }
+        />
+      )}
+      <div className="space-y-6">
       <Card className="p-6">
         <div className="space-y-4">
           <div>
@@ -235,5 +246,6 @@ export const VerseSearchSection = () => {
         </div>
       )}
     </div>
+    </>
   );
 };

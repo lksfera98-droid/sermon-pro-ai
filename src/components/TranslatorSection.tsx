@@ -3,6 +3,7 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import { LoadingProgress } from "@/components/LoadingProgress";
 import { Loader2, Languages } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -52,7 +53,17 @@ export const TranslatorSection = () => {
   };
 
   return (
-    <div className="space-y-6 md:space-y-8">
+    <>
+      {isLoading && (
+        <LoadingProgress 
+          message={
+            language === "pt" ? "Traduzindo palavra..." :
+            language === "en" ? "Translating word..." :
+            "Traduciendo palabra..."
+          }
+        />
+      )}
+      <div className="space-y-6 md:space-y-8">
       {/* Translation Form */}
       <Card className="p-4 md:p-6">
         <form onSubmit={handleTranslate} className="space-y-4">
@@ -140,5 +151,6 @@ export const TranslatorSection = () => {
         </div>
       )}
     </div>
+    </>
   );
 };

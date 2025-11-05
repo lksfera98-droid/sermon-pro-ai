@@ -6,6 +6,7 @@ import { SermonDisplay } from "@/components/SermonDisplay";
 import { TranslatorSection } from "@/components/TranslatorSection";
 import { VerseSearchSection } from "@/components/VerseSearchSection";
 import { PublicSermonsGallery } from "@/components/PublicSermonsGallery";
+import { LoadingProgress } from "@/components/LoadingProgress";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Home, Trash2, LogOut, Check } from "lucide-react";
@@ -214,7 +215,17 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <>
+      {isLoading && (
+        <LoadingProgress 
+          message={
+            language === "pt" ? "Gerando seu sermão inspirador..." :
+            language === "en" ? "Generating your inspiring sermon..." :
+            "Generando tu sermón inspirador..."
+          }
+        />
+      )}
+      <div className="min-h-screen bg-background">
       {currentView === "dashboard" && (
         <>
           <div className="p-4 flex justify-end">
@@ -384,6 +395,7 @@ const Index = () => {
         </div>
       )}
     </div>
+    </>
   );
 };
 

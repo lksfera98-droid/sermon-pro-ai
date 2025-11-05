@@ -42,10 +42,31 @@ serve(async (req) => {
 
     const { language = 'pt' } = await req.json();
 
+    // Buscar devocionais anteriores do usuário para evitar repetição
+    const { data: previousDevotionals } = await supabaseClient
+      .from('devotionals')
+      .select('content')
+      .eq('user_id', user.id)
+      .order('created_at', { ascending: false })
+      .limit(10);
+
     const lovableApiKey = Deno.env.get('LOVABLE_API_KEY');
     if (!lovableApiKey) {
       throw new Error('LOVABLE_API_KEY not configured');
     }
+
+
+    // Extrair versículos dos devocionais anteriores
+    const previousVerses = previousDevotionals?.map(dev => {
+      const verseMatch = dev.content.match(/\*\*Versículo do Dia:\*\*.*?(?:\*\*|$)/s) || 
+                        dev.content.match(/\*\*Verse of the Day:\*\*.*?(?:\*\*|$)/s) ||
+                        dev.content.match(/\*\*Versículo del Día:\*\*.*?(?:\*\*|$)/s);
+      return verseMatch ? verseMatch[0].substring(0, 150) : '';
+    }).filter(v => v).slice(0, 5) || [];
+
+    const avoidanceNote = previousVerses.length > 0 
+      ? `\n\nIMPORTANTE: NÃO use nenhum destes versículos que já foram usados recentemente:\n${previousVerses.join('\n')}\nEscolha um versículo DIFERENTE e um tema NOVO.`
+      : '';
 
     const prompts: Record<string, string> = {
       pt: `Você é um assistente espiritual cristão. Gere um devocional diário inspirador e edificante seguindo esta estrutura:
@@ -62,7 +83,7 @@ serve(async (req) => {
 
 **Desafio do Dia:** [Um desafio prático para o leitor colocar em prática hoje]
 
-Seja caloroso, encorajador e relevante para a vida moderna.`,
+Seja caloroso, encorajador e relevante para a vida moderna.${previousVerses.length > 0 ? `\n\nIMPORTANTE: NÃO use nenhum destes versículos que já foram usados recentemente:\n${previousVerses.join('\n')}\nEscolha um versículo DIFERENTE e um tema NOVO.` : ''}`,
       en: `You are a Christian spiritual assistant. Generate an inspiring daily devotional following this structure:
 
 **Title:** [An inspiring title for the devotional]
@@ -77,7 +98,7 @@ Seja caloroso, encorajador e relevante para a vida moderna.`,
 
 **Daily Challenge:** [A practical challenge for the reader to implement today]
 
-Be warm, encouraging and relevant to modern life.`,
+Be warm, encouraging and relevant to modern life.${previousVerses.length > 0 ? `\n\nIMPORTANT: DO NOT use any of these verses that were recently used:\n${previousVerses.join('\n')}\nChoose a DIFFERENT verse and a NEW theme.` : ''}`,
       es: `Eres un asistente espiritual cristiano. Genera un devocional diario inspirador siguiendo esta estructura:
 
 **Título:** [Un título inspirador para el devocional]
@@ -92,7 +113,7 @@ Be warm, encouraging and relevant to modern life.`,
 
 **Desafío del Día:** [Un desafío práctico para que el lector implemente hoy]
 
-Sé cálido, alentador y relevante para la vida moderna.`
+Sé cálido, alentador y relevante para la vida moderna.${previousVerses.length > 0 ? `\n\nIMPORTANTE: NO uses ninguno de estos versículos que ya fueron usados recientemente:\n${previousVerses.join('\n')}\nElige un versículo DIFERENTE y un tema NUEVO.` : ''}`
     };
 
     const systemPrompt = prompts[language] || prompts.pt;

@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Download, Calendar } from "lucide-react";
+import { Download, Calendar, Eye, ChevronDown, ChevronUp } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import jsPDF from "jspdf";
 import { format } from "date-fns";
@@ -22,6 +22,7 @@ export const PublicSermonsGallery = () => {
   const { language, t } = useLanguage();
   const [sermons, setSermons] = useState<PublicSermon[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [expandedSermons, setExpandedSermons] = useState<Set<string>>(new Set());
   const { toast } = useToast();
 
   useEffect(() => {
@@ -119,6 +120,16 @@ export const PublicSermonsGallery = () => {
     }
   };
 
+  const toggleSermonExpanded = (sermonId: string) => {
+    const newExpanded = new Set(expandedSermons);
+    if (newExpanded.has(sermonId)) {
+      newExpanded.delete(sermonId);
+    } else {
+      newExpanded.add(sermonId);
+    }
+    setExpandedSermons(newExpanded);
+  };
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
@@ -152,47 +163,83 @@ export const PublicSermonsGallery = () => {
         </Card>
       ) : (
         <div className="grid gap-4">
-          {sermons.map((sermon) => (
-            <Card key={sermon.id} className="p-6 space-y-4">
-              <div>
-                <h3 className="text-xl font-semibold mb-2">{sermon.title}</h3>
-                {sermon.theme && (
-                  <p className="text-sm text-muted-foreground">
-                    {language === "pt" && "Tema: "}
-                    {language === "en" && "Theme: "}
-                    {language === "es" && "Tema: "}
-                    {sermon.theme}
-                  </p>
-                )}
-                {sermon.verse && (
-                  <p className="text-sm text-muted-foreground">
-                    {language === "pt" && "Verso: "}
-                    {language === "en" && "Verse: "}
-                    {language === "es" && "Versículo: "}
-                    {sermon.verse}
-                  </p>
-                )}
-              </div>
-              
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <Calendar className="h-4 w-4" />
-                  {format(new Date(sermon.created_at), "dd/MM/yyyy")}
+          {sermons.map((sermon) => {
+            const isExpanded = expandedSermons.has(sermon.id);
+            return (
+              <Card key={sermon.id} className="p-6 space-y-4">
+                <div>
+                  <h3 className="text-xl font-semibold mb-2">{sermon.title}</h3>
+                  {sermon.theme && (
+                    <p className="text-sm text-muted-foreground">
+                      {language === "pt" && "Tema: "}
+                      {language === "en" && "Theme: "}
+                      {language === "es" && "Tema: "}
+                      {sermon.theme}
+                    </p>
+                  )}
+                  {sermon.verse && (
+                    <p className="text-sm text-muted-foreground">
+                      {language === "pt" && "Verso: "}
+                      {language === "en" && "Verse: "}
+                      {language === "es" && "Versículo: "}
+                      {sermon.verse}
+                    </p>
+                  )}
                 </div>
+
+                {/* Sermon Content - Expandable */}
+                {isExpanded && (
+                  <div className="mt-4 p-4 bg-muted/30 rounded-lg max-h-96 overflow-y-auto">
+                    <div className="prose prose-sm max-w-none whitespace-pre-wrap text-foreground">
+                      {sermon.content}
+                    </div>
+                  </div>
+                )}
                 
-                <Button
-                  onClick={() => handleDownloadPDF(sermon)}
-                  variant="outline"
-                  size="sm"
-                >
-                  <Download className="h-4 w-4 mr-2" />
-                  {language === "pt" && "Baixar PDF"}
-                  {language === "en" && "Download PDF"}
-                  {language === "es" && "Descargar PDF"}
-                </Button>
-              </div>
-            </Card>
-          ))}
+                <div className="flex flex-wrap items-center gap-3">
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <Calendar className="h-4 w-4" />
+                    {format(new Date(sermon.created_at), "dd/MM/yyyy")}
+                  </div>
+                  
+                  <div className="flex-1" />
+                  
+                  <Button
+                    onClick={() => toggleSermonExpanded(sermon.id)}
+                    variant="outline"
+                    size="sm"
+                  >
+                    {isExpanded ? (
+                      <>
+                        <ChevronUp className="h-4 w-4 mr-2" />
+                        {language === "pt" && "Ocultar"}
+                        {language === "en" && "Hide"}
+                        {language === "es" && "Ocultar"}
+                      </>
+                    ) : (
+                      <>
+                        <Eye className="h-4 w-4 mr-2" />
+                        {language === "pt" && "Ler Sermão"}
+                        {language === "en" && "Read Sermon"}
+                        {language === "es" && "Leer Sermón"}
+                      </>
+                    )}
+                  </Button>
+                  
+                  <Button
+                    onClick={() => handleDownloadPDF(sermon)}
+                    variant="default"
+                    size="sm"
+                  >
+                    <Download className="h-4 w-4 mr-2" />
+                    {language === "pt" && "Baixar PDF"}
+                    {language === "en" && "Download PDF"}
+                    {language === "es" && "Descargar PDF"}
+                  </Button>
+                </div>
+              </Card>
+            );
+          })}
         </div>
       )}
     </div>

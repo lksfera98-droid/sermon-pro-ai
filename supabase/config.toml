@@ -8,3 +8,6 @@ verify_jwt = false
 
 [functions.search-verses]
 verify_jwt = false
+
+[functions.save-public-sermon]
+verify_jwt = true

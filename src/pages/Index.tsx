@@ -102,16 +102,16 @@ const Index = () => {
         user_id: user.id
       });
 
-      const { error } = await supabase
-        .from('public_sermons')
-        .insert({
+      const { error } = await supabase.functions.invoke('save-public-sermon', {
+        body: {
           title: currentSermonTitle,
           content: sermon,
           language: currentSermonData.language,
           theme: currentSermonData.tema,
           verse: currentSermonData.versiculo || null,
-          user_id: user.id
-        });
+        }
+      }) as any;
+
 
       if (error) {
         console.error('Error saving to gallery:', error);
@@ -164,16 +164,15 @@ const Index = () => {
       
       // Auto-save to public gallery
       if (user) {
-        const { error: saveError } = await supabase
-          .from('public_sermons')
-          .insert({
+        const { error: saveError } = await supabase.functions.invoke('save-public-sermon', {
+          body: {
             title,
             content: result.sermao,
             language: data.language,
             theme: data.tema,
             verse: data.versiculo || null,
-            user_id: user.id
-          });
+          }
+        }) as any;
         if (!saveError) {
           setSavedToGallery(true);
         } else {

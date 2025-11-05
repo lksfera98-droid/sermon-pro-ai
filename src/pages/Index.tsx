@@ -112,7 +112,9 @@ const Index = () => {
         }
       });
 
-      if (error) {
+      console.log('Edge save-public-sermon response:', { data, error });
+
+      if (error || !data?.ok) {
         console.warn('Edge save failed, falling back to direct insert:', error);
         const { error: fallbackError } = await supabase.from('public_sermons').insert({
           title: currentSermonTitle,
@@ -126,6 +128,8 @@ const Index = () => {
           console.error('Fallback insert error:', fallbackError);
           throw fallbackError;
         }
+      } else {
+        setSavedToGallery(true);
       }
 
       toast.success(

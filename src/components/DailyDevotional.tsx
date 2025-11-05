@@ -29,11 +29,6 @@ const DailyDevotional = () => {
 
       if (error) throw error;
       setSavedDevotionals(data || []);
-      
-      // Load the most recent devotional if exists
-      if (data && data.length > 0) {
-        setDevotional(data[0].content);
-      }
     } catch (error: any) {
       console.error('Error loading devotionals:', error);
     }

@@ -97,7 +97,18 @@ Sé cálido, alentador y relevante para la vida moderna.`
 
     const systemPrompt = prompts[language] || prompts.pt;
 
+    const userPrompts: Record<string, string> = {
+      pt: 'Gere um devocional diário para hoje.',
+      en: 'Generate a daily devotional for today.',
+      es: 'Genera un devocional diario para hoy.'
+    };
+
+    const userPrompt = userPrompts[language] || userPrompts.pt;
+
+    console.log('Language received:', language);
+    console.log('Using system prompt for language:', language);
     console.log('Calling Lovable AI for devotional generation...');
+    
     const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -108,7 +119,7 @@ Sé cálido, alentador y relevante para la vida moderna.`
         model: 'google/gemini-2.5-flash',
         messages: [
           { role: 'system', content: systemPrompt },
-          { role: 'user', content: 'Gere um devocional diário para hoje.' }
+          { role: 'user', content: userPrompt }
         ],
         stream: false,
       }),

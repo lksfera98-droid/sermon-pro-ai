@@ -5,9 +5,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { BookOpen, Sparkles } from "lucide-react";
+import { BookOpen, Sparkles, Download, FileText } from "lucide-react";
 import { LoadingProgress } from "@/components/LoadingProgress";
 import { useLanguage } from "@/contexts/LanguageContext";
+import jsPDF from "jspdf";
 
 export const BibleStudy = () => {
   const [verseReference, setVerseReference] = useState("");
@@ -52,6 +53,94 @@ export const BibleStudy = () => {
     if (e.key === 'Enter') {
       handleGenerateStudy();
     }
+  };
+
+  const formatStudyText = (text: string) => {
+    return text.split('\n').map((line, index) => {
+      // Detect headers with ** or ##
+      if (line.match(/^\*\*.*\*\*/) || line.match(/^#+\s/)) {
+        const cleanLine = line.replace(/^\*\*|\*\*$/g, '').replace(/^#+\s/, '');
+        return (
+          <h3 key={index} className="text-xl font-bold text-primary mt-6 mb-3">
+            {cleanLine}
+          </h3>
+        );
+      }
+      // Regular text
+      if (line.trim()) {
+        return (
+          <p key={index} className="mb-3 leading-relaxed">
+            {line}
+          </p>
+        );
+      }
+      return <br key={index} />;
+    });
+  };
+
+  const downloadTXT = () => {
+    if (!study) return;
+    
+    const content = `${study.reference}\n\n${study.study}`;
+    const blob = new Blob([content], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `estudo-biblico-${study.reference.replace(/\s+/g, '-')}.txt`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    toast.success(language === 'pt' ? 'Arquivo TXT baixado!' : language === 'en' ? 'TXT file downloaded!' : '¡Archivo TXT descargado!');
+  };
+
+  const downloadPDF = () => {
+    if (!study) return;
+    
+    const doc = new jsPDF();
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const margin = 20;
+    const maxWidth = pageWidth - 2 * margin;
+    let yPosition = 20;
+
+    // Title
+    doc.setFontSize(18);
+    doc.setFont(undefined, 'bold');
+    const titleLines = doc.splitTextToSize(study.reference, maxWidth);
+    doc.text(titleLines, margin, yPosition);
+    yPosition += titleLines.length * 10 + 10;
+
+    // Content
+    doc.setFontSize(11);
+    const lines = study.study.split('\n');
+    
+    lines.forEach((line) => {
+      if (yPosition > 270) {
+        doc.addPage();
+        yPosition = 20;
+      }
+
+      // Check if it's a header
+      if (line.match(/^\*\*.*\*\*/) || line.match(/^#+\s/)) {
+        doc.setFont(undefined, 'bold');
+        doc.setFontSize(13);
+        const cleanLine = line.replace(/^\*\*|\*\*$/g, '').replace(/^#+\s/, '');
+        const headerLines = doc.splitTextToSize(cleanLine, maxWidth);
+        doc.text(headerLines, margin, yPosition);
+        yPosition += headerLines.length * 7 + 5;
+        doc.setFontSize(11);
+      } else if (line.trim()) {
+        doc.setFont(undefined, 'normal');
+        const textLines = doc.splitTextToSize(line, maxWidth);
+        doc.text(textLines, margin, yPosition);
+        yPosition += textLines.length * 6 + 3;
+      } else {
+        yPosition += 5;
+      }
+    });
+
+    doc.save(`estudo-biblico-${study.reference.replace(/\s+/g, '-')}.pdf`);
+    toast.success(language === 'pt' ? 'PDF gerado com sucesso!' : language === 'en' ? 'PDF generated successfully!' : '¡PDF generado con éxito!');
   };
 
   return (
@@ -109,14 +198,34 @@ export const BibleStudy = () => {
         <Card className="p-6 md:p-8 bg-gradient-to-br from-card to-card/80 border-2 border-primary/20">
           <div className="space-y-6">
             <div className="text-center pb-6 border-b border-border">
-              <h3 className="text-xl md:text-2xl font-bold text-primary mb-2">
+              <h3 className="text-xl md:text-2xl font-bold text-primary mb-4">
                 📖 {study.reference}
               </h3>
+              
+              {/* Download buttons */}
+              <div className="flex gap-3 justify-center">
+                <Button
+                  onClick={downloadPDF}
+                  variant="outline"
+                  className="gap-2"
+                >
+                  <Download className="h-4 w-4" />
+                  {language === 'pt' ? 'Baixar PDF' : language === 'en' ? 'Download PDF' : 'Descargar PDF'}
+                </Button>
+                <Button
+                  onClick={downloadTXT}
+                  variant="outline"
+                  className="gap-2"
+                >
+                  <FileText className="h-4 w-4" />
+                  {language === 'pt' ? 'Baixar TXT' : language === 'en' ? 'Download TXT' : 'Descargar TXT'}
+                </Button>
+              </div>
             </div>
 
             <div className="prose prose-lg max-w-none dark:prose-invert">
-              <div className="whitespace-pre-wrap text-foreground/90 leading-relaxed">
-                {study.study}
+              <div className="text-foreground/90">
+                {formatStudyText(study.study)}
               </div>
             </div>
           </div>

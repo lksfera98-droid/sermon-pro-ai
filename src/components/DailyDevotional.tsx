@@ -184,7 +184,7 @@ const DailyDevotional = () => {
             </div>
           </div>
 
-          {viewingId && (
+          {devotional && (
             <Button
               variant="ghost"
               size="sm"
@@ -194,11 +194,11 @@ const DailyDevotional = () => {
               }}
               className="mb-4 w-fit"
             >
-              {language === 'pt' ? 'Voltar' : language === 'es' ? 'Volver' : 'Back'}
+              {language === 'pt' ? '← Voltar' : language === 'es' ? '← Volver' : '← Back'}
             </Button>
           )}
 
-          {!isLoading && !viewingId && !devotional && (
+          {!devotional && !isLoading && (
             <Button
               onClick={handleGenerate}
               disabled={isLoading}
@@ -218,40 +218,7 @@ const DailyDevotional = () => {
             </div>
           )}
 
-          {devotional && !viewingId && (
-            <div className="space-y-6">
-              <div className="flex flex-wrap gap-3">
-                <Button
-                  onClick={downloadPDF}
-                  variant="outline"
-                  className="flex-1 min-w-[140px] border-2 hover:bg-primary/5"
-                >
-                  <Download className="w-4 h-4 mr-2" />
-                  {language === 'pt' ? 'Baixar PDF' : 
-                   language === 'es' ? 'Descargar PDF' : 
-                   'Download PDF'}
-                </Button>
-                <Button
-                  onClick={downloadTXT}
-                  variant="outline"
-                  className="flex-1 min-w-[140px] border-2 hover:bg-primary/5"
-                >
-                  <FileText className="w-4 h-4 mr-2" />
-                  {language === 'pt' ? 'Baixar TXT' : 
-                   language === 'es' ? 'Descargar TXT' : 
-                   'Download TXT'}
-                </Button>
-              </div>
-
-              <div className="bg-muted/30 rounded-xl p-6 md:p-8 border border-border/50">
-                <div className="prose prose-lg max-w-none">
-                  {formatDevotionalText(devotional)}
-                </div>
-              </div>
-            </div>
-          )}
-
-          {viewingId && devotional && (
+          {devotional && (
             <div className="space-y-6">
               <div className="flex flex-wrap gap-3">
                 <Button
@@ -285,7 +252,7 @@ const DailyDevotional = () => {
           )}
         </Card>
 
-        {!viewingId && savedDevotionals.length > 0 && (
+        {!devotional && savedDevotionals.length > 0 && (
           <Card className="p-6 md:p-8 bg-card/95 backdrop-blur-sm border-2 shadow-xl">
             <h3 className="text-xl font-bold mb-4 text-foreground">
               {language === 'pt' ? 'Devocionais Salvos' : 

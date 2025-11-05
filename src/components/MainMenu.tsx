@@ -9,7 +9,8 @@ import {
   Apple,
   Globe,
   Heart,
-  Sparkles
+  Sparkles,
+  GraduationCap
 } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useState } from "react";
@@ -18,7 +19,7 @@ import { toast } from "sonner";
 import { useLanguage } from "@/contexts/LanguageContext";
 import preacherLogo from "@/assets/preacher-logo.png";
 
-type View = "dashboard" | "new-sermon" | "translator" | "my-sermons" | "verse-search" | "public-gallery" | "prayer-requests" | "hear-god-speak";
+type View = "dashboard" | "new-sermon" | "translator" | "my-sermons" | "verse-search" | "public-gallery" | "prayer-requests" | "hear-god-speak" | "bible-study";
 
 interface MainMenuProps {
   onNavigate: (view: View) => void;
@@ -55,6 +56,7 @@ export const MainMenu = ({ onNavigate }: MainMenuProps) => {
     { id: "public-gallery" as View, label: t('sermonsGallery'), icon: Globe, emoji: "🌍" },
     { id: "prayer-requests" as View, label: t('prayerRequests'), icon: Heart, emoji: "🙏" },
     { id: "hear-god-speak" as View, label: t('hearGodSpeak'), icon: Sparkles, emoji: "✨" },
+    { id: "bible-study" as View, label: t('bibleStudy'), icon: GraduationCap, emoji: "📚" },
     { id: "verse-search" as View, label: t('verseSearch'), icon: Languages, emoji: "📖" },
     { id: "translator" as View, label: t('bibleTranslator'), icon: Languages, emoji: "🔤" },
   ];

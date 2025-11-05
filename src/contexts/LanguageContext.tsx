@@ -450,6 +450,17 @@ const translations: Translations = {
     pt: 'Amém',
     en: 'Amen',
     es: 'Amén'
+  },
+  // Bible Study
+  bibleStudy: {
+    pt: 'Estudo Bíblico Profundo',
+    en: 'Deep Bible Study',
+    es: 'Estudio Bíblico Profundo'
+  },
+  bibleStudySubtitle: {
+    pt: 'Entenda a verdade completa sobre qualquer versículo',
+    en: 'Understand the complete truth about any verse',
+    es: 'Comprende la verdad completa sobre cualquier versículo'
   }
 };
 

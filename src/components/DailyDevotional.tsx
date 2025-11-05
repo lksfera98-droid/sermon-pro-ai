@@ -3,7 +3,7 @@ import { Button } from "./ui/button";
 import { Card } from "./ui/card";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { Download, FileText, Sparkles, Calendar, Loader2 } from "lucide-react";
+import { Download, FileText, Sparkles, Calendar, Loader2, Trash2 } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import jsPDF from "jspdf";
 
@@ -133,6 +133,40 @@ const DailyDevotional = () => {
     doc.save(`devocional_${new Date().toISOString().split('T')[0]}.pdf`);
   };
 
+  const handleDelete = async (id: string) => {
+    try {
+      const { error } = await supabase
+        .from('devotionals')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+
+      // Se o devocional deletado era o que estava sendo exibido, limpar
+      const deletedDev = savedDevotionals.find(d => d.id === id);
+      if (deletedDev && devotional === deletedDev.content) {
+        setDevotional("");
+        setViewingId(null);
+      }
+
+      await loadSavedDevotionals();
+      
+      toast({
+        title: t('success'),
+        description: language === 'pt' ? 'Devocional excluído!' : 
+                    language === 'es' ? '¡Devocional eliminado!' : 
+                    'Devotional deleted!',
+      });
+    } catch (error: any) {
+      console.error('Error deleting devotional:', error);
+      toast({
+        title: t('error'),
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5 p-4 md:p-8">
       <div className="max-w-4xl mx-auto">
@@ -224,19 +258,32 @@ const DailyDevotional = () => {
             </h3>
             <div className="space-y-3">
               {savedDevotionals.map((dev) => (
-                <button
+                <div
                   key={dev.id}
-                  onClick={() => { setViewingId(dev.id); setDevotional(dev.content); }}
-                  className="w-full text-left p-4 rounded-lg border-2 border-border/50 hover:border-primary/50 hover:bg-primary/5 transition-all duration-200"
+                  className="w-full p-4 rounded-lg border-2 border-border/50 hover:border-primary/50 transition-all duration-200"
                 >
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <Calendar className="w-4 h-4" />
-                    {new Date(dev.created_at).toLocaleDateString(language === 'pt' ? 'pt-BR' : language === 'es' ? 'es-ES' : 'en-US')}
-                  </div>
-                  <p className="mt-1 text-foreground/70 line-clamp-2">
-                    {dev.content.substring(0, 100)}...
-                  </p>
-                </button>
+                  <button
+                    onClick={() => { setViewingId(dev.id); setDevotional(dev.content); }}
+                    className="w-full text-left"
+                  >
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <Calendar className="w-4 h-4" />
+                      {new Date(dev.created_at).toLocaleDateString(language === 'pt' ? 'pt-BR' : language === 'es' ? 'es-ES' : 'en-US')}
+                    </div>
+                    <p className="mt-1 text-foreground/70 line-clamp-2">
+                      {dev.content.substring(0, 100)}...
+                    </p>
+                  </button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handleDelete(dev.id)}
+                    className="mt-2 w-full text-destructive hover:text-destructive hover:bg-destructive/10"
+                  >
+                    <Trash2 className="w-4 h-4 mr-2" />
+                    {language === 'pt' ? 'Excluir' : language === 'es' ? 'Eliminar' : 'Delete'}
+                  </Button>
+                </div>
               ))}
             </div>
           </Card>

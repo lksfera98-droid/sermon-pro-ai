@@ -1,10 +1,10 @@
 project_id = "wskgiipqjtptptinnodb"
 
 [functions.generate-sermon]
-verify_jwt = false
+verify_jwt = true
 
 [functions.translate-word]
-verify_jwt = false
+verify_jwt = true
 
 [functions.search-verses]
-verify_jwt = false
+verify_jwt = true

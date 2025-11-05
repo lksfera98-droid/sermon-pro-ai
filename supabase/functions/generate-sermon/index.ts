@@ -1,5 +1,6 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { z } from "https://deno.land/x/zod@v3.22.4/mod.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -12,7 +13,17 @@ serve(async (req) => {
   }
 
   try {
-    const { tema, versiculo = '', tempo, language = 'pt' } = await req.json();
+    // Input validation schema
+    const sermonSchema = z.object({
+      tema: z.string().trim().min(1, "Tema é obrigatório").max(200, "Tema muito longo"),
+      versiculo: z.string().trim().max(100, "Versículo muito longo").optional().default(''),
+      tempo: z.number().int().min(10, "Tempo mínimo: 10 minutos").max(120, "Tempo máximo: 120 minutos"),
+      language: z.enum(['pt', 'en', 'es']).default('pt')
+    });
+
+    const rawData = await req.json();
+    const validated = sermonSchema.parse(rawData);
+    const { tema, versiculo, tempo, language } = validated;
     
     console.log('Gerando sermão com:', { tema, versiculo, tempo, language });
 

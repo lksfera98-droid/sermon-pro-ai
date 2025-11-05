@@ -31,16 +31,17 @@ const Auth = () => {
   const { t, language, setLanguage } = useLanguage();
 
   useEffect(() => {
-    // Load saved credentials if remember me was checked
+    // Load saved email if remember me was checked
     const savedEmail = localStorage.getItem('rememberedEmail');
-    const savedPassword = localStorage.getItem('rememberedPassword');
     const savedRemember = localStorage.getItem('rememberMe') === 'true';
     
-    if (savedRemember && savedEmail && savedPassword) {
+    if (savedRemember && savedEmail) {
       setEmail(savedEmail);
-      setPassword(savedPassword);
       setRememberMe(true);
     }
+    
+    // Clear any previously saved passwords (security cleanup)
+    localStorage.removeItem('rememberedPassword');
 
     // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
@@ -69,13 +70,11 @@ const Auth = () => {
 
   const handleRememberMe = (checked: boolean) => {
     setRememberMe(checked);
-    if (checked) {
+    if (checked && email) {
       localStorage.setItem('rememberedEmail', email);
-      localStorage.setItem('rememberedPassword', password);
       localStorage.setItem('rememberMe', 'true');
     } else {
       localStorage.removeItem('rememberedEmail');
-      localStorage.removeItem('rememberedPassword');
       localStorage.removeItem('rememberMe');
     }
   };
@@ -141,10 +140,9 @@ const Auth = () => {
       } else {
         toast.success(language === 'pt' ? "Login realizado com sucesso!" : language === 'en' ? "Login successful!" : "¡Inicio de sesión exitoso!");
         
-        // Save credentials if remember me is checked
+        // Save email if remember me is checked
         if (rememberMe) {
           localStorage.setItem('rememberedEmail', email);
-          localStorage.setItem('rememberedPassword', password);
           localStorage.setItem('rememberMe', 'true');
         }
       }
@@ -205,12 +203,7 @@ const Auth = () => {
               id="email"
               type="email"
               value={email}
-              onChange={(e) => {
-                setEmail(e.target.value);
-                if (rememberMe) {
-                  localStorage.setItem('rememberedEmail', e.target.value);
-                }
-              }}
+              onChange={(e) => setEmail(e.target.value)}
               placeholder="seu@email.com"
               disabled={isLoading}
               required
@@ -228,12 +221,7 @@ const Auth = () => {
               id="password"
               type="password"
               value={password}
-              onChange={(e) => {
-                setPassword(e.target.value);
-                if (rememberMe) {
-                  localStorage.setItem('rememberedPassword', e.target.value);
-                }
-              }}
+              onChange={(e) => setPassword(e.target.value)}
               placeholder="••••••••"
               disabled={isLoading}
               required
@@ -251,7 +239,7 @@ const Auth = () => {
                 htmlFor="remember" 
                 className="text-sm cursor-pointer"
               >
-                {language === 'pt' ? 'Lembrar email e senha' : language === 'en' ? 'Remember email and password' : 'Recordar correo y contraseña'}
+                {language === 'pt' ? 'Lembrar email' : language === 'en' ? 'Remember email' : 'Recordar correo'}
               </Label>
             </div>
           )}

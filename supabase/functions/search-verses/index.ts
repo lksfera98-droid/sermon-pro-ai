@@ -1,5 +1,6 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { z } from "https://deno.land/x/zod@v3.22.4/mod.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -12,11 +13,15 @@ serve(async (req) => {
   }
 
   try {
-    const { word, language = 'pt' } = await req.json();
-    
-    if (!word) {
-      throw new Error('Palavra não fornecida');
-    }
+    // Input validation schema
+    const verseSchema = z.object({
+      word: z.string().trim().min(1, "Palavra é obrigatória").max(100, "Palavra muito longa"),
+      language: z.enum(['pt', 'en', 'es']).default('pt')
+    });
+
+    const rawData = await req.json();
+    const validated = verseSchema.parse(rawData);
+    const { word, language } = validated;
 
     const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
     if (!LOVABLE_API_KEY) {

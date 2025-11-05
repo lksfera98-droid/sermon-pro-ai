@@ -40,10 +40,10 @@ export const Dashboard = ({ recentSermons, onNewSermon, onViewSermon }: Dashboar
       {/* Mensagem de Saudação */}
       <div className="text-center py-6 md:py-8">
         <h1 className="text-3xl md:text-4xl font-bold text-primary mb-3">
-          Bem-vindo ao App do Pregador
+          Bem-vindo ao SermonPro
         </h1>
         <p className="text-base md:text-lg text-muted-foreground">
-          Seu assistente completo para criação de sermões bíblicos
+          Tudo o que você precisa para se conectar com a Palavra de DEUS
         </p>
       </div>
 

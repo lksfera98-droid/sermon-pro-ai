@@ -13,12 +13,12 @@ interface Translations {
 const translations: Translations = {
   // Welcome
   welcome: {
-    pt: 'Bem-vindo ao App do Pregador',
+    pt: 'Bem-vindo ao SermonPro',
     en: 'Welcome to the Preacher App',
     es: 'Bienvenido a la App del Predicador'
   },
   welcomeSubtitle: {
-    pt: 'Seu assistente completo para criação de sermões bíblicos',
+    pt: 'Tudo o que você precisa para se conectar com a Palavra de DEUS',
     en: 'Your complete assistant for creating biblical sermons',
     es: 'Tu asistente completo para crear sermones bíblicos'
   },

@@ -66,11 +66,20 @@ export const BibleStudy = () => {
           </h3>
         );
       }
-      // Regular text
+      // Regular text with bold formatting
       if (line.trim()) {
+        const parts = line.split(/(\*\*.*?\*\*)/g);
+        const formattedLine = parts.map((part, i) => {
+          if (part.match(/^\*\*.*\*\*$/)) {
+            const boldText = part.replace(/^\*\*|\*\*$/g, '');
+            return <strong key={i} className="font-bold">{boldText}</strong>;
+          }
+          return part;
+        });
+        
         return (
           <p key={index} className="mb-3 leading-relaxed">
-            {line}
+            {formattedLine}
           </p>
         );
       }

@@ -31,18 +31,48 @@ serve(async (req) => {
 
     // Generate inspirational message with AI
     const languagePrompts: Record<string, string> = {
-      pt: `Gere uma mensagem de Deus para a pessoa baseada neste versículo:
+      pt: `Com base neste versículo bíblico:
 "${verse}" - ${reference}
+
+Por favor, faça duas coisas:
+1. Traduza o versículo acima para o português (mantendo a referência ${reference})
+2. Gere uma mensagem de Deus para a pessoa baseada neste versículo
+
 A mensagem deve transmitir fé, esperança, paz, confiança e força.
-Seja breve, tocante e espiritual. Responda em português.`,
-      en: `Generate a message from God to the person based on this verse:
+Seja breve, tocante e espiritual.
+
+Retorne no formato:
+VERSÍCULO TRADUZIDO: [versículo em português]
+---
+MENSAGEM: [mensagem inspiradora em português]`,
+      en: `Based on this Bible verse:
 "${verse}" - ${reference}
+
+Please do two things:
+1. Keep the verse as it is (it's already in English)
+2. Generate a message from God to the person based on this verse
+
 The message should convey faith, hope, peace, trust and strength.
-Be brief, touching and spiritual. Respond in English.`,
-      es: `Genera un mensaje de Dios para la persona basado en este versículo:
+Be brief, touching and spiritual.
+
+Return in the format:
+TRANSLATED VERSE: ${verse}
+---
+MESSAGE: [inspirational message in English]`,
+      es: `Con base en este versículo bíblico:
 "${verse}" - ${reference}
+
+Por favor, haz dos cosas:
+1. Traduce el versículo arriba al español (manteniendo la referencia ${reference})
+2. Genera un mensaje de Dios para la persona basado en este versículo
+
 El mensaje debe transmitir fe, esperanza, paz, confianza y fuerza.
-Sé breve, conmovedor y espiritual. Responde en español.`
+Sé breve, conmovedor y espiritual.
+
+Retorna en el formato:
+VERSÍCULO TRADUCIDO: [versículo en español]
+---
+MENSAJE: [mensaje inspirador en español]`
     };
 
     const prompt = languagePrompts[language] || languagePrompts.en;
@@ -81,13 +111,37 @@ Sé breve, conmovedor y espiritual. Responde en español.`
     }
 
     const aiData = await aiResponse.json();
-    const message = aiData.choices[0].message.content;
+    const fullResponse = aiData.choices[0].message.content;
 
-    console.log("AI message generated successfully");
+    console.log("AI response generated successfully");
+
+    // Parse the response to extract translated verse and message
+    let translatedVerse = verse; // fallback to original
+    let message = fullResponse;
+
+    if (fullResponse.includes('---')) {
+      const parts = fullResponse.split('---');
+      if (parts.length >= 2) {
+        const versePart = parts[0].trim();
+        const messagePart = parts[1].trim();
+        
+        // Extract verse from "VERSÍCULO TRADUZIDO:" or similar
+        const verseMatch = versePart.match(/(?:VERSÍCULO TRADUZIDO|TRANSLATED VERSE|VERSÍCULO TRADUCIDO):\s*(.+)/s);
+        if (verseMatch) {
+          translatedVerse = verseMatch[1].trim();
+        }
+        
+        // Extract message from "MENSAGEM:" or similar
+        const messageMatch = messagePart.match(/(?:MENSAGEM|MESSAGE|MENSAJE):\s*(.+)/s);
+        if (messageMatch) {
+          message = messageMatch[1].trim();
+        }
+      }
+    }
 
     return new Response(
       JSON.stringify({
-        verse,
+        verse: translatedVerse,
         reference,
         message
       }),

@@ -283,6 +283,16 @@ const translations: Translations = {
     pt: 'Sair',
     en: 'Logout',
     es: 'Cerrar Sesión'
+  },
+  sermonsGallery: {
+    pt: 'Galeria de Sermões',
+    en: 'Sermons Gallery',
+    es: 'Galería de Sermones'
+  },
+  saveToGallery: {
+    pt: 'Salvar na Galeria Pública',
+    en: 'Save to Public Gallery',
+    es: 'Guardar en Galería Pública'
   }
 };
 

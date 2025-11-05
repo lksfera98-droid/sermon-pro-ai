@@ -16,7 +16,7 @@ import { toast } from "sonner";
 import { useLanguage } from "@/contexts/LanguageContext";
 import preacherLogo from "@/assets/preacher-logo.png";
 
-type View = "dashboard" | "new-sermon" | "translator" | "my-sermons" | "verse-search";
+type View = "dashboard" | "new-sermon" | "translator" | "my-sermons" | "verse-search" | "public-gallery";
 
 interface MainMenuProps {
   onNavigate: (view: View) => void;
@@ -50,6 +50,7 @@ export const MainMenu = ({ onNavigate }: MainMenuProps) => {
   const menuItems = [
     { id: "new-sermon" as View, label: t('createSermon'), icon: FileText, emoji: "📝" },
     { id: "my-sermons" as View, label: t('mySermons'), icon: BookOpen, emoji: "📚" },
+    { id: "public-gallery" as View, label: t('sermonsGallery'), icon: Globe, emoji: "🌍" },
     { id: "verse-search" as View, label: t('verseSearch'), icon: Languages, emoji: "📖" },
     { id: "translator" as View, label: t('bibleTranslator'), icon: Languages, emoji: "🔤" },
   ];

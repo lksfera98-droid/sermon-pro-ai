@@ -5,6 +5,7 @@ import { SermonForm } from "@/components/SermonForm";
 import { SermonDisplay } from "@/components/SermonDisplay";
 import { TranslatorSection } from "@/components/TranslatorSection";
 import { VerseSearchSection } from "@/components/VerseSearchSection";
+import { PublicSermonsGallery } from "@/components/PublicSermonsGallery";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Home, Trash2, LogOut } from "lucide-react";
@@ -13,17 +14,18 @@ import { toast } from "sonner";
 import { useLanguage } from "@/contexts/LanguageContext";
 import type { Session, User } from '@supabase/supabase-js';
 
-type View = "dashboard" | "new-sermon" | "translator" | "my-sermons" | "verse-search";
+type View = "dashboard" | "new-sermon" | "translator" | "my-sermons" | "verse-search" | "public-gallery";
 
 const Index = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [sermon, setSermon] = useState<string | null>(null);
   const [currentSermonTitle, setCurrentSermonTitle] = useState<string>("");
+  const [currentSermonData, setCurrentSermonData] = useState<{ tema: string; versiculo: string; language: string } | null>(null);
   const [currentView, setCurrentView] = useState<View>("dashboard");
   const [recentSermons, setRecentSermons] = useState<Array<{ title: string; date: string; content: string }>>([]);
   const [session, setSession] = useState<Session | null>(null);
   const [user, setUser] = useState<User | null>(null);
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const navigate = useNavigate();
 
   // Check authentication
@@ -81,6 +83,38 @@ const Index = () => {
     toast.success(t('deleteSermon') + "!");
   };
 
+  const handleSaveToPublicGallery = async () => {
+    if (!sermon || !currentSermonData || !user) return;
+
+    try {
+      const { error } = await supabase
+        .from('public_sermons')
+        .insert({
+          title: currentSermonTitle,
+          content: sermon,
+          language: currentSermonData.language,
+          theme: currentSermonData.tema,
+          verse: currentSermonData.versiculo || null,
+          user_id: user.id
+        });
+
+      if (error) throw error;
+
+      toast.success(
+        language === "pt" ? "Sermão salvo na galeria pública!" :
+        language === "en" ? "Sermon saved to public gallery!" :
+        "¡Sermón guardado en la galería pública!"
+      );
+    } catch (error) {
+      console.error('Error saving to public gallery:', error);
+      toast.error(
+        language === "pt" ? "Erro ao salvar na galeria" :
+        language === "en" ? "Error saving to gallery" :
+        "Error al guardar en la galería"
+      );
+    }
+  };
+
   const handleGenerate = async (data: { tema: string; versiculo: string; tempo: number; language: string }) => {
     setIsLoading(true);
     setSermon(null);
@@ -97,6 +131,7 @@ const Index = () => {
       }
 
       setSermon(result.sermao);
+      setCurrentSermonData(data);
       
       // Add to recent sermons
       const title = data.tema || t('createSermon');
@@ -156,7 +191,16 @@ const Index = () => {
             <SermonForm onGenerate={handleGenerate} isLoading={isLoading} />
             
             {sermon && (
-              <div className="mt-6 md:mt-8">
+              <div className="mt-6 md:mt-8 space-y-4">
+                <div className="flex justify-end">
+                  <Button
+                    onClick={handleSaveToPublicGallery}
+                    variant="outline"
+                    className="gap-2"
+                  >
+                    {t('saveToGallery')}
+                  </Button>
+                </div>
                 <SermonDisplay content={sermon} title={currentSermonTitle} />
               </div>
             )}
@@ -249,6 +293,24 @@ const Index = () => {
               </Button>
             </div>
             <TranslatorSection />
+          </div>
+        </div>
+      )}
+
+      {currentView === "public-gallery" && (
+        <div className="p-4 md:p-8">
+          <div className="max-w-4xl mx-auto space-y-6 md:space-y-8">
+            <div className="flex flex-col items-center gap-4 mb-4">
+              <Button
+                onClick={() => setCurrentView("dashboard")}
+                variant="outline"
+                className="flex flex-col items-center gap-1 h-auto py-2"
+              >
+                <Home className="h-4 w-4" />
+                <span className="text-xs">{t('home')}</span>
+              </Button>
+            </div>
+            <PublicSermonsGallery />
           </div>
         </div>
       )}

@@ -6,6 +6,8 @@ import { SermonDisplay } from "@/components/SermonDisplay";
 import { TranslatorSection } from "@/components/TranslatorSection";
 import { VerseSearchSection } from "@/components/VerseSearchSection";
 import { PublicSermonsGallery } from "@/components/PublicSermonsGallery";
+import { PrayerRequestForm } from "@/components/PrayerRequestForm";
+import { PrayerRequestsGallery } from "@/components/PrayerRequestsGallery";
 import { LoadingProgress } from "@/components/LoadingProgress";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -15,7 +17,7 @@ import { toast } from "sonner";
 import { useLanguage } from "@/contexts/LanguageContext";
 import type { Session, User } from '@supabase/supabase-js';
 
-type View = "dashboard" | "new-sermon" | "translator" | "my-sermons" | "verse-search" | "public-gallery";
+type View = "dashboard" | "new-sermon" | "translator" | "my-sermons" | "verse-search" | "public-gallery" | "prayer-requests";
 
 const Index = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -367,6 +369,31 @@ const Index = () => {
               </Button>
             </div>
             <PublicSermonsGallery />
+          </div>
+        </div>
+      )}
+
+      {currentView === "prayer-requests" && (
+        <div className="p-4 md:p-8">
+          <div className="max-w-4xl mx-auto space-y-6 md:space-y-8">
+            <div className="flex flex-col items-center gap-4 mb-4">
+              <h1 className="text-2xl md:text-3xl font-bold text-foreground">{t('prayerRequests')}</h1>
+              <Button
+                onClick={() => setCurrentView("dashboard")}
+                variant="outline"
+                className="flex flex-col items-center gap-1 h-auto py-2"
+              >
+                <Home className="h-4 w-4" />
+                <span className="text-xs">{t('home')}</span>
+              </Button>
+            </div>
+            
+            <PrayerRequestForm onSuccess={() => {}} />
+            
+            <div className="mt-8">
+              <h2 className="text-xl font-semibold mb-4">{t('prayerRequests')}</h2>
+              <PrayerRequestsGallery />
+            </div>
           </div>
         </div>
       )}

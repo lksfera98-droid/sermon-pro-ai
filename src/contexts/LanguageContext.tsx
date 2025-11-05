@@ -293,6 +293,132 @@ const translations: Translations = {
     pt: 'Salve na Galeria Publica e deixe Deus falar com alguém',
     en: 'Save to Public Gallery and let God speak to someone',
     es: 'Guarde en la Galería Pública y deje que Dios hable con alguien'
+  },
+  // Prayer Requests
+  prayerRequests: {
+    pt: 'Pedidos de Oração',
+    en: 'Prayer Requests',
+    es: 'Pedidos de Oración'
+  },
+  newPrayerRequest: {
+    pt: 'Novo Pedido de Oração',
+    en: 'New Prayer Request',
+    es: 'Nueva Petición de Oración'
+  },
+  sharePrayerRequest: {
+    pt: 'Compartilhe seu pedido de oração com a comunidade',
+    en: 'Share your prayer request with the community',
+    es: 'Comparte tu petición de oración con la comunidad'
+  },
+  sendAnonymously: {
+    pt: 'Enviar anonimamente',
+    en: 'Send anonymously',
+    es: 'Enviar anónimamente'
+  },
+  yourName: {
+    pt: 'Seu Nome',
+    en: 'Your Name',
+    es: 'Tu Nombre'
+  },
+  enterYourName: {
+    pt: 'Digite seu nome',
+    en: 'Enter your name',
+    es: 'Escribe tu nombre'
+  },
+  prayerRequest: {
+    pt: 'Pedido de Oração',
+    en: 'Prayer Request',
+    es: 'Petición de Oración'
+  },
+  writeYourRequest: {
+    pt: 'Escreva seu pedido de oração...',
+    en: 'Write your prayer request...',
+    es: 'Escribe tu petición de oración...'
+  },
+  image: {
+    pt: 'Imagem',
+    en: 'Image',
+    es: 'Imagen'
+  },
+  optional: {
+    pt: 'opcional',
+    en: 'optional',
+    es: 'opcional'
+  },
+  remove: {
+    pt: 'Remover',
+    en: 'Remove',
+    es: 'Eliminar'
+  },
+  sending: {
+    pt: 'Enviando...',
+    en: 'Sending...',
+    es: 'Enviando...'
+  },
+  sendRequest: {
+    pt: 'Enviar Pedido',
+    en: 'Send Request',
+    es: 'Enviar Petición'
+  },
+  success: {
+    pt: 'Sucesso',
+    en: 'Success',
+    es: 'Éxito'
+  },
+  error: {
+    pt: 'Erro',
+    en: 'Error',
+    es: 'Error'
+  },
+  fillAllFields: {
+    pt: 'Por favor preencha todos os campos obrigatórios',
+    en: 'Please fill all required fields',
+    es: 'Por favor completa todos los campos obligatorios'
+  },
+  tryAgain: {
+    pt: 'Algo deu errado. Tente novamente.',
+    en: 'Something went wrong. Please try again.',
+    es: 'Algo salió mal. Por favor intenta de nuevo.'
+  },
+  prayerRequestSent: {
+    pt: 'Seu pedido de oração foi compartilhado',
+    en: 'Your prayer request has been shared',
+    es: 'Tu petición de oración ha sido compartida'
+  },
+  noPrayerRequests: {
+    pt: 'Nenhum pedido de oração ainda. Seja o primeiro a compartilhar!',
+    en: 'No prayer requests yet. Be the first to share!',
+    es: '¡Aún no hay peticiones de oración. Sé el primero en compartir!'
+  },
+  anonymous: {
+    pt: 'Anônimo',
+    en: 'Anonymous',
+    es: 'Anónimo'
+  },
+  confirmDelete: {
+    pt: 'Confirmar Exclusão',
+    en: 'Confirm Delete',
+    es: 'Confirmar Eliminación'
+  },
+  confirmDeleteRequest: {
+    pt: 'Tem certeza que deseja excluir este pedido de oração?',
+    en: 'Are you sure you want to delete this prayer request?',
+    es: '¿Estás seguro de que quieres eliminar esta petición de oración?'
+  },
+  cancel: {
+    pt: 'Cancelar',
+    en: 'Cancel',
+    es: 'Cancelar'
+  },
+  delete: {
+    pt: 'Excluir',
+    en: 'Delete',
+    es: 'Eliminar'
+  },
+  requestDeleted: {
+    pt: 'Pedido de oração excluído',
+    en: 'Prayer request deleted',
+    es: 'Petición de oración eliminada'
   }
 };
 

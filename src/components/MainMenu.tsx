@@ -7,7 +7,8 @@ import {
   Book, 
   Smartphone, 
   Apple,
-  Globe
+  Globe,
+  Heart
 } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useState } from "react";
@@ -16,7 +17,7 @@ import { toast } from "sonner";
 import { useLanguage } from "@/contexts/LanguageContext";
 import preacherLogo from "@/assets/preacher-logo.png";
 
-type View = "dashboard" | "new-sermon" | "translator" | "my-sermons" | "verse-search" | "public-gallery";
+type View = "dashboard" | "new-sermon" | "translator" | "my-sermons" | "verse-search" | "public-gallery" | "prayer-requests";
 
 interface MainMenuProps {
   onNavigate: (view: View) => void;
@@ -51,6 +52,7 @@ export const MainMenu = ({ onNavigate }: MainMenuProps) => {
     { id: "new-sermon" as View, label: t('createSermon'), icon: FileText, emoji: "📝" },
     { id: "my-sermons" as View, label: t('mySermons'), icon: BookOpen, emoji: "📚" },
     { id: "public-gallery" as View, label: t('sermonsGallery'), icon: Globe, emoji: "🌍" },
+    { id: "prayer-requests" as View, label: t('prayerRequests'), icon: Heart, emoji: "🙏" },
     { id: "verse-search" as View, label: t('verseSearch'), icon: Languages, emoji: "📖" },
     { id: "translator" as View, label: t('bibleTranslator'), icon: Languages, emoji: "🔤" },
   ];

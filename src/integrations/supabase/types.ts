@@ -14,6 +14,39 @@ export type Database = {
   }
   public: {
     Tables: {
+      prayer_requests: {
+        Row: {
+          author_name: string | null
+          created_at: string
+          id: string
+          image_url: string | null
+          is_anonymous: boolean
+          language: string
+          request_text: string
+          user_id: string | null
+        }
+        Insert: {
+          author_name?: string | null
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          is_anonymous?: boolean
+          language: string
+          request_text: string
+          user_id?: string | null
+        }
+        Update: {
+          author_name?: string | null
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          is_anonymous?: boolean
+          language?: string
+          request_text?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       public_sermons: {
         Row: {
           content: string

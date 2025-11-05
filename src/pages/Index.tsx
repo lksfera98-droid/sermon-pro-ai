@@ -102,7 +102,7 @@ const Index = () => {
         user_id: user.id
       });
 
-      const { error } = await supabase.functions.invoke('save-public-sermon', {
+      const { data, error } = await supabase.functions.invoke('save-public-sermon', {
         body: {
           title: currentSermonTitle,
           content: sermon,
@@ -110,12 +110,22 @@ const Index = () => {
           theme: currentSermonData.tema,
           verse: currentSermonData.versiculo || null,
         }
-      }) as any;
-
+      });
 
       if (error) {
-        console.error('Error saving to gallery:', error);
-        throw error;
+        console.warn('Edge save failed, falling back to direct insert:', error);
+        const { error: fallbackError } = await supabase.from('public_sermons').insert({
+          title: currentSermonTitle,
+          content: sermon,
+          language: currentSermonData.language,
+          theme: currentSermonData.tema,
+          verse: currentSermonData.versiculo || null,
+          user_id: user.id,
+        });
+        if (fallbackError) {
+          console.error('Fallback insert error:', fallbackError);
+          throw fallbackError;
+        }
       }
 
       toast.success(
@@ -164,7 +174,7 @@ const Index = () => {
       
       // Auto-save to public gallery
       if (user) {
-        const { error: saveError } = await supabase.functions.invoke('save-public-sermon', {
+        const { data: edgeData, error: saveError } = await supabase.functions.invoke('save-public-sermon', {
           body: {
             title,
             content: result.sermao,
@@ -172,11 +182,21 @@ const Index = () => {
             theme: data.tema,
             verse: data.versiculo || null,
           }
-        }) as any;
-        if (!saveError) {
-          setSavedToGallery(true);
+        });
+        if (saveError) {
+          console.warn('Auto-save edge failed, fallback to direct insert:', saveError);
+          const { error: fb } = await supabase.from('public_sermons').insert({
+            title,
+            content: result.sermao,
+            language: data.language,
+            theme: data.tema,
+            verse: data.versiculo || null,
+            user_id: user.id,
+          });
+          if (fb) console.error('Auto-save fallback failed:', fb);
+          else setSavedToGallery(true);
         } else {
-          console.error('Auto-save gallery error:', saveError);
+          setSavedToGallery(true);
         }
       }
 

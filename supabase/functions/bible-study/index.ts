@@ -18,27 +18,13 @@ serve(async (req) => {
       throw new Error("LOVABLE_API_KEY is not configured");
     }
 
-    console.log("Fetching Bible verse for:", verseReference);
-    
-    // Fetch the specific verse from Bible API
-    const bibleResponse = await fetch(`https://labs.bible.org/api/?passage=${encodeURIComponent(verseReference)}&type=json`);
-    const bibleData = await bibleResponse.json();
-    
-    if (!bibleData || bibleData.length === 0) {
-      throw new Error("Verse not found");
-    }
-    
-    const verse = bibleData[0].text;
-    const reference = `${bibleData[0].bookname} ${bibleData[0].chapter}:${bibleData[0].verse}`;
-    
-    console.log("Verse fetched:", reference);
+    console.log("Generating Bible study for:", verseReference);
 
-    // Generate comprehensive Bible study with AI
+    // Generate comprehensive Bible study with AI (AI will fetch the verse text itself)
     const languagePrompts: Record<string, string> = {
-      pt: `Com base neste versículo bíblico:
-"${verse}" - ${reference}
+      pt: `Por favor, crie um estudo bíblico COMPLETO e PROFUNDO sobre o versículo: ${verseReference}
 
-Por favor, crie um estudo bíblico COMPLETO e PROFUNDO sobre este versículo. O estudo deve incluir:
+O estudo deve incluir:
 
 1. **VERSÍCULO TRADUZIDO**: Traduza o versículo para o português de forma clara e precisa.
 
@@ -57,12 +43,11 @@ Por favor, crie um estudo bíblico COMPLETO e PROFUNDO sobre este versículo. O 
 8. **PALAVRA DE ENCORAJAMENTO**: Termine com uma palavra de fé, esperança e encorajamento baseada neste versículo.
 
 Seja profundo, claro e espiritual. Use linguagem acessível mas teologicamente precisa.`,
-      en: `Based on this Bible verse:
-"${verse}" - ${reference}
+      en: `Please create a COMPLETE and DEEP Bible study on the verse: ${verseReference}
 
-Please create a COMPLETE and DEEP Bible study on this verse. The study should include:
+The study should include:
 
-1. **VERSE**: Keep the verse in English (it's already in English).
+1. **VERSE**: First, write the complete verse text in English.
 
 2. **HISTORICAL CONTEXT**: Explain when and by whom it was written, what was the historical and cultural situation of that time.
 
@@ -79,12 +64,11 @@ Please create a COMPLETE and DEEP Bible study on this verse. The study should in
 8. **WORD OF ENCOURAGEMENT**: End with a word of faith, hope and encouragement based on this verse.
 
 Be deep, clear and spiritual. Use accessible but theologically accurate language.`,
-      es: `Con base en este versículo bíblico:
-"${verse}" - ${reference}
+      es: `Por favor, crea un estudio bíblico COMPLETO y PROFUNDO sobre el versículo: ${verseReference}
 
-Por favor, crea un estudio bíblico COMPLETO y PROFUNDO sobre este versículo. El estudio debe incluir:
+El estudio debe incluir:
 
-1. **VERSÍCULO TRADUCIDO**: Traduce el versículo al español de forma clara y precisa.
+1. **VERSÍCULO TRADUCIDO**: Primero, escribe el versículo completo traducido al español de forma clara y precisa.
 
 2. **CONTEXTO HISTÓRICO**: Explica cuándo y por quién fue escrito, cuál era la situación histórica y cultural de la época.
 
@@ -145,8 +129,7 @@ Sé profundo, claro y espiritual. Usa lenguaje accesible pero teológicamente pr
 
     return new Response(
       JSON.stringify({
-        verse,
-        reference,
+        reference: verseReference,
         study
       }),
       {

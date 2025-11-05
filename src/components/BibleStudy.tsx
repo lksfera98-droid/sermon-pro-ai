@@ -13,7 +13,6 @@ export const BibleStudy = () => {
   const [verseReference, setVerseReference] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [study, setStudy] = useState<{
-    verse: string;
     reference: string;
     study: string;
   } | null>(null);
@@ -111,11 +110,8 @@ export const BibleStudy = () => {
           <div className="space-y-6">
             <div className="text-center pb-6 border-b border-border">
               <h3 className="text-xl md:text-2xl font-bold text-primary mb-2">
-                {study.reference}
+                📖 {study.reference}
               </h3>
-              <p className="text-base md:text-lg italic text-foreground/90 leading-relaxed">
-                "{study.verse}"
-              </p>
             </div>
 
             <div className="prose prose-lg max-w-none dark:prose-invert">

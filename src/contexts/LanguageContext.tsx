@@ -419,6 +419,37 @@ const translations: Translations = {
     pt: 'Pedido de oração excluído',
     en: 'Prayer request deleted',
     es: 'Petición de oración eliminada'
+  },
+  // Hear God Speak
+  hearGodSpeak: {
+    pt: 'Ouvir Deus Falar Comigo',
+    en: 'Hear God Speak to Me',
+    es: 'Escuchar a Dios Hablarme'
+  },
+  hearGodSpeakDesc: {
+    pt: 'Receba um versículo especial e uma mensagem inspiradora de Deus',
+    en: 'Receive a special verse and an inspiring message from God',
+    es: 'Recibe un versículo especial y un mensaje inspirador de Dios'
+  },
+  hearGodSpeakBtn: {
+    pt: 'Ouvir Deus Falar',
+    en: 'Hear God Speak',
+    es: 'Escuchar a Dios'
+  },
+  hearGodSpeakLoading: {
+    pt: 'Preparando mensagem...',
+    en: 'Preparing message...',
+    es: 'Preparando mensaje...'
+  },
+  hearGodSpeakTitle: {
+    pt: 'Deus falou com você',
+    en: 'God spoke to you',
+    es: 'Dios te habló'
+  },
+  amen: {
+    pt: 'Amém',
+    en: 'Amen',
+    es: 'Amén'
   }
 };
 

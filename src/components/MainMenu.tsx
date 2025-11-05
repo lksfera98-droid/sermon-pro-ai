@@ -57,6 +57,16 @@ export const MainMenu = ({ onNavigate }: MainMenuProps) => {
 
   const handleForceUpdate = async () => {
     setIsUpdating(true);
+    
+    // Mostrar mensagem de início
+    toast.info(
+      language === 'pt' 
+        ? '🔄 Estamos atualizando o app...' 
+        : language === 'es'
+        ? '🔄 Estamos actualizando la app...'
+        : '🔄 Updating the app...'
+    );
+    
     try {
       // Limpar todos os caches
       if ('caches' in window) {
@@ -75,10 +85,10 @@ export const MainMenu = ({ onNavigate }: MainMenuProps) => {
 
       toast.success(
         language === 'pt' 
-          ? '🔄 App atualizado! Recarregando...' 
+          ? '✅ App atualizado com sucesso!' 
           : language === 'es'
-          ? '🔄 ¡App actualizada! Recargando...'
-          : '🔄 App updated! Reloading...'
+          ? '✅ ¡App actualizada con éxito!'
+          : '✅ App updated successfully!'
       );
 
       // Recarregar a página após 1 segundo
@@ -162,7 +172,7 @@ export const MainMenu = ({ onNavigate }: MainMenuProps) => {
   ];
 
   return (
-    <div className="min-h-screen w-full flex flex-col items-center justify-center p-4 bg-background">
+    <div className="min-h-screen w-full flex flex-col items-center justify-center p-4 pb-28 md:pb-4 bg-background">
       <div className="w-full max-w-md space-y-6">
         {/* Header with Logo and Language Selector */}
         <div className="text-center space-y-4">
@@ -252,11 +262,11 @@ export const MainMenu = ({ onNavigate }: MainMenuProps) => {
 
         {/* Botão de Atualização - só aparece quando instalado */}
         {isInStandaloneMode() && (
-          <div className="pt-4 border-t">
+          <div className="pt-4 border-t mb-6">
             <Button
               onClick={handleForceUpdate}
               disabled={isUpdating}
-              className="w-full h-12 text-base bg-primary/10 hover:bg-primary/20 text-primary border-2 border-primary/30 font-semibold"
+              className="w-full h-14 text-base bg-primary/10 hover:bg-primary/20 text-primary border-2 border-primary/30 font-semibold shadow-lg"
               variant="outline"
             >
               {isUpdating ? (

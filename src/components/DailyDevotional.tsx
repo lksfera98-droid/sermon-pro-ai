@@ -3,15 +3,16 @@ import { Button } from "./ui/button";
 import { Card } from "./ui/card";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { Download, FileText, Sparkles, Calendar } from "lucide-react";
+import { Download, FileText, Sparkles, Calendar, Loader2 } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import jsPDF from "jspdf";
-import { LoadingProgress } from "./LoadingProgress";
+
 
 const DailyDevotional = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [devotional, setDevotional] = useState<string>("");
   const [savedDevotionals, setSavedDevotionals] = useState<any[]>([]);
+  const [viewingId, setViewingId] = useState<string | null>(null);
   const { toast } = useToast();
   const { language, t } = useLanguage();
 
@@ -154,22 +155,31 @@ const DailyDevotional = () => {
             </div>
           </div>
 
-          <Button
-            onClick={handleGenerate}
-            disabled={isLoading}
-            className="w-full mb-6 h-14 text-lg font-semibold bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 shadow-lg hover:shadow-xl transition-all duration-300"
-          >
-            {isLoading ? (
-              <LoadingProgress />
-            ) : (
-              <>
-                <Sparkles className="w-5 h-5 mr-2" />
-                {language === 'pt' ? 'Gerar Meu Devocional' : 
-                 language === 'es' ? 'Generar Mi Devocional' : 
-                 'Generate My Devotional'}
-              </>
-            )}
-          </Button>
+          {viewingId && (
+            <Button variant="ghost" size="sm" onClick={() => { setViewingId(null); }} className="mb-4 w-fit">
+              {language === 'pt' ? 'Voltar' : language === 'es' ? 'Volver' : 'Back'}
+            </Button>
+          )}
+
+          {!isLoading && !viewingId && (
+            <Button
+              onClick={handleGenerate}
+              disabled={isLoading}
+              className="w-full mb-6 h-14 text-lg font-semibold bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 shadow-lg hover:shadow-xl transition-all duration-300"
+            >
+              <Sparkles className="w-5 h-5 mr-2" />
+              {language === 'pt' ? 'Gerar Meu Devocional' : 
+               language === 'es' ? 'Generar Mi Devocional' : 
+               'Generate My Devotional'}
+            </Button>
+          )}
+
+          {isLoading && (
+            <div className="w-full mb-6 h-14 flex items-center justify-center rounded-xl border-2 border-primary/20 bg-primary/5 text-primary font-semibold">
+              <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+              {language === 'pt' ? 'Gerando...' : language === 'es' ? 'Generando...' : 'Generating...'}
+            </div>
+          )}
 
           {devotional && (
             <div className="space-y-6">
@@ -205,18 +215,18 @@ const DailyDevotional = () => {
           )}
         </Card>
 
-        {savedDevotionals.length > 1 && (
+        {savedDevotionals.length > 0 && (
           <Card className="p-6 md:p-8 bg-card/95 backdrop-blur-sm border-2 shadow-xl">
             <h3 className="text-xl font-bold mb-4 text-foreground">
-              {language === 'pt' ? 'Devocionais Anteriores' : 
-               language === 'es' ? 'Devocionales Anteriores' : 
-               'Previous Devotionals'}
+              {language === 'pt' ? 'Devocionais Salvos' : 
+               language === 'es' ? 'Devocionales Guardados' : 
+               'Saved Devotionals'}
             </h3>
             <div className="space-y-3">
-              {savedDevotionals.slice(1).map((dev) => (
+              {savedDevotionals.map((dev) => (
                 <button
                   key={dev.id}
-                  onClick={() => setDevotional(dev.content)}
+                  onClick={() => { setViewingId(dev.id); setDevotional(dev.content); }}
                   className="w-full text-left p-4 rounded-lg border-2 border-border/50 hover:border-primary/50 hover:bg-primary/5 transition-all duration-200"
                 >
                   <div className="flex items-center gap-2 text-sm text-muted-foreground">

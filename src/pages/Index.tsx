@@ -139,7 +139,7 @@ const Index = () => {
         body: {
           tema: data.tema,
           versiculo: data.versiculo,
-          duracao: data.tempo.toString(),
+          tempo: data.tempo,
           language: data.language
         }
       });

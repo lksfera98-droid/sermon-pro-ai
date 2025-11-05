@@ -189,8 +189,8 @@ const Index = () => {
     <div className="min-h-screen bg-background">
       {isLoading && <LoadingProgress />}
       
-      <div className="min-h-screen flex flex-col pb-24 md:pb-0">
-        <div className="flex-1 overflow-y-auto">
+      <div className="min-h-screen flex flex-col">
+        <div className="flex-1 overflow-y-auto pb-24 md:pb-0">
           {currentView === 'dashboard' && <MainMenu onNavigate={setCurrentView} />}
           
           {currentView === 'new-sermon' && (
@@ -386,33 +386,33 @@ const Index = () => {
           )}
         </div>
 
-        {/* Bottom Navigation - Mobile Only */}
-        <div className="fixed bottom-0 left-0 right-0 bg-card/95 backdrop-blur-lg border-t-2 border-primary/20 shadow-2xl md:hidden z-50 pb-safe">
-          <div className="grid grid-cols-2 gap-2 p-3 max-w-md mx-auto">
+        {/* Bottom Navigation - Mobile Only - FIXED */}
+        <nav className="fixed bottom-0 left-0 right-0 bg-card/98 backdrop-blur-xl border-t-2 border-primary/30 shadow-2xl md:hidden z-[100]" style={{ paddingBottom: 'env(safe-area-inset-bottom, 0.75rem)' }}>
+          <div className="grid grid-cols-2 gap-3 p-4 max-w-md mx-auto">
             <Button
-              variant={currentView === 'dashboard' ? 'default' : 'ghost'}
+              variant={currentView === 'dashboard' ? 'default' : 'outline'}
               size="lg"
               onClick={() => setCurrentView('dashboard')}
-              className="flex flex-col gap-1 h-auto py-3 rounded-xl"
+              className="flex flex-col gap-1.5 h-auto py-4 rounded-2xl shadow-md hover:shadow-lg transition-all"
             >
-              <Home className="h-5 w-5" />
-              <span className="text-xs font-semibold">
+              <Home className="h-6 w-6" />
+              <span className="text-xs font-bold">
                 {language === 'pt' ? 'Início' : language === 'es' ? 'Inicio' : 'Home'}
               </span>
             </Button>
             <Button
-              variant="ghost"
+              variant="outline"
               size="lg"
               onClick={handleLogout}
-              className="flex flex-col gap-1 h-auto py-3 rounded-xl text-destructive hover:text-destructive hover:bg-destructive/10"
+              className="flex flex-col gap-1.5 h-auto py-4 rounded-2xl shadow-md hover:shadow-lg transition-all border-destructive/30 text-destructive hover:bg-destructive hover:text-destructive-foreground"
             >
-              <LogOut className="h-5 w-5" />
-              <span className="text-xs font-semibold">
+              <LogOut className="h-6 w-6" />
+              <span className="text-xs font-bold">
                 {language === 'pt' ? 'Sair' : language === 'es' ? 'Salir' : 'Logout'}
               </span>
             </Button>
           </div>
-        </div>
+        </nav>
       </div>
     </div>
   );

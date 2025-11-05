@@ -31,8 +31,9 @@ const Auth = () => {
   const { t, language, setLanguage } = useLanguage();
 
   useEffect(() => {
-    // Load saved email if remember me was checked
+    // Load saved credentials if remember me was checked
     const savedEmail = localStorage.getItem('rememberedEmail');
+    const savedPassword = localStorage.getItem('rememberedPassword');
     const savedRemember = localStorage.getItem('rememberMe') === 'true';
     
     if (savedRemember && savedEmail) {
@@ -40,8 +41,9 @@ const Auth = () => {
       setRememberMe(true);
     }
     
-    // Clear any previously saved passwords (security cleanup)
-    localStorage.removeItem('rememberedPassword');
+    if (savedRemember && savedPassword) {
+      setPassword(savedPassword);
+    }
 
     // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
@@ -70,11 +72,13 @@ const Auth = () => {
 
   const handleRememberMe = (checked: boolean) => {
     setRememberMe(checked);
-    if (checked && email) {
-      localStorage.setItem('rememberedEmail', email);
+    if (checked) {
+      if (email) localStorage.setItem('rememberedEmail', email);
+      if (password) localStorage.setItem('rememberedPassword', password);
       localStorage.setItem('rememberMe', 'true');
     } else {
       localStorage.removeItem('rememberedEmail');
+      localStorage.removeItem('rememberedPassword');
       localStorage.removeItem('rememberMe');
     }
   };
@@ -140,9 +144,10 @@ const Auth = () => {
       } else {
         toast.success(language === 'pt' ? "Login realizado com sucesso!" : language === 'en' ? "Login successful!" : "¡Inicio de sesión exitoso!");
         
-        // Save email if remember me is checked
+        // Save credentials if remember me is checked
         if (rememberMe) {
           localStorage.setItem('rememberedEmail', email);
+          localStorage.setItem('rememberedPassword', password);
           localStorage.setItem('rememberMe', 'true');
         }
       }
@@ -239,7 +244,7 @@ const Auth = () => {
                 htmlFor="remember" 
                 className="text-sm cursor-pointer"
               >
-                {language === 'pt' ? 'Lembrar email' : language === 'en' ? 'Remember email' : 'Recordar correo'}
+                {language === 'pt' ? 'Lembrar email e senha' : language === 'en' ? 'Remember email and password' : 'Recordar correo y contraseña'}
               </Label>
             </div>
           )}

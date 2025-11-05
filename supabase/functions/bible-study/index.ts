@@ -103,6 +103,7 @@ Sé profundo, claro y espiritual. Usa lenguaje accesible pero teológicamente pr
           { role: "system", content: "You are a biblical scholar and theologian providing deep, comprehensive Bible studies. Your studies should be thorough, theologically sound, and spiritually enriching." },
           { role: "user", content: prompt }
         ],
+        stream: false,
       }),
     });
 
@@ -122,8 +123,15 @@ Sé profundo, claro y espiritual. Usa lenguaje accesible pero teológicamente pr
       throw new Error(`AI gateway error: ${aiResponse.status}`);
     }
 
-    const aiData = await aiResponse.json();
-    const study = aiData.choices[0].message.content;
+    const raw = await aiResponse.text();
+    let study = "";
+    try {
+      const aiData = JSON.parse(raw);
+      study = aiData.choices?.[0]?.message?.content ?? "";
+    } catch (e) {
+      console.error("Failed to parse AI JSON. Raw response:", raw);
+      throw new Error("AI gateway returned invalid JSON");
+    }
 
     console.log("Bible study generated successfully");
 

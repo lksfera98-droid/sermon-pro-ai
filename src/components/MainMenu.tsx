@@ -13,7 +13,8 @@ import {
   GraduationCap,
   Ear,
   BookHeart,
-  Search
+  Search,
+  RefreshCw
 } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useState } from "react";
@@ -31,6 +32,7 @@ interface MainMenuProps {
 export const MainMenu = ({ onNavigate }: MainMenuProps) => {
   const [showIOSInstructions, setShowIOSInstructions] = useState(false);
   const [showLanguageMenu, setShowLanguageMenu] = useState(false);
+  const [isUpdating, setIsUpdating] = useState(false);
   const { isInstallable, installPWA } = usePWAInstall();
   const { language, setLanguage, t } = useLanguage();
 
@@ -51,6 +53,49 @@ export const MainMenu = ({ onNavigate }: MainMenuProps) => {
   const isInStandaloneMode = () => {
     return (window.matchMedia('(display-mode: standalone)').matches) || 
            (window.navigator as any).standalone === true;
+  };
+
+  const handleForceUpdate = async () => {
+    setIsUpdating(true);
+    try {
+      // Limpar todos os caches
+      if ('caches' in window) {
+        const cacheNames = await caches.keys();
+        await Promise.all(cacheNames.map(name => caches.delete(name)));
+      }
+
+      // Forçar atualização do service worker
+      if ('serviceWorker' in navigator) {
+        const registrations = await navigator.serviceWorker.getRegistrations();
+        for (const registration of registrations) {
+          await registration.update();
+          await registration.unregister();
+        }
+      }
+
+      toast.success(
+        language === 'pt' 
+          ? '🔄 App atualizado! Recarregando...' 
+          : language === 'es'
+          ? '🔄 ¡App actualizada! Recargando...'
+          : '🔄 App updated! Reloading...'
+      );
+
+      // Recarregar a página após 1 segundo
+      setTimeout(() => {
+        window.location.reload();
+      }, 1000);
+    } catch (error) {
+      console.error('Error updating app:', error);
+      toast.error(
+        language === 'pt' 
+          ? 'Erro ao atualizar. Tente novamente.' 
+          : language === 'es'
+          ? 'Error al actualizar. Intente de nuevo.'
+          : 'Error updating. Please try again.'
+      );
+      setIsUpdating(false);
+    }
   };
 
   const menuItems = [
@@ -202,6 +247,30 @@ export const MainMenu = ({ onNavigate }: MainMenuProps) => {
                 🍎 {t('installIPhone')}
               </Button>
             </div>
+          </div>
+        )}
+
+        {/* Botão de Atualização - só aparece quando instalado */}
+        {isInStandaloneMode() && (
+          <div className="pt-4 border-t">
+            <Button
+              onClick={handleForceUpdate}
+              disabled={isUpdating}
+              className="w-full h-12 text-base bg-primary/10 hover:bg-primary/20 text-primary border-2 border-primary/30 font-semibold"
+              variant="outline"
+            >
+              {isUpdating ? (
+                <>
+                  <RefreshCw className="mr-2 h-5 w-5 animate-spin" />
+                  {language === 'pt' ? 'Atualizando...' : language === 'es' ? 'Actualizando...' : 'Updating...'}
+                </>
+              ) : (
+                <>
+                  <RefreshCw className="mr-2 h-5 w-5" />
+                  {language === 'pt' ? '🔄 Buscar Atualizações' : language === 'es' ? '🔄 Buscar Actualizaciones' : '🔄 Check for Updates'}
+                </>
+              )}
+            </Button>
           </div>
         )}
       </div>

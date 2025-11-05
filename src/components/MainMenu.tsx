@@ -82,10 +82,12 @@ export const MainMenu = ({ onNavigate }: MainMenuProps) => {
             {t('welcomeSubtitle')}
           </p>
           
-          {/* Choose Language Prompt */}
-          <p className="text-sm font-semibold text-primary">
-            {t('chooseLanguage')}
-          </p>
+          {/* Choose Language Prompt in 3 languages */}
+          <div className="space-y-1 text-left">
+            <p className="text-sm font-semibold text-foreground">🇧🇷 Selecione seu idioma abaixo</p>
+            <p className="text-sm font-semibold text-foreground">🇺🇸 Select your language below</p>
+            <p className="text-sm font-semibold text-foreground">🇪🇸 Seleccione su idioma a continuación</p>
+          </div>
           
           {/* Language Selector */}
           <Button

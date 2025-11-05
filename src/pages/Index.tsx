@@ -8,7 +8,7 @@ import { VerseSearchSection } from "@/components/VerseSearchSection";
 import { PublicSermonsGallery } from "@/components/PublicSermonsGallery";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Home, Trash2, LogOut } from "lucide-react";
+import { Home, Trash2, LogOut, Check } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -21,6 +21,7 @@ const Index = () => {
   const [sermon, setSermon] = useState<string | null>(null);
   const [currentSermonTitle, setCurrentSermonTitle] = useState<string>("");
   const [currentSermonData, setCurrentSermonData] = useState<{ tema: string; versiculo: string; language: string } | null>(null);
+  const [savedToGallery, setSavedToGallery] = useState<boolean>(false);
   const [currentView, setCurrentView] = useState<View>("dashboard");
   const [recentSermons, setRecentSermons] = useState<Array<{ title: string; date: string; content: string }>>([]);
   const [session, setSession] = useState<Session | null>(null);
@@ -135,6 +136,7 @@ const Index = () => {
   const handleGenerate = async (data: { tema: string; versiculo: string; tempo: number; language: string }) => {
     setIsLoading(true);
     setSermon(null);
+    setSavedToGallery(false);
 
     try {
       const { data: result, error } = await supabase.functions.invoke('generate-sermon', {
@@ -160,6 +162,25 @@ const Index = () => {
       };
       setRecentSermons(prev => [newSermon, ...prev]);
       
+      // Auto-save to public gallery
+      if (user) {
+        const { error: saveError } = await supabase
+          .from('public_sermons')
+          .insert({
+            title,
+            content: result.sermao,
+            language: data.language,
+            theme: data.tema,
+            verse: data.versiculo || null,
+            user_id: user.id
+          });
+        if (!saveError) {
+          setSavedToGallery(true);
+        } else {
+          console.error('Auto-save gallery error:', saveError);
+        }
+      }
+
       toast.success(t('generateSermon') + "!");
     } catch (error) {
       console.error('Erro ao gerar sermão:', error);
@@ -214,8 +235,16 @@ const Index = () => {
                     onClick={handleSaveToPublicGallery}
                     variant="outline"
                     className="gap-2"
+                    disabled={savedToGallery}
+                    aria-disabled={savedToGallery}
                   >
-                    {t('saveToGallery')}
+                    {savedToGallery ? (
+                      <>
+                        <Check className="h-4 w-4" /> {language === 'pt' ? 'Já salvo' : language === 'en' ? 'Saved' : 'Guardado'}
+                      </>
+                    ) : (
+                      <>{t('saveToGallery')}</>
+                    )}
                   </Button>
                 </div>
                 <SermonDisplay content={sermon} title={currentSermonTitle} />

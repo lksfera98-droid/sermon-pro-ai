@@ -10,6 +10,7 @@ import { PrayerRequestForm } from "@/components/PrayerRequestForm";
 import { PrayerRequestsGallery } from "@/components/PrayerRequestsGallery";
 import { HearGodSpeak } from "@/components/HearGodSpeak";
 import { BibleStudy } from "@/components/BibleStudy";
+import DailyDevotional from "@/components/DailyDevotional";
 import { LoadingProgress } from "@/components/LoadingProgress";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -19,7 +20,7 @@ import { toast } from "sonner";
 import { useLanguage } from "@/contexts/LanguageContext";
 import type { Session, User } from '@supabase/supabase-js';
 
-type View = "dashboard" | "new-sermon" | "translator" | "my-sermons" | "verse-search" | "public-gallery" | "prayer-requests" | "hear-god-speak" | "bible-study";
+type View = "dashboard" | "new-sermon" | "translator" | "my-sermons" | "verse-search" | "public-gallery" | "prayer-requests" | "hear-god-speak" | "bible-study" | "daily-devotional";
 
 const Index = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -354,9 +355,24 @@ const Index = () => {
             </div>
           )}
 
-          {currentView === 'bible-study' && (
+          {currentView === 'daily-devotional' && (
             <div className="container max-w-4xl mx-auto p-4">
               <Button 
+                variant="ghost" 
+                size="lg" 
+                onClick={() => setCurrentView('dashboard')}
+                className="mb-6 gap-2"
+              >
+                <Home className="h-4 w-4" />
+                {t('home')}
+              </Button>
+              <DailyDevotional />
+            </div>
+          )}
+
+          {currentView === 'bible-study' && (
+            <div className="container max-w-4xl mx-auto p-4">
+              <Button
                 variant="ghost" 
                 size="lg" 
                 onClick={() => setCurrentView('dashboard')}

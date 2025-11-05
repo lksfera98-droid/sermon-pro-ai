@@ -10,7 +10,10 @@ import {
   Globe,
   Heart,
   Sparkles,
-  GraduationCap
+  GraduationCap,
+  Ear,
+  BookHeart,
+  Search
 } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useState } from "react";
@@ -19,7 +22,7 @@ import { toast } from "sonner";
 import { useLanguage } from "@/contexts/LanguageContext";
 import preacherLogo from "@/assets/preacher-logo.png";
 
-type View = "dashboard" | "new-sermon" | "translator" | "my-sermons" | "verse-search" | "public-gallery" | "prayer-requests" | "hear-god-speak" | "bible-study";
+type View = "dashboard" | "new-sermon" | "translator" | "my-sermons" | "verse-search" | "public-gallery" | "prayer-requests" | "hear-god-speak" | "bible-study" | "daily-devotional";
 
 interface MainMenuProps {
   onNavigate: (view: View) => void;
@@ -51,14 +54,60 @@ export const MainMenu = ({ onNavigate }: MainMenuProps) => {
   };
 
   const menuItems = [
-    { id: "new-sermon" as View, label: t('createSermon'), icon: FileText, emoji: "📝" },
-    { id: "my-sermons" as View, label: t('mySermons'), icon: BookOpen, emoji: "📚" },
-    { id: "public-gallery" as View, label: t('sermonsGallery'), icon: Globe, emoji: "🌍" },
-    { id: "prayer-requests" as View, label: t('prayerRequests'), icon: Heart, emoji: "🙏" },
-    { id: "hear-god-speak" as View, label: t('hearGodSpeak'), icon: Sparkles, emoji: "✨" },
-    { id: "bible-study" as View, label: t('bibleStudy'), icon: GraduationCap, emoji: "📚" },
-    { id: "verse-search" as View, label: t('verseSearch'), icon: Languages, emoji: "📖" },
-    { id: "translator" as View, label: t('bibleTranslator'), icon: Languages, emoji: "🔤" },
+    { 
+      id: "hear-god-speak" as View, 
+      label: language === 'pt' ? 'Ouvir Deus Falar Comigo' : language === 'es' ? 'Escuchar a Dios Hablarme' : 'Hear God Speak to Me', 
+      icon: Ear, 
+      emoji: "👂" 
+    },
+    { 
+      id: "prayer-requests" as View, 
+      label: language === 'pt' ? 'Fazer um Pedido de Oração' : language === 'es' ? 'Hacer una Petición de Oración' : 'Make a Prayer Request', 
+      icon: Heart, 
+      emoji: "🙏" 
+    },
+    { 
+      id: "daily-devotional" as View, 
+      label: language === 'pt' ? 'Gerar Meu Devocional Diário' : language === 'es' ? 'Generar Mi Devocional Diario' : 'Generate My Daily Devotional', 
+      icon: BookHeart, 
+      emoji: "📖" 
+    },
+    { 
+      id: "bible-study" as View, 
+      label: language === 'pt' ? 'Fazer um Estudo Bíblico' : language === 'es' ? 'Hacer un Estudio Bíblico' : 'Make a Bible Study', 
+      icon: GraduationCap, 
+      emoji: "📚" 
+    },
+    { 
+      id: "translator" as View, 
+      label: language === 'pt' ? 'Tradutor Bíblico' : language === 'es' ? 'Traductor Bíblico' : 'Biblical Translator', 
+      icon: Languages, 
+      emoji: "🔤" 
+    },
+    { 
+      id: "verse-search" as View, 
+      label: language === 'pt' ? 'Pesquisar um Versículo' : language === 'es' ? 'Buscar un Versículo' : 'Search a Verse', 
+      icon: Search, 
+      emoji: "🔍" 
+    },
+    { 
+      id: "new-sermon" as View, 
+      label: language === 'pt' ? 'Criar um Sermão' : language === 'es' ? 'Crear un Sermón' : 'Create a Sermon', 
+      icon: FileText, 
+      emoji: "📝" 
+    },
+    { 
+      id: "my-sermons" as View, 
+      label: language === 'pt' ? 'Meus Sermões Criados' : language === 'es' ? 'Mis Sermones Creados' : 'My Created Sermons', 
+      icon: BookOpen, 
+      emoji: "📚" 
+    },
+    { 
+      id: "public-gallery" as View, 
+      label: language === 'pt' ? 'Veja o que Deus Falou com Outras Pessoas' : language === 'es' ? 'Ve lo que Dios Habló con Otras Personas' : 'See What God Spoke to Others', 
+      icon: Globe, 
+      emoji: "🌍" 
+    }
   ];
 
   const languages = [

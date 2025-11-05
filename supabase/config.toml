@@ -11,3 +11,6 @@ verify_jwt = true
 
 [functions.bible-study]
 verify_jwt = true
+
+[functions.generate-devotional]
+verify_jwt = true

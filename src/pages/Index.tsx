@@ -84,9 +84,23 @@ const Index = () => {
   };
 
   const handleSaveToPublicGallery = async () => {
-    if (!sermon || !currentSermonData || !user) return;
+    if (!sermon || !currentSermonData || !user) {
+      toast.error(
+        language === "pt" ? "Nenhum sermão para salvar" :
+        language === "en" ? "No sermon to save" :
+        "No hay sermón para guardar"
+      );
+      return;
+    }
 
     try {
+      console.log('Saving sermon to public gallery:', {
+        title: currentSermonTitle,
+        language: currentSermonData.language,
+        theme: currentSermonData.tema,
+        user_id: user.id
+      });
+
       const { error } = await supabase
         .from('public_sermons')
         .insert({
@@ -98,7 +112,10 @@ const Index = () => {
           user_id: user.id
         });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error saving to gallery:', error);
+        throw error;
+      }
 
       toast.success(
         language === "pt" ? "Sermão salvo na galeria pública!" :

@@ -31,11 +31,15 @@ export const PublicSermonsGallery = () => {
   const loadSermons = async () => {
     setIsLoading(true);
     try {
+      console.log('Loading public sermons for language:', language);
+      
       const { data, error } = await supabase
         .from("public_sermons")
         .select("*")
         .eq("language", language)
         .order("created_at", { ascending: false });
+
+      console.log('Query result:', { data, error });
 
       if (error) throw error;
       setSermons(data || []);

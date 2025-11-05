@@ -189,8 +189,8 @@ const Index = () => {
     <div className="min-h-screen bg-background">
       {isLoading && <LoadingProgress />}
       
-      <div className="min-h-screen flex flex-col">
-        <div className="flex-1 overflow-y-auto pb-20 md:pb-0">
+      <div className="min-h-screen flex flex-col pb-24 md:pb-0">
+        <div className="flex-1 overflow-y-auto">
           {currentView === 'dashboard' && <MainMenu onNavigate={setCurrentView} />}
           
           {currentView === 'new-sermon' && (
@@ -386,22 +386,30 @@ const Index = () => {
           )}
         </div>
 
-        {/* Bottom Navigation */}
-        <div className="fixed bottom-0 left-0 right-0 bg-background border-t md:hidden">
-          <div className="flex justify-around p-4">
+        {/* Bottom Navigation - Mobile Only */}
+        <div className="fixed bottom-0 left-0 right-0 bg-card/95 backdrop-blur-lg border-t-2 border-primary/20 shadow-2xl md:hidden z-50 pb-safe">
+          <div className="grid grid-cols-2 gap-2 p-3 max-w-md mx-auto">
             <Button
-              variant="ghost"
+              variant={currentView === 'dashboard' ? 'default' : 'ghost'}
               size="lg"
               onClick={() => setCurrentView('dashboard')}
+              className="flex flex-col gap-1 h-auto py-3 rounded-xl"
             >
               <Home className="h-5 w-5" />
+              <span className="text-xs font-semibold">
+                {language === 'pt' ? 'Início' : language === 'es' ? 'Inicio' : 'Home'}
+              </span>
             </Button>
             <Button
               variant="ghost"
               size="lg"
               onClick={handleLogout}
+              className="flex flex-col gap-1 h-auto py-3 rounded-xl text-destructive hover:text-destructive hover:bg-destructive/10"
             >
               <LogOut className="h-5 w-5" />
+              <span className="text-xs font-semibold">
+                {language === 'pt' ? 'Sair' : language === 'es' ? 'Salir' : 'Logout'}
+              </span>
             </Button>
           </div>
         </div>

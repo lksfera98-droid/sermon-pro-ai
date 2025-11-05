@@ -290,9 +290,9 @@ const translations: Translations = {
     es: 'Galería de Sermones'
   },
   saveToGallery: {
-    pt: 'Salvar na Galeria Pública',
-    en: 'Save to Public Gallery',
-    es: 'Guardar en Galería Pública'
+    pt: 'Salve na Galeria Publica e deixe Deus falar com alguém',
+    en: 'Save to Public Gallery and let God speak to someone',
+    es: 'Guarde en la Galería Pública y deje que Dios hable con alguien'
   }
 };
 

@@ -137,55 +137,62 @@ export const SermonDisplay = ({ content, title }: SermonDisplayProps) => {
     return text
       .split('\n')
       .map((line, index) => {
-        // Title lines (all caps or ending with :)
-        if (line.match(/^[A-ZÁÉÍÓÚÂÊÔÃÕ\s]+:?$/) && line.length < 100) {
+        // Main title (all uppercase)
+        if (line === line.toUpperCase() && line.trim() && line.length > 5 && line.length < 100 && !line.startsWith('*')) {
           return (
-            <h2 key={index} className="text-2xl font-bold text-primary mt-6 mb-3">
+            <h2 key={index} className="text-2xl md:text-3xl font-extrabold text-primary mt-8 mb-4 border-b-2 border-primary/30 pb-2">
               {line}
             </h2>
           );
         }
         
-        // Section headers (starting with ### or **)
-        if (line.startsWith('###') || line.startsWith('**')) {
-          const cleanLine = line.replace(/^###\s*/, '').replace(/\*\*/g, '');
+        // Section headers (starting with ** or ### or ending with :)
+        if (line.startsWith('**') || line.startsWith('###') || (line.match(/^[A-ZÁÉÍÓÚÂÊÔÃÕ][^:]*:$/) && line.length < 100)) {
+          const cleanLine = line.replace(/^(###|\*\*)\s*/g, '').replace(/\*\*$/g, '');
           return (
-            <h3 key={index} className="text-xl font-bold text-foreground mt-4 mb-2">
+            <h3 key={index} className="text-xl md:text-2xl font-bold text-primary mt-6 mb-3 bg-primary/5 p-3 rounded-lg">
               {cleanLine}
             </h3>
           );
         }
         
         // Numbered points (1., 2., etc)
-        if (line.match(/^\d+\./)) {
+        if (line.match(/^\d+\.\s/)) {
+          // Extract bold text within **
+          const processedLine = line.replace(/\*\*([^*]+)\*\*/g, '<strong class="text-primary font-extrabold text-lg">$1</strong>');
           return (
-            <p key={index} className="font-semibold text-primary my-3">
-              {line}
-            </p>
+            <div key={index} className="my-4 p-4 bg-muted/30 rounded-lg border-l-4 border-primary">
+              <p 
+                className="font-semibold text-base md:text-lg text-foreground leading-relaxed"
+                dangerouslySetInnerHTML={{ __html: processedLine }}
+              />
+            </div>
           );
         }
         
         // Sub-points (starting with - or •)
         if (line.match(/^\s*[-•]/)) {
+          const processedLine = line.replace(/\*\*([^*]+)\*\*/g, '<strong class="text-primary font-bold">$1</strong>');
           return (
-            <p key={index} className="ml-6 my-2 text-foreground">
-              {line}
-            </p>
+            <p 
+              key={index} 
+              className="ml-6 my-2 text-foreground leading-relaxed"
+              dangerouslySetInnerHTML={{ __html: processedLine }}
+            />
           );
         }
         
         // Regular paragraphs
         if (line.trim()) {
           // Highlight words in quotes or between **
-          const highlightedLine = line.replace(
-            /"([^"]+)"|"([^"]+)"|'([^']+)'|\*\*([^*]+)\*\*/g,
-            '<strong class="text-primary font-bold">$1$2$3$4</strong>'
-          );
+          const highlightedLine = line
+            .replace(/\*\*([^*]+)\*\*/g, '<strong class="text-primary font-bold text-lg bg-primary/10 px-1 rounded">$1</strong>')
+            .replace(/"([^"]+)"|"([^"]+)"|'([^']+)'/g, '<em class="text-primary font-semibold italic">$1$2$3</em>');
           
           return (
             <p 
               key={index} 
-              className="my-2 text-foreground leading-relaxed"
+              className="my-3 text-foreground leading-relaxed text-base"
               dangerouslySetInnerHTML={{ __html: highlightedLine }}
             />
           );

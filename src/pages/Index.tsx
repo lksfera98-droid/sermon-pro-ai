@@ -146,7 +146,10 @@ const Index = () => {
 
       if (functionError) throw functionError;
 
-      const sermonContent = functionData.sermon;
+      const sermonContent = functionData?.sermon ?? functionData?.sermao;
+      if (!sermonContent) {
+        throw new Error('Falha ao gerar o conteúdo do sermão. Tente novamente.');
+      }
       setSermon(sermonContent);
       setCurrentSermonTitle(data.tema);
 

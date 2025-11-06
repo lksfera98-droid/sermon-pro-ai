@@ -50,12 +50,14 @@ export const PrayerRequestForm = ({ onSuccess }: PrayerRequestFormProps) => {
     }
 
     setIsSubmitting(true);
+    console.log('Starting prayer request submission...');
 
     try {
       let imageUrl = null;
 
       // Upload image if provided
       if (image) {
+        console.log('Uploading image...');
         const fileExt = image.name.split('.').pop();
         const fileName = `${Math.random()}.${fileExt}`;
         const filePath = `${fileName}`;
@@ -64,19 +66,30 @@ export const PrayerRequestForm = ({ onSuccess }: PrayerRequestFormProps) => {
           .from('prayer-images')
           .upload(filePath, image);
 
-        if (uploadError) throw uploadError;
+        if (uploadError) {
+          console.error('Image upload error:', uploadError);
+          throw uploadError;
+        }
 
         const { data: { publicUrl } } = supabase.storage
           .from('prayer-images')
           .getPublicUrl(filePath);
 
         imageUrl = publicUrl;
+        console.log('Image uploaded successfully:', imageUrl);
       }
 
       // Get current user if logged in
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
+      
+      if (userError) {
+        console.error('Error getting user:', userError);
+      }
+      
+      console.log('Current user:', user?.id);
 
       // Insert prayer request
+      console.log('Inserting prayer request...');
       const { error: insertError } = await supabase
         .from('prayer_requests')
         .insert({
@@ -88,7 +101,12 @@ export const PrayerRequestForm = ({ onSuccess }: PrayerRequestFormProps) => {
           user_id: user?.id || null,
         });
 
-      if (insertError) throw insertError;
+      if (insertError) {
+        console.error('Insert error:', insertError);
+        throw insertError;
+      }
+
+      console.log('Prayer request inserted successfully');
 
       toast({
         title: t('success'),
@@ -102,11 +120,12 @@ export const PrayerRequestForm = ({ onSuccess }: PrayerRequestFormProps) => {
       setIsAnonymous(false);
       
       if (onSuccess) onSuccess();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error submitting prayer request:', error);
+      console.error('Error details:', JSON.stringify(error, null, 2));
       toast({
         title: t('error'),
-        description: t('tryAgain'),
+        description: error.message || t('tryAgain'),
         variant: "destructive",
       });
     } finally {

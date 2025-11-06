@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Download, Calendar, Eye, ChevronDown, ChevronUp } from "lucide-react";
+import { Download, Calendar, Eye, ChevronDown, ChevronUp, Trash2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import jsPDF from "jspdf";
 import { format } from "date-fns";
@@ -16,6 +16,7 @@ interface PublicSermon {
   theme: string;
   verse: string | null;
   created_at: string;
+  user_id: string | null;
 }
 
 export const PublicSermonsGallery = () => {
@@ -23,7 +24,16 @@ export const PublicSermonsGallery = () => {
   const [sermons, setSermons] = useState<PublicSermon[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [expandedSermons, setExpandedSermons] = useState<Set<string>>(new Set());
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const { toast } = useToast();
+
+  useEffect(() => {
+    const getUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      setCurrentUserId(user?.id || null);
+    };
+    getUser();
+  }, []);
 
   useEffect(() => {
     loadSermons();
@@ -128,6 +138,30 @@ export const PublicSermonsGallery = () => {
       newExpanded.add(sermonId);
     }
     setExpandedSermons(newExpanded);
+  };
+
+  const handleDeleteSermon = async (sermonId: string) => {
+    try {
+      const { error } = await supabase
+        .from("public_sermons")
+        .delete()
+        .eq("id", sermonId);
+
+      if (error) throw error;
+
+      setSermons(sermons.filter(s => s.id !== sermonId));
+      toast({
+        title: language === "pt" ? "Sucesso" : language === "en" ? "Success" : "Éxito",
+        description: language === "pt" ? "Sermão excluído" : language === "en" ? "Sermon deleted" : "Sermón eliminado",
+      });
+    } catch (error) {
+      console.error("Error deleting sermon:", error);
+      toast({
+        title: language === "pt" ? "Erro" : language === "en" ? "Error" : "Error",
+        description: language === "pt" ? "Erro ao excluir sermão" : language === "en" ? "Error deleting sermon" : "Error al eliminar sermón",
+        variant: "destructive",
+      });
+    }
   };
 
   if (isLoading) {
@@ -236,6 +270,19 @@ export const PublicSermonsGallery = () => {
                     {language === "en" && "Download PDF"}
                     {language === "es" && "Descargar PDF"}
                   </Button>
+
+                  {currentUserId && sermon.user_id === currentUserId && (
+                    <Button
+                      onClick={() => handleDeleteSermon(sermon.id)}
+                      variant="destructive"
+                      size="sm"
+                    >
+                      <Trash2 className="h-4 w-4 mr-2" />
+                      {language === "pt" && "Excluir"}
+                      {language === "en" && "Delete"}
+                      {language === "es" && "Eliminar"}
+                    </Button>
+                  )}
                 </div>
               </Card>
             );

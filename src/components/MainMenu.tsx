@@ -261,7 +261,7 @@ export const MainMenu = ({ onNavigate }: MainMenuProps) => {
         )}
 
         {/* Botão de Atualização - só aparece quando instalado */}
-        {isInStandaloneMode() && (
+        {true && (
           <div className="pt-4 border-t mb-6">
             <Button
               onClick={handleForceUpdate}

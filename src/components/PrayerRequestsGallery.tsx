@@ -4,7 +4,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card";
 import { Button } from "./ui/button";
 import { toast } from "@/hooks/use-toast";
-import { Loader2, Trash2, User } from "lucide-react";
+import { Loader2, Trash2, User, ArrowLeft, Eye } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -33,6 +33,7 @@ export const PrayerRequestsGallery = () => {
   const [requests, setRequests] = useState<PrayerRequest[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  const [viewingRequest, setViewingRequest] = useState<PrayerRequest | null>(null);
 
   useEffect(() => {
     loadRequests();
@@ -110,6 +111,84 @@ export const PrayerRequestsGallery = () => {
     }
   };
 
+  if (viewingRequest) {
+    const isOwner = currentUserId && currentUserId === viewingRequest.user_id;
+    
+    return (
+      <div className="space-y-4">
+        <Button 
+          variant="outline" 
+          onClick={() => setViewingRequest(null)}
+          className="mb-4 gap-2"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          {t('backToList')}
+        </Button>
+        
+        <Card>
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <User className="h-4 w-4 text-muted-foreground" />
+                <CardTitle className="text-xl">
+                  {viewingRequest.is_anonymous
+                    ? t('anonymous')
+                    : viewingRequest.author_name}
+                </CardTitle>
+              </div>
+              {isOwner && (
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button variant="destructive" size="sm" className="gap-2">
+                      <Trash2 className="h-4 w-4" />
+                      {t('delete')}
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>
+                        {t('confirmDelete')}
+                      </AlertDialogTitle>
+                      <AlertDialogDescription>
+                        {t('confirmDeleteRequest')}
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>
+                        {t('cancel')}
+                      </AlertDialogCancel>
+                      <AlertDialogAction onClick={() => {
+                        handleDelete(viewingRequest.id);
+                        setViewingRequest(null);
+                      }}>
+                        {t('delete')}
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              )}
+            </div>
+            <CardDescription>
+              {new Date(viewingRequest.created_at).toLocaleDateString()}
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <p className="text-base whitespace-pre-wrap leading-relaxed">
+              {viewingRequest.request_text}
+            </p>
+            {viewingRequest.image_url && (
+              <img
+                src={viewingRequest.image_url}
+                alt="Prayer request"
+                className="w-full rounded-lg object-cover"
+              />
+            )}
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
   if (isLoading) {
     return (
       <div className="flex justify-center items-center py-8">
@@ -134,60 +213,45 @@ export const PrayerRequestsGallery = () => {
         const isOwner = currentUserId && currentUserId === request.user_id;
         
         return (
-          <Card key={request.id} className="relative">
+          <Card 
+            key={request.id} 
+            className="relative cursor-pointer hover:shadow-lg transition-all"
+            onClick={() => setViewingRequest(request)}
+          >
             <CardHeader>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <User className="h-4 w-4 text-muted-foreground" />
-                  <CardTitle className="text-lg">
+                  <CardTitle className="text-base">
                     {request.is_anonymous
                       ? t('anonymous')
                       : request.author_name}
                   </CardTitle>
                 </div>
-                {isOwner && (
-                <AlertDialog>
-                  <AlertDialogTrigger asChild>
-                    <Button variant="ghost" size="icon" className="h-8 w-8">
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </AlertDialogTrigger>
-                  <AlertDialogContent>
-                    <AlertDialogHeader>
-                      <AlertDialogTitle>
-                        {t('confirmDelete')}
-                      </AlertDialogTitle>
-                      <AlertDialogDescription>
-                        {t('confirmDeleteRequest')}
-                      </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                      <AlertDialogCancel>
-                        {t('cancel')}
-                      </AlertDialogCancel>
-                      <AlertDialogAction onClick={() => handleDelete(request.id)}>
-                        {t('delete')}
-                      </AlertDialogAction>
-                    </AlertDialogFooter>
-                  </AlertDialogContent>
-                </AlertDialog>
+              </div>
+              <CardDescription className="text-xs">
+                {new Date(request.created_at).toLocaleDateString()}
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <p className="text-sm line-clamp-3 whitespace-pre-wrap">
+                {request.request_text}
+              </p>
+              {request.image_url && (
+                <div className="w-full h-32 rounded-lg overflow-hidden">
+                  <img
+                    src={request.image_url}
+                    alt="Prayer request"
+                    className="w-full h-full object-cover"
+                  />
+                </div>
               )}
-            </div>
-            <CardDescription>
-              {new Date(request.created_at).toLocaleDateString()}
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            <p className="text-sm whitespace-pre-wrap">{request.request_text}</p>
-            {request.image_url && (
-              <img
-                src={request.image_url}
-                alt="Prayer request"
-                className="w-full rounded-lg object-cover max-h-64"
-              />
-            )}
-          </CardContent>
-        </Card>
+              <div className="flex items-center gap-2 text-primary text-sm font-semibold pt-2">
+                <Eye className="h-4 w-4" />
+                <span>{t('clickToView')}</span>
+              </div>
+            </CardContent>
+          </Card>
         );
       })}
     </div>

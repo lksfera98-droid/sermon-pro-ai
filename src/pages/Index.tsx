@@ -438,13 +438,13 @@ const Index = () => {
         </div>
 
         {/* Bottom Navigation - Mobile Only - FIXED */}
-        <nav className="fixed bottom-0 left-0 right-0 bg-card/98 backdrop-blur-xl border-t-2 border-primary/30 shadow-2xl md:hidden z-[100]" style={{ paddingBottom: 'env(safe-area-inset-bottom, 0.75rem)' }}>
+        <nav className="fixed bottom-0 left-0 right-0 bg-card/98 backdrop-blur-xl border-t-2 border-primary/30 shadow-2xl md:hidden z-[100] pb-safe" style={{ paddingBottom: 'max(env(safe-area-inset-bottom, 0.75rem), 0.75rem)' }}>
           <div className="grid grid-cols-2 gap-3 p-4 max-w-md mx-auto">
             <Button
               variant={currentView === 'dashboard' ? 'default' : 'outline'}
               size="lg"
               onClick={() => setCurrentView('dashboard')}
-              className="flex flex-col gap-1.5 h-auto py-4 rounded-2xl shadow-md hover:shadow-lg transition-all"
+              className="flex flex-col gap-1.5 h-auto py-4 rounded-2xl shadow-md hover:shadow-lg transition-all touch-manipulation"
             >
               <Home className="h-6 w-6" />
               <span className="text-xs font-bold">
@@ -455,7 +455,7 @@ const Index = () => {
               variant="outline"
               size="lg"
               onClick={handleLogout}
-              className="flex flex-col gap-1.5 h-auto py-4 rounded-2xl shadow-md hover:shadow-lg transition-all border-destructive/30 text-destructive hover:bg-destructive hover:text-destructive-foreground"
+              className="flex flex-col gap-1.5 h-auto py-4 rounded-2xl shadow-md hover:shadow-lg transition-all border-destructive/30 text-destructive hover:bg-destructive hover:text-destructive-foreground touch-manipulation"
             >
               <LogOut className="h-6 w-6" />
               <span className="text-xs font-bold">

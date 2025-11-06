@@ -258,7 +258,7 @@ const Index = () => {
                           <h3 className="text-xl font-semibold mb-2">{sermon.title}</h3>
                           <p className="text-sm text-muted-foreground mb-4">{sermon.date}</p>
                           <div className="prose prose-sm max-w-none line-clamp-3">
-                            {sermon.content.substring(0, 200)}...
+                            {sermon.content ? sermon.content.substring(0, 200) : ''}...
                           </div>
                         </div>
                         <Button

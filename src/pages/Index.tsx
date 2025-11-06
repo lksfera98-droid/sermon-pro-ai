@@ -157,7 +157,7 @@ const Index = () => {
           title: data.tema,
           content: sermonContent,
           theme: data.tema,
-          base_verse: data.versiculo,
+          verse: data.versiculo,
           language: language,
           user_id: user.id
         });

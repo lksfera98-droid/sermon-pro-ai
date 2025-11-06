@@ -257,17 +257,28 @@ const Index = () => {
                   {recentSermons.map((sermon, index) => (
                     <Card key={index} className="p-6 hover:shadow-lg transition-all">
                       <div className="flex items-start justify-between gap-4">
-                        <div className="flex-1">
+                        <div 
+                          className="flex-1 cursor-pointer" 
+                          onClick={() => {
+                            setSermon(sermon.content);
+                            setCurrentSermonTitle(sermon.title);
+                            setCurrentView('new-sermon');
+                          }}
+                        >
                           <h3 className="text-xl font-semibold mb-2">{sermon.title}</h3>
                           <p className="text-sm text-muted-foreground mb-4">{sermon.date}</p>
                           <div className="prose prose-sm max-w-none line-clamp-3">
                             {sermon.content ? sermon.content.substring(0, 200) : ''}...
                           </div>
+                          <p className="text-sm text-primary mt-2 font-semibold">{t('clickToView')}</p>
                         </div>
                         <Button
                           variant="destructive"
                           size="icon"
-                          onClick={() => handleDeleteSermon(index)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDeleteSermon(index);
+                          }}
                           className="shrink-0"
                         >
                           <Trash2 className="h-4 w-4" />

@@ -57,7 +57,7 @@ export const PrayerRequestsGallery = () => {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [language]);
+  }, []);
 
   const getCurrentUser = async () => {
     const { data: { user } } = await supabase.auth.getUser();
@@ -130,19 +130,22 @@ export const PrayerRequestsGallery = () => {
 
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-      {requests.map((request) => (
-        <Card key={request.id} className="relative">
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <User className="h-4 w-4 text-muted-foreground" />
-                <CardTitle className="text-lg">
-                  {request.is_anonymous
-                    ? t('anonymous')
-                    : request.author_name}
-                </CardTitle>
-              </div>
-              {currentUserId && currentUserId === request.user_id && (
+      {requests.map((request) => {
+        const isOwner = currentUserId && currentUserId === request.user_id;
+        
+        return (
+          <Card key={request.id} className="relative">
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <User className="h-4 w-4 text-muted-foreground" />
+                  <CardTitle className="text-lg">
+                    {request.is_anonymous
+                      ? t('anonymous')
+                      : request.author_name}
+                  </CardTitle>
+                </div>
+                {isOwner && (
                 <AlertDialog>
                   <AlertDialogTrigger asChild>
                     <Button variant="ghost" size="icon" className="h-8 w-8">
@@ -185,7 +188,8 @@ export const PrayerRequestsGallery = () => {
             )}
           </CardContent>
         </Card>
-      ))}
+        );
+      })}
     </div>
   );
 };

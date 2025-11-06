@@ -104,7 +104,7 @@ const Index = () => {
           title: currentSermonTitle,
           content: sermon,
           theme: currentSermonData.tema,
-          base_verse: currentSermonData.versiculo,
+          verse: currentSermonData.versiculo,
           language: currentSermonData.language,
           user_id: user.id
         });
@@ -133,7 +133,7 @@ const Index = () => {
     setIsLoading(true);
     setSermon(null);
     setSavedToGallery(false);
-    setCurrentSermonData({ ...data, language });
+    setCurrentSermonData(data);
     
     try {
       const { data: functionData, error: functionError } = await supabase.functions.invoke('generate-sermon', {

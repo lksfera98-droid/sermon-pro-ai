@@ -20,7 +20,7 @@ import { toast } from "sonner";
 import { useLanguage } from "@/contexts/LanguageContext";
 import type { Session, User } from '@supabase/supabase-js';
 
-type View = "dashboard" | "new-sermon" | "translator" | "my-sermons" | "verse-search" | "public-gallery" | "prayer-requests" | "hear-god-speak" | "bible-study" | "daily-devotional";
+type View = "dashboard" | "new-sermon" | "translator" | "my-sermons" | "verse-search" | "public-gallery" | "prayer-requests" | "prayer-gallery" | "hear-god-speak" | "bible-study" | "daily-devotional";
 
 const Index = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -370,9 +370,24 @@ const Index = () => {
                 {t('home')}
               </Button>
               <PrayerRequestForm />
-              <div className="mt-8">
-                <PrayerRequestsGallery />
-              </div>
+            </div>
+          )}
+
+          {currentView === 'prayer-gallery' && (
+            <div className="container max-w-6xl mx-auto p-4">
+              <Button 
+                variant="ghost" 
+                size="lg" 
+                onClick={() => setCurrentView('dashboard')}
+                className="mb-6 gap-2"
+              >
+                <Home className="h-4 w-4" />
+                {t('home')}
+              </Button>
+              <h1 className="text-3xl font-bold mb-6 text-center">
+                {language === 'pt' ? '🙏 Pedidos de Oração Feitos' : language === 'es' ? '🙏 Peticiones de Oración Hechas' : '🙏 Prayer Requests Made'}
+              </h1>
+              <PrayerRequestsGallery />
             </div>
           )}
 

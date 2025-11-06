@@ -23,7 +23,7 @@ import { toast } from "sonner";
 import { useLanguage } from "@/contexts/LanguageContext";
 import preacherLogo from "@/assets/preacher-logo.png";
 
-type View = "dashboard" | "new-sermon" | "translator" | "my-sermons" | "verse-search" | "public-gallery" | "prayer-requests" | "hear-god-speak" | "bible-study" | "daily-devotional";
+type View = "dashboard" | "new-sermon" | "translator" | "my-sermons" | "verse-search" | "public-gallery" | "prayer-requests" | "prayer-gallery" | "hear-god-speak" | "bible-study" | "daily-devotional";
 
 interface MainMenuProps {
   onNavigate: (view: View) => void;
@@ -120,6 +120,12 @@ export const MainMenu = ({ onNavigate }: MainMenuProps) => {
       label: language === 'pt' ? 'Fazer um Pedido de Oração' : language === 'es' ? 'Hacer una Petición de Oración' : 'Make a Prayer Request', 
       icon: Heart, 
       emoji: "🙏" 
+    },
+    { 
+      id: "prayer-gallery" as View, 
+      label: language === 'pt' ? 'Pedidos de Oração Feitos' : language === 'es' ? 'Peticiones de Oración Hechas' : 'Prayer Requests Made', 
+      icon: Heart, 
+      emoji: "🌍" 
     },
     { 
       id: "daily-devotional" as View, 

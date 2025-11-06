@@ -70,7 +70,6 @@ export const PrayerRequestsGallery = () => {
       const { data, error } = await supabase
         .from('prayer_requests')
         .select('*')
-        .eq('language', language)
         .order('created_at', { ascending: false });
 
       if (error) throw error;

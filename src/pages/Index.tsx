@@ -14,7 +14,7 @@ import DailyDevotional from "@/components/DailyDevotional";
 import { LoadingProgress } from "@/components/LoadingProgress";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Home, Trash2, LogOut, Check } from "lucide-react";
+import { Home, Trash2, LogOut, Check, ArrowLeft } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -30,6 +30,7 @@ const Index = () => {
   const [savedToGallery, setSavedToGallery] = useState<boolean>(false);
   const [currentView, setCurrentView] = useState<View>("dashboard");
   const [recentSermons, setRecentSermons] = useState<Array<{ title: string; date: string; content: string }>>([]);
+  const [viewingSermon, setViewingSermon] = useState<{title: string; content: string} | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [user, setUser] = useState<User | null>(null);
   const { t, language } = useLanguage();
@@ -239,54 +240,72 @@ const Index = () => {
               <Button 
                 variant="ghost" 
                 size="lg" 
-                onClick={() => setCurrentView('dashboard')}
+                onClick={() => {
+                  setViewingSermon(null);
+                  setCurrentView('dashboard');
+                }}
                 className="mb-6 gap-2"
               >
                 <Home className="h-4 w-4" />
                 {t('home')}
               </Button>
               
-              <h1 className="text-3xl font-bold mb-8 text-center">{t('mySermons')}</h1>
-              
-              {recentSermons.length === 0 ? (
-                <Card className="p-8 text-center">
-                  <p className="text-muted-foreground text-lg">{t('noSavedSermons')}</p>
-                </Card>
-              ) : (
+              {viewingSermon ? (
                 <div className="space-y-4">
-                  {recentSermons.map((sermon, index) => (
-                    <Card key={index} className="p-6 hover:shadow-lg transition-all">
-                      <div className="flex items-start justify-between gap-4">
-                        <div 
-                          className="flex-1 cursor-pointer" 
-                          onClick={() => {
-                            setSermon(sermon.content);
-                            setCurrentSermonTitle(sermon.title);
-                            setCurrentView('new-sermon');
-                          }}
-                        >
-                          <h3 className="text-xl font-semibold mb-2">{sermon.title}</h3>
-                          <p className="text-sm text-muted-foreground mb-4">{sermon.date}</p>
-                          <div className="prose prose-sm max-w-none line-clamp-3">
-                            {sermon.content ? sermon.content.substring(0, 200) : ''}...
-                          </div>
-                          <p className="text-sm text-primary mt-2 font-semibold">{t('clickToView')}</p>
-                        </div>
-                        <Button
-                          variant="destructive"
-                          size="icon"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleDeleteSermon(index);
-                          }}
-                          className="shrink-0"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </Card>
-                  ))}
+                  <Button 
+                    variant="outline" 
+                    onClick={() => setViewingSermon(null)}
+                    className="mb-4 gap-2"
+                  >
+                    <ArrowLeft className="h-4 w-4" />
+                    {t('backToList')}
+                  </Button>
+                  <SermonDisplay 
+                    content={viewingSermon.content} 
+                    title={viewingSermon.title}
+                  />
                 </div>
+              ) : (
+                <>
+                  <h1 className="text-3xl font-bold mb-8 text-center">{t('mySermons')}</h1>
+                  
+                  {recentSermons.length === 0 ? (
+                    <Card className="p-8 text-center">
+                      <p className="text-muted-foreground text-lg">{t('noSavedSermons')}</p>
+                    </Card>
+                  ) : (
+                    <div className="space-y-4">
+                      {recentSermons.map((sermon, index) => (
+                        <Card key={index} className="p-6 hover:shadow-lg transition-all">
+                          <div className="flex items-start justify-between gap-4">
+                            <div 
+                              className="flex-1 cursor-pointer" 
+                              onClick={() => setViewingSermon({title: sermon.title, content: sermon.content})}
+                            >
+                              <h3 className="text-xl font-semibold mb-2">{sermon.title}</h3>
+                              <p className="text-sm text-muted-foreground mb-4">{sermon.date}</p>
+                              <div className="prose prose-sm max-w-none line-clamp-3">
+                                {sermon.content ? sermon.content.substring(0, 200) : ''}...
+                              </div>
+                              <p className="text-sm text-primary mt-2 font-semibold">{t('clickToView')}</p>
+                            </div>
+                            <Button
+                              variant="destructive"
+                              size="icon"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleDeleteSermon(index);
+                              }}
+                              className="shrink-0"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </Card>
+                      ))}
+                    </div>
+                  )}
+                </>
               )}
             </div>
           )}

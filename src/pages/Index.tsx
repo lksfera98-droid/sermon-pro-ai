@@ -197,7 +197,7 @@ const Index = () => {
       {isLoading && <LoadingProgress />}
       
       <div className="h-[100svh] flex flex-col">
-        <div className="flex-1 overflow-y-auto overscroll-contain pb-24 md:pb-0" style={{ WebkitOverflowScrolling: 'touch' }}>
+        <div className="flex-1 overflow-y-auto overscroll-contain pb-20 md:pb-0" style={{ WebkitOverflowScrolling: 'touch' }}>
           {currentView === 'dashboard' && <MainMenu onNavigate={setCurrentView} />}
           
           {currentView === 'new-sermon' && (
@@ -441,20 +441,15 @@ const Index = () => {
         <nav 
           className="fixed bottom-0 left-0 right-0 bg-card/98 backdrop-blur-xl border-t border-primary/20 shadow-lg md:hidden z-[9999]"
           style={{
-            paddingBottom: 'max(env(safe-area-inset-bottom), 12px)',
-            WebkitTransform: 'translateZ(0)',
-            backfaceVisibility: 'hidden',
-            contain: 'layout paint size',
-            willChange: 'transform',
-            transform: 'translateZ(0)'
+            paddingBottom: 'env(safe-area-inset-bottom, 0px)'
           }}
         >
-          <div className="grid grid-cols-2 gap-3 p-2 max-w-md mx-auto select-none">
+          <div className="grid grid-cols-2 gap-3 p-1.5 max-w-md mx-auto select-none">
             <Button
               variant={currentView === 'dashboard' ? 'default' : 'outline'}
               size="lg"
               onClick={() => setCurrentView('dashboard')}
-              className="flex flex-col gap-1.5 h-auto py-2 rounded-xl touch-manipulation"
+              className="flex flex-col gap-1.5 h-auto py-1.5 rounded-xl touch-manipulation"
             >
               <Home className="h-5 w-5" />
               <span className="text-[12px] font-bold">
@@ -465,7 +460,7 @@ const Index = () => {
               variant="outline"
               size="lg"
               onClick={handleLogout}
-              className="flex flex-col gap-1.5 h-auto py-2 rounded-xl border-destructive/30 text-destructive hover:bg-destructive hover:text-destructive-foreground touch-manipulation"
+              className="flex flex-col gap-1.5 h-auto py-1.5 rounded-xl border-destructive/30 text-destructive hover:bg-destructive hover:text-destructive-foreground touch-manipulation"
             >
               <LogOut className="h-5 w-5" />
               <span className="text-[12px] font-bold">

@@ -97,6 +97,7 @@ All colors MUST be HSL.
     -moz-osx-font-smoothing: grayscale;
     overscroll-behavior: none;
     touch-action: pan-y;
+    overflow: hidden;
   }
 }
 
@@ -114,3 +115,6 @@ All colors MUST be HSL.
     padding-bottom: env(safe-area-inset-bottom);
   }
 }
+
+/* Ensure root takes full viewport height to stabilize fixed bottom bar on iOS */
+html, body, #root { height: 100%; }

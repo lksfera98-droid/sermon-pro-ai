@@ -193,10 +193,10 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-[100svh] bg-background">
+    <div className="h-[100svh] bg-background overflow-hidden">
       {isLoading && <LoadingProgress />}
       
-      <div className="min-h-[100svh] flex flex-col">
+      <div className="h-[100svh] flex flex-col">
         <div className="flex-1 overflow-y-auto overscroll-contain pb-24 md:pb-0" style={{ WebkitOverflowScrolling: 'touch' }}>
           {currentView === 'dashboard' && <MainMenu onNavigate={setCurrentView} />}
           
@@ -441,7 +441,12 @@ const Index = () => {
         <nav 
           className="fixed bottom-0 left-0 right-0 bg-card/98 backdrop-blur-xl border-t border-primary/20 shadow-lg md:hidden z-[9999]"
           style={{
-            paddingBottom: 'env(safe-area-inset-bottom)'
+            paddingBottom: 'max(env(safe-area-inset-bottom), 12px)',
+            WebkitTransform: 'translateZ(0)',
+            backfaceVisibility: 'hidden',
+            contain: 'layout paint size',
+            willChange: 'transform',
+            transform: 'translateZ(0)'
           }}
         >
           <div className="grid grid-cols-2 gap-3 p-2 max-w-md mx-auto select-none">

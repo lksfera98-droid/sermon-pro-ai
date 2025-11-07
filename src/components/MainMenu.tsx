@@ -188,7 +188,7 @@ export const MainMenu = ({ onNavigate }: MainMenuProps) => {
   ];
 
   return (
-    <div className="min-h-screen w-full flex flex-col items-center justify-start pt-8 p-4 pb-32 md:pb-4 bg-background">
+    <div className="min-h-screen w-full flex flex-col items-center justify-start pt-12 p-4 pb-32 md:pb-4 bg-background">
       <div className="w-full max-w-md space-y-6">
         {/* Header with Logo and Language Selector */}
         <div className="text-center space-y-4">

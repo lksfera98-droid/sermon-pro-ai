@@ -193,11 +193,11 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="h-screen overflow-hidden bg-background">
       {isLoading && <LoadingProgress />}
       
-      <div className="min-h-screen flex flex-col">
-        <div className="flex-1 overflow-y-auto pb-16 md:pb-0">
+      <div className="h-full flex flex-col">
+        <div className="flex-1 overflow-y-auto overscroll-none pb-16 md:pb-0">
           {currentView === 'dashboard' && <MainMenu onNavigate={setCurrentView} />}
           
           {currentView === 'new-sermon' && (
@@ -443,10 +443,11 @@ const Index = () => {
           style={{ 
             position: 'fixed',
             paddingBottom: 'max(env(safe-area-inset-bottom, 0.5rem), 0.5rem)',
+            WebkitOverflowScrolling: 'auto',
             WebkitBackfaceVisibility: 'hidden',
             backfaceVisibility: 'hidden',
-            transform: 'translateZ(0)',
-            willChange: 'transform'
+            overscrollBehaviorY: 'contain',
+            contain: 'layout paint size'
           }}
         >
           <div className="grid grid-cols-2 gap-2 p-2 max-w-md mx-auto">

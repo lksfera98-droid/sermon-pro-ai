@@ -110,6 +110,27 @@ export const MainMenu = ({ onNavigate }: MainMenuProps) => {
 
   const menuItems = [
     { 
+      id: "hear-god-speak" as View, 
+      label: language === 'pt' ? 'Ouvir Deus Falar Comigo' : language === 'es' ? 'Escuchar a Dios Hablarme' : 'Hear God Speak to Me', 
+      icon: Ear,
+      color: "bg-teal-100 dark:bg-teal-900/30",
+      iconColor: "text-teal-600 dark:text-teal-400"
+    },
+    { 
+      id: "daily-devotional" as View, 
+      label: language === 'pt' ? 'Gerar Meu Devocional Diário' : language === 'es' ? 'Generar Mi Devocional Diario' : 'Generate My Daily Devotional', 
+      icon: BookHeart,
+      color: "bg-rose-100 dark:bg-rose-900/30",
+      iconColor: "text-rose-600 dark:text-rose-400"
+    },
+    { 
+      id: "bible-study" as View, 
+      label: language === 'pt' ? 'Esmiuçar um versiculo' : language === 'es' ? 'Hacer un Estudio Bíblico' : 'Make a Bible Study', 
+      icon: GraduationCap,
+      color: "bg-indigo-100 dark:bg-indigo-900/30",
+      iconColor: "text-indigo-600 dark:text-indigo-400"
+    },
+    { 
       id: "new-sermon" as View, 
       label: language === 'pt' ? 'Crie seu novo sermão' : language === 'es' ? 'Crea tu nuevo sermón' : 'Create your new sermon', 
       icon: FileText,
@@ -157,27 +178,6 @@ export const MainMenu = ({ onNavigate }: MainMenuProps) => {
       icon: Globe,
       color: "bg-pink-100 dark:bg-pink-900/30",
       iconColor: "text-pink-600 dark:text-pink-400"
-    },
-    { 
-      id: "daily-devotional" as View, 
-      label: language === 'pt' ? 'Gerar Meu Devocional Diário' : language === 'es' ? 'Generar Mi Devocional Diario' : 'Generate My Daily Devotional', 
-      icon: BookHeart,
-      color: "bg-rose-100 dark:bg-rose-900/30",
-      iconColor: "text-rose-600 dark:text-rose-400"
-    },
-    { 
-      id: "bible-study" as View, 
-      label: language === 'pt' ? 'Esmiuçar um versiculo' : language === 'es' ? 'Hacer un Estudio Bíblico' : 'Make a Bible Study', 
-      icon: GraduationCap,
-      color: "bg-indigo-100 dark:bg-indigo-900/30",
-      iconColor: "text-indigo-600 dark:text-indigo-400"
-    },
-    { 
-      id: "hear-god-speak" as View, 
-      label: language === 'pt' ? 'Ouvir Deus Falar Comigo' : language === 'es' ? 'Escuchar a Dios Hablarme' : 'Hear God Speak to Me', 
-      icon: Ear,
-      color: "bg-teal-100 dark:bg-teal-900/30",
-      iconColor: "text-teal-600 dark:text-teal-400"
     }
   ];
 

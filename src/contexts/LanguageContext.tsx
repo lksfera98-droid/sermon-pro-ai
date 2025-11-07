@@ -13,9 +13,9 @@ interface Translations {
 const translations: Translations = {
   // Welcome
   welcome: {
-    pt: 'Bem-vindo ao SermonPro',
-    en: 'Welcome to the Preacher App',
-    es: 'Bienvenido a la App del Predicador'
+    pt: 'O App que foi criado para te aproximar de Deus',
+    en: 'The App created to bring you closer to God',
+    es: 'La App creada para acercarte a Dios'
   },
   welcomeSubtitle: {
     pt: 'Tudo o que você precisa para se conectar com a Palavra de DEUS',

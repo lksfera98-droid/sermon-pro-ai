@@ -160,7 +160,7 @@ export const MainMenu = ({ onNavigate }: MainMenuProps) => {
     },
     { 
       id: "bible-study" as View, 
-      label: language === 'pt' ? 'Fazer um Estudo Bíblico' : language === 'es' ? 'Hacer un Estudio Bíblico' : 'Make a Bible Study', 
+      label: language === 'pt' ? 'Esmiuçar um versiculo' : language === 'es' ? 'Hacer un Estudio Bíblico' : 'Make a Bible Study', 
       icon: GraduationCap,
       color: "bg-indigo-100 dark:bg-indigo-900/30",
       iconColor: "text-indigo-600 dark:text-indigo-400"

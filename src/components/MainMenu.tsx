@@ -111,63 +111,53 @@ export const MainMenu = ({ onNavigate }: MainMenuProps) => {
   const menuItems = [
     { 
       id: "new-sermon" as View, 
-      label: language === 'pt' ? '📝 Crie seu novo sermão' : language === 'es' ? '📝 Crea tu nuevo sermón' : '📝 Create your new sermon', 
-      icon: FileText, 
-      emoji: "📝" 
+      label: language === 'pt' ? 'Crie seu novo sermão' : language === 'es' ? 'Crea tu nuevo sermón' : 'Create your new sermon', 
+      icon: FileText
     },
     { 
       id: "my-sermons" as View, 
-      label: language === 'pt' ? '📚 Seus Sermões Criados' : language === 'es' ? '📚 Tus Sermones Creados' : '📚 Your Created Sermons', 
-      icon: BookOpen, 
-      emoji: "📚" 
+      label: language === 'pt' ? 'Seus Sermões Criados' : language === 'es' ? 'Tus Sermones Creados' : 'Your Created Sermons', 
+      icon: BookOpen
     },
     { 
       id: "verse-search" as View, 
-      label: language === 'pt' ? '🔎 Pesquisar Versículos' : language === 'es' ? '🔎 Buscar Versículos' : '🔎 Search Verses', 
-      icon: Search, 
-      emoji: "🔍" 
+      label: language === 'pt' ? 'Pesquisar Versículos' : language === 'es' ? 'Buscar Versículos' : 'Search Verses', 
+      icon: Search
     },
     { 
       id: "translator" as View, 
-      label: language === 'pt' ? '📖 Tradutor Bíblico' : language === 'es' ? '📖 Traductor Bíblico' : '📖 Biblical Translator', 
-      icon: Languages, 
-      emoji: "🔤" 
+      label: language === 'pt' ? 'Tradutor Bíblico' : language === 'es' ? 'Traductor Bíblico' : 'Biblical Translator', 
+      icon: Languages
     },
     { 
       id: "prayer-requests" as View, 
-      label: language === 'pt' ? '🙏 Fazer um Pedido de Oração' : language === 'es' ? '🙏 Hacer una Petición de Oración' : '🙏 Make a Prayer Request', 
-      icon: Heart, 
-      emoji: "🙏" 
+      label: language === 'pt' ? 'Fazer um Pedido de Oração' : language === 'es' ? 'Hacer una Petición de Oración' : 'Make a Prayer Request', 
+      icon: Heart
     },
     { 
       id: "prayer-gallery" as View, 
-      label: language === 'pt' ? '🌍 Pedidos de Oração' : language === 'es' ? '🌍 Peticiones de Oración' : '🌍 Prayer Requests', 
-      icon: Heart, 
-      emoji: "🌍" 
+      label: language === 'pt' ? 'Pedidos de Oração' : language === 'es' ? 'Peticiones de Oración' : 'Prayer Requests', 
+      icon: Heart
     },
     { 
       id: "daily-devotional" as View, 
-      label: language === 'pt' ? '📖 Gerar Meu Devocional Diário' : language === 'es' ? '📖 Generar Mi Devocional Diario' : '📖 Generate My Daily Devotional', 
-      icon: BookHeart, 
-      emoji: "📖" 
+      label: language === 'pt' ? 'Gerar Meu Devocional Diário' : language === 'es' ? 'Generar Mi Devocional Diario' : 'Generate My Daily Devotional', 
+      icon: BookHeart
     },
     { 
       id: "bible-study" as View, 
-      label: language === 'pt' ? '📚 Fazer um Estudo Bíblico' : language === 'es' ? '📚 Hacer un Estudio Bíblico' : '📚 Make a Bible Study', 
-      icon: GraduationCap, 
-      emoji: "📚" 
+      label: language === 'pt' ? 'Fazer um Estudo Bíblico' : language === 'es' ? 'Hacer un Estudio Bíblico' : 'Make a Bible Study', 
+      icon: GraduationCap
     },
     { 
       id: "hear-god-speak" as View, 
-      label: language === 'pt' ? '🎧 Ouvir Deus Falar Comigo' : language === 'es' ? '🎧 Escuchar a Dios Hablarme' : '🎧 Hear God Speak to Me', 
-      icon: Ear, 
-      emoji: "👂" 
+      label: language === 'pt' ? 'Ouvir Deus Falar Comigo' : language === 'es' ? 'Escuchar a Dios Hablarme' : 'Hear God Speak to Me', 
+      icon: Ear
     },
     { 
       id: "public-gallery" as View, 
-      label: language === 'pt' ? '🌍 Veja o que Deus Falou' : language === 'es' ? '🌍 Ve lo que Dios Habló' : '🌍 See What God Spoke', 
-      icon: Globe, 
-      emoji: "🌍" 
+      label: language === 'pt' ? 'Veja o que Deus Falou' : language === 'es' ? 'Ve lo que Dios Habló' : 'See What God Spoke', 
+      icon: Globe
     }
   ];
 
@@ -231,7 +221,7 @@ export const MainMenu = ({ onNavigate }: MainMenuProps) => {
                     <Icon className="h-6 w-6 text-primary" />
                   </div>
                   <span className="flex-1 font-semibold text-base">
-                    {item.emoji} {item.label}
+                    {item.label}
                   </span>
                 </div>
               </Card>

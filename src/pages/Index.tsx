@@ -441,7 +441,8 @@ const Index = () => {
         <nav 
           className="fixed bottom-0 left-0 right-0 bg-card/98 backdrop-blur-xl border-t border-primary/20 shadow-lg md:hidden z-[9999]"
           style={{
-            paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 8px)'
+            paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 8px)',
+            bottom: '-12px'
           }}
         >
           <div className="grid grid-cols-2 gap-3 p-2.5 max-w-md mx-auto select-none">

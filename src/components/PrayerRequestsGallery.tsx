@@ -89,19 +89,28 @@ export const PrayerRequestsGallery = () => {
     }
   };
 
-  const handleDelete = async (requestId: string) => {
+  const handleDelete = async (requestId: string, deleteToken?: string) => {
     try {
-      const { error } = await supabase
-        .from('prayer_requests')
-        .delete()
-        .eq('id', requestId);
-
-      if (error) throw error;
+      if (deleteToken) {
+        const { data, error } = await supabase.functions.invoke('delete-prayer-request', {
+          body: { id: requestId, deleteToken },
+        });
+        if (error) throw error as any;
+        if (!data?.success) throw new Error('Delete failed');
+      } else {
+        const { error } = await supabase
+          .from('prayer_requests')
+          .delete()
+          .eq('id', requestId);
+        if (error) throw error;
+      }
 
       toast({
         title: t('success'),
         description: t('requestDeleted'),
       });
+      // Refresh list
+      loadRequests();
     } catch (error) {
       console.error('Error deleting prayer request:', error);
       toast({
@@ -163,17 +172,18 @@ export const PrayerRequestsGallery = () => {
                         {t('cancel')}
                       </AlertDialogCancel>
                        <AlertDialogAction onClick={() => {
-                        handleDelete(viewingRequest.id);
-                        // Remove token from localStorage if it was an anonymous request
-                        if (viewingRequest.is_anonymous) {
-                          const tokens = JSON.parse(localStorage.getItem('prayer_delete_tokens') || '{}');
+                        const tokens = JSON.parse(localStorage.getItem('prayer_delete_tokens') || '{}');
+                        const tokenToUse = tokens[viewingRequest.id];
+                        handleDelete(viewingRequest.id, tokenToUse);
+                        // Clean up token after deletion
+                        if (tokenToUse) {
                           delete tokens[viewingRequest.id];
                           localStorage.setItem('prayer_delete_tokens', JSON.stringify(tokens));
                         }
                         setViewingRequest(null);
                        }}>
                         {t('delete')}
-                      </AlertDialogAction>
+                       </AlertDialogAction>
                     </AlertDialogFooter>
                   </AlertDialogContent>
                 </AlertDialog>

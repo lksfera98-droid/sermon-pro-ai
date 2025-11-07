@@ -193,11 +193,11 @@ const Index = () => {
   };
 
   return (
-    <div className="h-screen overflow-hidden bg-background">
+    <div className="min-h-screen bg-background">
       {isLoading && <LoadingProgress />}
       
-      <div className="h-full flex flex-col">
-        <div className="flex-1 overflow-y-auto overscroll-none pb-16 md:pb-0">
+      <div className="min-h-screen flex flex-col">
+        <div className="flex-1 overflow-y-auto pb-24 md:pb-0">
           {currentView === 'dashboard' && <MainMenu onNavigate={setCurrentView} />}
           
           {currentView === 'new-sermon' && (
@@ -439,37 +439,31 @@ const Index = () => {
 
         {/* Bottom Navigation - Mobile Only - FIXED */}
         <nav 
-          className="fixed bottom-0 left-0 right-0 bg-card/98 backdrop-blur-xl border-t border-primary/20 shadow-lg md:hidden z-[9999]" 
+          className="fixed bottom-0 left-0 right-0 bg-card/98 backdrop-blur-xl border-t border-primary/20 shadow-lg md:hidden z-[9999] pb-safe" 
           style={{ 
-            position: 'fixed',
-            paddingBottom: 'max(env(safe-area-inset-bottom, 0.5rem), 0.5rem)',
-            WebkitOverflowScrolling: 'auto',
-            WebkitBackfaceVisibility: 'hidden',
-            backfaceVisibility: 'hidden',
-            overscrollBehaviorY: 'contain',
-            contain: 'layout paint size'
+            paddingBottom: 'max(env(safe-area-inset-bottom, 0.75rem), 0.75rem)'
           }}
         >
-          <div className="grid grid-cols-2 gap-2 p-2 max-w-md mx-auto">
+          <div className="grid grid-cols-2 gap-3 p-3 max-w-md mx-auto">
             <Button
               variant={currentView === 'dashboard' ? 'default' : 'outline'}
-              size="sm"
+              size="lg"
               onClick={() => setCurrentView('dashboard')}
-              className="flex flex-col gap-1 h-auto py-2.5 rounded-xl touch-manipulation"
+              className="flex flex-col gap-1.5 h-auto py-3 rounded-xl touch-manipulation"
             >
               <Home className="h-5 w-5" />
-              <span className="text-[10px] font-semibold">
+              <span className="text-[12px] font-bold">
                 {language === 'pt' ? 'Início' : language === 'es' ? 'Inicio' : 'Home'}
               </span>
             </Button>
             <Button
               variant="outline"
-              size="sm"
+              size="lg"
               onClick={handleLogout}
-              className="flex flex-col gap-1 h-auto py-2.5 rounded-xl border-destructive/30 text-destructive hover:bg-destructive hover:text-destructive-foreground touch-manipulation"
+              className="flex flex-col gap-1.5 h-auto py-3 rounded-xl border-destructive/30 text-destructive hover:bg-destructive hover:text-destructive-foreground touch-manipulation"
             >
               <LogOut className="h-5 w-5" />
-              <span className="text-[10px] font-semibold">
+              <span className="text-[12px] font-bold">
                 {language === 'pt' ? 'Sair' : language === 'es' ? 'Salir' : 'Logout'}
               </span>
             </Button>

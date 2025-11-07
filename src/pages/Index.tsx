@@ -197,7 +197,7 @@ const Index = () => {
       {isLoading && <LoadingProgress />}
       
       <div className="h-[100svh] flex flex-col">
-        <div className="flex-1 overflow-y-auto overscroll-contain pb-20 md:pb-0" style={{ WebkitOverflowScrolling: 'touch' }}>
+        <div className="flex-1 overflow-y-auto overscroll-contain pb-[88px] md:pb-0" style={{ WebkitOverflowScrolling: 'touch' }}>
           {currentView === 'dashboard' && <MainMenu onNavigate={setCurrentView} />}
           
           {currentView === 'new-sermon' && (
@@ -441,10 +441,10 @@ const Index = () => {
         <nav 
           className="fixed bottom-0 left-0 right-0 bg-card/98 backdrop-blur-xl border-t border-primary/20 shadow-lg md:hidden z-[9999]"
           style={{
-            paddingBottom: 'env(safe-area-inset-bottom, 0px)'
+            paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 8px)'
           }}
         >
-          <div className="grid grid-cols-2 gap-3 p-1.5 max-w-md mx-auto select-none">
+          <div className="grid grid-cols-2 gap-3 p-2.5 max-w-md mx-auto select-none">
             <Button
               variant={currentView === 'dashboard' ? 'default' : 'outline'}
               size="lg"

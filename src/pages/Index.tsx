@@ -193,11 +193,11 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-[100dvh] bg-background">
       {isLoading && <LoadingProgress />}
       
-      <div className="min-h-screen flex flex-col">
-        <div className="flex-1 overflow-y-auto pb-24 md:pb-0">
+      <div className="min-h-[100dvh] flex flex-col">
+        <div className="flex-1 overflow-y-auto overscroll-contain pb-28 md:pb-0" style={{ WebkitOverflowScrolling: 'touch' }}>
           {currentView === 'dashboard' && <MainMenu onNavigate={setCurrentView} />}
           
           {currentView === 'new-sermon' && (
@@ -439,12 +439,16 @@ const Index = () => {
 
         {/* Bottom Navigation - Mobile Only - FIXED */}
         <nav 
-          className="fixed bottom-0 left-0 right-0 bg-card/98 backdrop-blur-xl border-t border-primary/20 shadow-lg md:hidden z-[9999] pb-safe" 
-          style={{ 
-            paddingBottom: 'max(env(safe-area-inset-bottom, 0.75rem), 0.75rem)'
+          className="sticky bottom-0 left-0 right-0 bg-card/98 backdrop-blur-xl border-t border-primary/20 shadow-lg md:hidden z-[9999] pb-safe mt-auto"
+          style={{
+            paddingBottom: 'max(env(safe-area-inset-bottom, 0.75rem), 0.75rem)',
+            WebkitTransform: 'translateZ(0)',
+            backfaceVisibility: 'hidden',
+            contain: 'layout paint size',
+            willChange: 'transform'
           }}
         >
-          <div className="grid grid-cols-2 gap-3 p-3 max-w-md mx-auto">
+          <div className="grid grid-cols-2 gap-3 p-3 max-w-md mx-auto select-none">
             <Button
               variant={currentView === 'dashboard' ? 'default' : 'outline'}
               size="lg"

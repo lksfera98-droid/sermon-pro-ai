@@ -442,7 +442,7 @@ const Index = () => {
           className="fixed bottom-0 left-0 right-0 bg-card/98 backdrop-blur-xl border-t border-primary/20 shadow-lg md:hidden z-[9999]"
           style={{
             paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 8px)',
-            bottom: '-12px'
+            bottom: '-24px'
           }}
         >
           <div className="grid grid-cols-2 gap-3 p-2.5 max-w-md mx-auto select-none">
@@ -450,7 +450,7 @@ const Index = () => {
               variant={currentView === 'dashboard' ? 'default' : 'outline'}
               size="lg"
               onClick={() => setCurrentView('dashboard')}
-              className="flex flex-col gap-1.5 h-auto py-1.5 rounded-xl touch-manipulation"
+              className="flex flex-col gap-1.5 h-auto py-1.5 rounded-none touch-manipulation"
             >
               <Home className="h-5 w-5" />
               <span className="text-[12px] font-bold">
@@ -461,7 +461,7 @@ const Index = () => {
               variant="outline"
               size="lg"
               onClick={handleLogout}
-              className="flex flex-col gap-1.5 h-auto py-1.5 rounded-xl border-destructive/30 text-destructive hover:bg-destructive hover:text-destructive-foreground touch-manipulation"
+              className="flex flex-col gap-1.5 h-auto py-1.5 rounded-none border-destructive/30 text-destructive hover:bg-destructive hover:text-destructive-foreground touch-manipulation"
             >
               <LogOut className="h-5 w-5" />
               <span className="text-[12px] font-bold">

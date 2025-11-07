@@ -112,52 +112,72 @@ export const MainMenu = ({ onNavigate }: MainMenuProps) => {
     { 
       id: "new-sermon" as View, 
       label: language === 'pt' ? 'Crie seu novo sermão' : language === 'es' ? 'Crea tu nuevo sermón' : 'Create your new sermon', 
-      icon: FileText
+      icon: FileText,
+      color: "bg-blue-100 dark:bg-blue-900/30",
+      iconColor: "text-blue-600 dark:text-blue-400"
     },
     { 
       id: "my-sermons" as View, 
       label: language === 'pt' ? 'Seus Sermões Criados' : language === 'es' ? 'Tus Sermones Creados' : 'Your Created Sermons', 
-      icon: BookOpen
+      icon: BookOpen,
+      color: "bg-green-100 dark:bg-green-900/30",
+      iconColor: "text-green-600 dark:text-green-400"
     },
     { 
       id: "verse-search" as View, 
       label: language === 'pt' ? 'Pesquisar Versículos' : language === 'es' ? 'Buscar Versículos' : 'Search Verses', 
-      icon: Search
+      icon: Search,
+      color: "bg-purple-100 dark:bg-purple-900/30",
+      iconColor: "text-purple-600 dark:text-purple-400"
     },
     { 
       id: "translator" as View, 
       label: language === 'pt' ? 'Tradutor Bíblico' : language === 'es' ? 'Traductor Bíblico' : 'Biblical Translator', 
-      icon: Languages
+      icon: Languages,
+      color: "bg-orange-100 dark:bg-orange-900/30",
+      iconColor: "text-orange-600 dark:text-orange-400"
     },
     { 
       id: "prayer-requests" as View, 
       label: language === 'pt' ? 'Fazer um Pedido de Oração' : language === 'es' ? 'Hacer una Petición de Oración' : 'Make a Prayer Request', 
-      icon: Heart
+      icon: Heart,
+      color: "bg-red-100 dark:bg-red-900/30",
+      iconColor: "text-red-600 dark:text-red-400"
     },
     { 
       id: "prayer-gallery" as View, 
       label: language === 'pt' ? 'Pedidos de Oração' : language === 'es' ? 'Peticiones de Oración' : 'Prayer Requests', 
-      icon: Heart
+      icon: Globe,
+      color: "bg-pink-100 dark:bg-pink-900/30",
+      iconColor: "text-pink-600 dark:text-pink-400"
     },
     { 
       id: "daily-devotional" as View, 
       label: language === 'pt' ? 'Gerar Meu Devocional Diário' : language === 'es' ? 'Generar Mi Devocional Diario' : 'Generate My Daily Devotional', 
-      icon: BookHeart
+      icon: BookHeart,
+      color: "bg-rose-100 dark:bg-rose-900/30",
+      iconColor: "text-rose-600 dark:text-rose-400"
     },
     { 
       id: "bible-study" as View, 
       label: language === 'pt' ? 'Fazer um Estudo Bíblico' : language === 'es' ? 'Hacer un Estudio Bíblico' : 'Make a Bible Study', 
-      icon: GraduationCap
+      icon: GraduationCap,
+      color: "bg-indigo-100 dark:bg-indigo-900/30",
+      iconColor: "text-indigo-600 dark:text-indigo-400"
     },
     { 
       id: "hear-god-speak" as View, 
       label: language === 'pt' ? 'Ouvir Deus Falar Comigo' : language === 'es' ? 'Escuchar a Dios Hablarme' : 'Hear God Speak to Me', 
-      icon: Ear
+      icon: Ear,
+      color: "bg-teal-100 dark:bg-teal-900/30",
+      iconColor: "text-teal-600 dark:text-teal-400"
     },
     { 
       id: "public-gallery" as View, 
       label: language === 'pt' ? 'Veja o que Deus Falou' : language === 'es' ? 'Ve lo que Dios Habló' : 'See What God Spoke', 
-      icon: Globe
+      icon: Sparkles,
+      color: "bg-amber-100 dark:bg-amber-900/30",
+      iconColor: "text-amber-600 dark:text-amber-400"
     }
   ];
 
@@ -217,8 +237,8 @@ export const MainMenu = ({ onNavigate }: MainMenuProps) => {
                 onClick={() => onNavigate(item.id)}
               >
                 <div className="flex items-center gap-4">
-                  <div className="p-3 bg-primary/10 rounded-lg">
-                    <Icon className="h-6 w-6 text-primary" />
+                  <div className={`p-3 rounded-lg ${item.color}`}>
+                    <Icon className={`h-6 w-6 ${item.iconColor}`} />
                   </div>
                   <span className="flex-1 font-semibold text-base">
                     {item.label}

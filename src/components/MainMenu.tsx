@@ -110,62 +110,62 @@ export const MainMenu = ({ onNavigate }: MainMenuProps) => {
 
   const menuItems = [
     { 
-      id: "hear-god-speak" as View, 
-      label: language === 'pt' ? 'Ouvir Deus Falar Comigo' : language === 'es' ? 'Escuchar a Dios Hablarme' : 'Hear God Speak to Me', 
-      icon: Ear, 
-      emoji: "👂" 
-    },
-    { 
-      id: "prayer-requests" as View, 
-      label: language === 'pt' ? 'Fazer um Pedido de Oração' : language === 'es' ? 'Hacer una Petición de Oración' : 'Make a Prayer Request', 
-      icon: Heart, 
-      emoji: "🙏" 
-    },
-    { 
-      id: "prayer-gallery" as View, 
-      label: language === 'pt' ? 'Pedidos de Oração Feitos' : language === 'es' ? 'Peticiones de Oración Hechas' : 'Prayer Requests Made', 
-      icon: Heart, 
-      emoji: "🌍" 
-    },
-    { 
-      id: "daily-devotional" as View, 
-      label: language === 'pt' ? 'Gerar Meu Devocional Diário' : language === 'es' ? 'Generar Mi Devocional Diario' : 'Generate My Daily Devotional', 
-      icon: BookHeart, 
-      emoji: "📖" 
-    },
-    { 
-      id: "bible-study" as View, 
-      label: language === 'pt' ? 'Fazer um Estudo Bíblico' : language === 'es' ? 'Hacer un Estudio Bíblico' : 'Make a Bible Study', 
-      icon: GraduationCap, 
-      emoji: "📚" 
-    },
-    { 
-      id: "translator" as View, 
-      label: language === 'pt' ? 'Tradutor Bíblico' : language === 'es' ? 'Traductor Bíblico' : 'Biblical Translator', 
-      icon: Languages, 
-      emoji: "🔤" 
-    },
-    { 
-      id: "verse-search" as View, 
-      label: language === 'pt' ? 'Pesquisar um Versículo' : language === 'es' ? 'Buscar un Versículo' : 'Search a Verse', 
-      icon: Search, 
-      emoji: "🔍" 
-    },
-    { 
       id: "new-sermon" as View, 
-      label: language === 'pt' ? 'Criar um Sermão' : language === 'es' ? 'Crear un Sermón' : 'Create a Sermon', 
+      label: language === 'pt' ? '📝 Crie seu novo sermão' : language === 'es' ? '📝 Crea tu nuevo sermón' : '📝 Create your new sermon', 
       icon: FileText, 
       emoji: "📝" 
     },
     { 
       id: "my-sermons" as View, 
-      label: language === 'pt' ? 'Meus Sermões Criados' : language === 'es' ? 'Mis Sermones Creados' : 'My Created Sermons', 
+      label: language === 'pt' ? '📚 Seus Sermões Criados' : language === 'es' ? '📚 Tus Sermones Creados' : '📚 Your Created Sermons', 
       icon: BookOpen, 
       emoji: "📚" 
     },
     { 
+      id: "verse-search" as View, 
+      label: language === 'pt' ? '🔎 Pesquisar Versículos' : language === 'es' ? '🔎 Buscar Versículos' : '🔎 Search Verses', 
+      icon: Search, 
+      emoji: "🔍" 
+    },
+    { 
+      id: "translator" as View, 
+      label: language === 'pt' ? '📖 Tradutor Bíblico' : language === 'es' ? '📖 Traductor Bíblico' : '📖 Biblical Translator', 
+      icon: Languages, 
+      emoji: "🔤" 
+    },
+    { 
+      id: "prayer-requests" as View, 
+      label: language === 'pt' ? '🙏 Fazer um Pedido de Oração' : language === 'es' ? '🙏 Hacer una Petición de Oración' : '🙏 Make a Prayer Request', 
+      icon: Heart, 
+      emoji: "🙏" 
+    },
+    { 
+      id: "prayer-gallery" as View, 
+      label: language === 'pt' ? '🌍 Pedidos de Oração' : language === 'es' ? '🌍 Peticiones de Oración' : '🌍 Prayer Requests', 
+      icon: Heart, 
+      emoji: "🌍" 
+    },
+    { 
+      id: "daily-devotional" as View, 
+      label: language === 'pt' ? '📖 Gerar Meu Devocional Diário' : language === 'es' ? '📖 Generar Mi Devocional Diario' : '📖 Generate My Daily Devotional', 
+      icon: BookHeart, 
+      emoji: "📖" 
+    },
+    { 
+      id: "bible-study" as View, 
+      label: language === 'pt' ? '📚 Fazer um Estudo Bíblico' : language === 'es' ? '📚 Hacer un Estudio Bíblico' : '📚 Make a Bible Study', 
+      icon: GraduationCap, 
+      emoji: "📚" 
+    },
+    { 
+      id: "hear-god-speak" as View, 
+      label: language === 'pt' ? '🎧 Ouvir Deus Falar Comigo' : language === 'es' ? '🎧 Escuchar a Dios Hablarme' : '🎧 Hear God Speak to Me', 
+      icon: Ear, 
+      emoji: "👂" 
+    },
+    { 
       id: "public-gallery" as View, 
-      label: language === 'pt' ? 'Veja o que Deus Falou com Outras Pessoas' : language === 'es' ? 'Ve lo que Dios Habló con Otras Personas' : 'See What God Spoke to Others', 
+      label: language === 'pt' ? '🌍 Veja o que Deus Falou' : language === 'es' ? '🌍 Ve lo que Dios Habló' : '🌍 See What God Spoke', 
       icon: Globe, 
       emoji: "🌍" 
     }

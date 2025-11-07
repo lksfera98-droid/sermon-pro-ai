@@ -124,6 +124,13 @@ export const MainMenu = ({ onNavigate }: MainMenuProps) => {
       iconColor: "text-green-600 dark:text-green-400"
     },
     { 
+      id: "public-gallery" as View, 
+      label: language === 'pt' ? 'Sermões criados pelos irmãos' : language === 'es' ? 'Sermones creados por los hermanos' : 'Sermons created by brothers', 
+      icon: Sparkles,
+      color: "bg-amber-100 dark:bg-amber-900/30",
+      iconColor: "text-amber-600 dark:text-amber-400"
+    },
+    { 
       id: "verse-search" as View, 
       label: language === 'pt' ? 'Pesquisar Versículos' : language === 'es' ? 'Buscar Versículos' : 'Search Verses', 
       icon: Search,
@@ -171,13 +178,6 @@ export const MainMenu = ({ onNavigate }: MainMenuProps) => {
       icon: Ear,
       color: "bg-teal-100 dark:bg-teal-900/30",
       iconColor: "text-teal-600 dark:text-teal-400"
-    },
-    { 
-      id: "public-gallery" as View, 
-      label: language === 'pt' ? 'Veja o que Deus Falou' : language === 'es' ? 'Ve lo que Dios Habló' : 'See What God Spoke', 
-      icon: Sparkles,
-      color: "bg-amber-100 dark:bg-amber-900/30",
-      iconColor: "text-amber-600 dark:text-amber-400"
     }
   ];
 
@@ -188,7 +188,7 @@ export const MainMenu = ({ onNavigate }: MainMenuProps) => {
   ];
 
   return (
-    <div className="min-h-screen w-full flex flex-col items-center justify-center p-4 pb-28 md:pb-4 bg-background">
+    <div className="min-h-screen w-full flex flex-col items-center justify-start pt-8 p-4 pb-32 md:pb-4 bg-background">
       <div className="w-full max-w-md space-y-6">
         {/* Header with Logo and Language Selector */}
         <div className="text-center space-y-4">

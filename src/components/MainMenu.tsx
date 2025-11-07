@@ -146,7 +146,7 @@ export const MainMenu = ({ onNavigate }: MainMenuProps) => {
     },
     { 
       id: "prayer-gallery" as View, 
-      label: language === 'pt' ? 'Pedidos de Oração' : language === 'es' ? 'Peticiones de Oración' : 'Prayer Requests', 
+      label: language === 'pt' ? 'Pedidos de Oração Feitos' : language === 'es' ? 'Peticiones de Oración Hechas' : 'Prayer Requests Made', 
       icon: Globe,
       color: "bg-pink-100 dark:bg-pink-900/30",
       iconColor: "text-pink-600 dark:text-pink-400"

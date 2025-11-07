@@ -26,6 +26,7 @@ interface PrayerRequest {
   is_anonymous: boolean;
   image_url: string | null;
   user_id: string | null;
+  delete_token: string | null;
 }
 
 export const PrayerRequestsGallery = () => {
@@ -112,7 +113,11 @@ export const PrayerRequestsGallery = () => {
   };
 
   if (viewingRequest) {
-    const isOwner = currentUserId && currentUserId === viewingRequest.user_id;
+    // Check if user can delete (either is owner or has delete token for anonymous)
+    const canDelete = currentUserId && currentUserId === viewingRequest.user_id;
+    const deleteTokens = JSON.parse(localStorage.getItem('prayer_delete_tokens') || '{}');
+    const hasDeleteToken = viewingRequest.is_anonymous && deleteTokens[viewingRequest.id] === viewingRequest.delete_token;
+    const showDeleteButton = canDelete || hasDeleteToken;
     
     return (
       <div className="space-y-4">
@@ -136,7 +141,7 @@ export const PrayerRequestsGallery = () => {
                     : viewingRequest.author_name}
                 </CardTitle>
               </div>
-              {isOwner && (
+              {showDeleteButton && (
                 <AlertDialog>
                   <AlertDialogTrigger asChild>
                     <Button variant="destructive" size="sm" className="gap-2">
@@ -157,10 +162,16 @@ export const PrayerRequestsGallery = () => {
                       <AlertDialogCancel>
                         {t('cancel')}
                       </AlertDialogCancel>
-                      <AlertDialogAction onClick={() => {
+                       <AlertDialogAction onClick={() => {
                         handleDelete(viewingRequest.id);
+                        // Remove token from localStorage if it was an anonymous request
+                        if (viewingRequest.is_anonymous) {
+                          const tokens = JSON.parse(localStorage.getItem('prayer_delete_tokens') || '{}');
+                          delete tokens[viewingRequest.id];
+                          localStorage.setItem('prayer_delete_tokens', JSON.stringify(tokens));
+                        }
                         setViewingRequest(null);
-                      }}>
+                       }}>
                         {t('delete')}
                       </AlertDialogAction>
                     </AlertDialogFooter>

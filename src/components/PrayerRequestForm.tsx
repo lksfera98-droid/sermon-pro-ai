@@ -88,9 +88,12 @@ export const PrayerRequestForm = ({ onSuccess }: PrayerRequestFormProps) => {
       
       console.log('Current user:', user?.id);
 
+      // Generate delete token for anonymous requests
+      const deleteToken = isAnonymous ? crypto.randomUUID() : null;
+
       // Insert prayer request
       console.log('Inserting prayer request...');
-      const { error: insertError } = await supabase
+      const { data: newRequest, error: insertError } = await supabase
         .from('prayer_requests')
         .insert({
           language,
@@ -99,11 +102,21 @@ export const PrayerRequestForm = ({ onSuccess }: PrayerRequestFormProps) => {
           is_anonymous: isAnonymous,
           image_url: imageUrl,
           user_id: user?.id || null,
-        });
+          delete_token: deleteToken,
+        })
+        .select()
+        .single();
 
       if (insertError) {
         console.error('Insert error:', insertError);
         throw insertError;
+      }
+
+      // Store delete token locally for anonymous requests
+      if (isAnonymous && deleteToken && newRequest) {
+        const existingTokens = JSON.parse(localStorage.getItem('prayer_delete_tokens') || '{}');
+        existingTokens[newRequest.id] = deleteToken;
+        localStorage.setItem('prayer_delete_tokens', JSON.stringify(existingTokens));
       }
 
       console.log('Prayer request inserted successfully');

@@ -39,6 +39,7 @@ export type Database = {
         Row: {
           author_name: string | null
           created_at: string
+          delete_token: string | null
           id: string
           image_url: string | null
           is_anonymous: boolean
@@ -49,6 +50,7 @@ export type Database = {
         Insert: {
           author_name?: string | null
           created_at?: string
+          delete_token?: string | null
           id?: string
           image_url?: string | null
           is_anonymous?: boolean
@@ -59,6 +61,7 @@ export type Database = {
         Update: {
           author_name?: string | null
           created_at?: string
+          delete_token?: string | null
           id?: string
           image_url?: string | null
           is_anonymous?: boolean

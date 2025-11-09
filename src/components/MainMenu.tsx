@@ -14,7 +14,8 @@ import {
   Ear,
   BookHeart,
   Search,
-  RefreshCw
+  RefreshCw,
+  LogOut
 } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useState } from "react";
@@ -22,6 +23,8 @@ import { usePWAInstall } from "@/hooks/usePWAInstall";
 import { toast } from "sonner";
 import { useLanguage } from "@/contexts/LanguageContext";
 import preacherLogo from "@/assets/preacher-logo.png";
+import { supabase } from "@/integrations/supabase/client";
+import { useNavigate } from "react-router-dom";
 
 type View = "dashboard" | "new-sermon" | "translator" | "my-sermons" | "verse-search" | "public-gallery" | "prayer-requests" | "prayer-gallery" | "hear-god-speak" | "bible-study" | "daily-devotional";
 
@@ -35,6 +38,12 @@ export const MainMenu = ({ onNavigate }: MainMenuProps) => {
   const [isUpdating, setIsUpdating] = useState(false);
   const { isInstallable, installPWA } = usePWAInstall();
   const { language, setLanguage, t } = useLanguage();
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    navigate("/auth");
+  };
 
   const handleAndroidInstall = async () => {
     const installed = await installPWA();
@@ -190,6 +199,18 @@ export const MainMenu = ({ onNavigate }: MainMenuProps) => {
   return (
     <div className="min-h-screen w-full flex flex-col items-center justify-start pt-12 p-4 pb-32 md:pb-4 bg-background">
       <div className="w-full max-w-md space-y-6">
+        {/* Logout Button - Desktop Only */}
+        <div className="hidden md:flex justify-end mb-4">
+          <Button
+            onClick={handleLogout}
+            variant="outline"
+            className="gap-2 border-destructive/30 text-destructive hover:bg-destructive hover:text-destructive-foreground"
+          >
+            <LogOut className="h-4 w-4" />
+            {language === 'pt' ? 'Sair' : language === 'es' ? 'Salir' : 'Logout'}
+          </Button>
+        </div>
+        
         {/* Header with Logo and Language Selector */}
         <div className="text-center space-y-4">
           {/* Logo Image */}

@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/select";
 import type { Session, User } from '@supabase/supabase-js';
 import sermonLogo from "@/assets/sermon-logo.png";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -28,6 +29,7 @@ const Auth = () => {
   const [session, setSession] = useState<Session | null>(null);
   const [user, setUser] = useState<User | null>(null);
   const navigate = useNavigate();
+  const location = useLocation();
   const { t, language, setLanguage } = useLanguage();
 
   useEffect(() => {
@@ -69,6 +71,22 @@ const Auth = () => {
 
     return () => subscription.unsubscribe();
   }, [navigate]);
+
+  // Preselect signup via URL (?mode=signup, ?signup=1, ?signup, #signup)
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const hash = location.hash?.replace('#', '');
+    if (
+      params.get('mode') === 'signup' ||
+      params.get('signup') === '1' ||
+      params.has('signup') ||
+      hash === 'signup' ||
+      hash === 'cadastro' ||
+      hash === 'cadastrar'
+    ) {
+      setIsLogin(false);
+    }
+  }, [location]);
 
   const handleRememberMe = (checked: boolean) => {
     setRememberMe(checked);
@@ -160,7 +178,7 @@ const Auth = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary/5 via-background to-primary/10 flex items-center justify-center p-4">
-      <Card className="w-full max-w-md p-8 shadow-xl">
+      <Card className="w-full max-w-md p-8 shadow-xl max-h-[90svh] overflow-y-auto">
         <div className="text-center mb-8">
           <img src={sermonLogo} alt="Sermon Logo" className="w-32 h-32 mx-auto mb-4" />
           <h1 className="text-3xl font-bold text-primary mb-2">
@@ -172,6 +190,15 @@ const Auth = () => {
               : (language === 'pt' ? 'Crie sua conta' : language === 'en' ? 'Create your account' : 'Crea tu cuenta')
             }
           </p>
+        </div>
+
+        <div className="mb-6">
+          <Tabs value={isLogin ? 'login' : 'signup'} onValueChange={(v) => setIsLogin(v === 'login')}>
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="login">{language === 'pt' ? 'Entrar' : language === 'en' ? 'Sign In' : 'Iniciar Sesión'}</TabsTrigger>
+              <TabsTrigger value="signup">{language === 'pt' ? 'Cadastrar' : language === 'en' ? 'Sign Up' : 'Registrarse'}</TabsTrigger>
+            </TabsList>
+          </Tabs>
         </div>
 
         {/* Language Selector */}

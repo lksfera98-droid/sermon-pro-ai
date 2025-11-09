@@ -269,8 +269,10 @@ const Auth = () => {
           </Button>
         </form>
 
-        <div className="mt-6 text-center">
-          <button
+        <div className="mt-6 text-center space-y-3">
+          <Button
+            type="button"
+            variant="outline"
             onClick={() => {
               setIsLogin(!isLogin);
               if (!rememberMe) {
@@ -278,14 +280,14 @@ const Auth = () => {
                 setPassword("");
               }
             }}
-            className="text-sm text-foreground hover:underline font-bold"
+            className="w-full"
             disabled={isLoading}
           >
             {isLogin 
               ? (language === 'pt' ? 'Não tem uma conta? Cadastre-se' : language === 'en' ? "Don't have an account? Sign up" : '¿No tienes cuenta? Regístrate')
               : (language === 'pt' ? 'Já tem uma conta? Entre' : language === 'en' ? 'Already have an account? Sign in' : '¿Ya tienes cuenta? Inicia sesión')
             }
-          </button>
+          </Button>
         </div>
       </Card>
     </div>

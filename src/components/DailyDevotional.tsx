@@ -35,15 +35,39 @@ const DailyDevotional = () => {
   };
 
   const handleGenerate = async () => {
+    console.log('🔍 Gerando devocional diário...');
     setIsLoading(true);
     try {
       const { data, error } = await supabase.functions.invoke('generate-devotional', {
         body: { language }
       });
 
-      if (error) throw error;
+      console.log('📥 Resposta recebida:', { data, error });
+
+      if (error) {
+        console.error('❌ Erro da edge function:', error);
+        
+        if (error.message?.includes('429') || error.message?.includes('Rate limit')) {
+          throw new Error(language === "pt" 
+            ? "Você atingiu o limite de uso. Aguarde alguns minutos e tente novamente." 
+            : language === "en"
+            ? "Rate limit exceeded. Please wait a few minutes and try again."
+            : "Límite de uso alcanzado. Espere unos minutos e intente nuevamente.");
+        }
+        
+        if (error.message?.includes('402') || error.message?.includes('Payment')) {
+          throw new Error(language === "pt" 
+            ? "Créditos esgotados. Por favor, adicione créditos ao seu workspace Lovable." 
+            : language === "en"
+            ? "Credits exhausted. Please add credits to your Lovable workspace."
+            : "Créditos agotados. Por favor, agregue créditos a su workspace Lovable.");
+        }
+        
+        throw error;
+      }
 
       if (data?.content) {
+        console.log('✅ Devocional gerado com sucesso!');
         setDevotional(data.content);
         await loadSavedDevotionals();
         toast({
@@ -54,10 +78,10 @@ const DailyDevotional = () => {
         });
       }
     } catch (error: any) {
-      console.error('Error generating devotional:', error);
+      console.error('💥 Erro final:', error);
       toast({
         title: t('error'),
-        description: error.message,
+        description: error.message || (language === 'pt' ? 'Erro ao gerar devocional' : language === 'en' ? 'Error generating devotional' : 'Error al generar devocional'),
         variant: "destructive",
       });
     } finally {

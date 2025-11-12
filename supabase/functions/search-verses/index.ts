@@ -95,7 +95,7 @@ NO incluyas frases como "¡Por supuesto!" o "Aquí están X versículos" - ve di
 
     console.log('Pesquisando versículos para:', word, 'em', language);
 
-    const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
+    let response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${LOVABLE_API_KEY}`,
@@ -110,14 +110,47 @@ NO incluyas frases como "¡Por supuesto!" o "Aquí están X versículos" - ve di
       }),
     });
 
-    if (!response.ok) {
+    let verses = "";
+    
+    // Check if Lovable AI failed with 402 or 429 - use OpenAI fallback
+    if (!response.ok && (response.status === 402 || response.status === 429)) {
+      console.log(`Lovable AI returned ${response.status}, using OpenAI fallback...`);
+      
+      const OPENAI_API_KEY = Deno.env.get("OPENAI_API_KEY");
+      if (!OPENAI_API_KEY) {
+        throw new Error(response.status === 429 ? "Rate limits exceeded, please try again later." : "Payment required, please add funds to your Lovable AI workspace.");
+      }
+
+      const openaiResponse = await fetch("https://api.openai.com/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${OPENAI_API_KEY}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          model: "gpt-4o-mini",
+          messages: [
+            { role: 'system', content: systemMessage },
+            { role: 'user', content: prompt }
+          ],
+        }),
+      });
+
+      if (!openaiResponse.ok) {
+        throw new Error(`OpenAI fallback error: ${openaiResponse.status}`);
+      }
+
+      const openaiData = await openaiResponse.json();
+      verses = openaiData.choices[0].message.content;
+      console.log("Using OpenAI fallback response");
+    } else if (!response.ok) {
       const errorText = await response.text();
       console.error('Erro na API:', response.status, errorText);
       throw new Error(`Erro na API: ${response.status}`);
+    } else {
+      const data = await response.json();
+      verses = data.choices[0].message.content;
     }
-
-    const data = await response.json();
-    const verses = data.choices[0].message.content;
 
     console.log('Versículos encontrados com sucesso');
 

@@ -79,7 +79,7 @@ MENSAJE: [mensaje inspirador en español]`
 
     console.log("Generating AI message...");
 
-    const aiResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    let aiResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
       headers: {
         Authorization: `Bearer ${LOVABLE_API_KEY}`,
@@ -94,24 +94,48 @@ MENSAJE: [mensaje inspirador en español]`
       }),
     });
 
-    if (!aiResponse.ok) {
-      if (aiResponse.status === 429) {
-        return new Response(JSON.stringify({ error: "Rate limits exceeded, please try again later." }), {
-          status: 429,
+    let fullResponse = "";
+    
+    // Check if Lovable AI failed with 402 or 429 - use OpenAI fallback
+    if (!aiResponse.ok && (aiResponse.status === 402 || aiResponse.status === 429)) {
+      console.log(`Lovable AI returned ${aiResponse.status}, using OpenAI fallback...`);
+      
+      const OPENAI_API_KEY = Deno.env.get("OPENAI_API_KEY");
+      if (!OPENAI_API_KEY) {
+        return new Response(JSON.stringify({ error: aiResponse.status === 429 ? "Rate limits exceeded, please try again later." : "Payment required, please add funds to your Lovable AI workspace." }), {
+          status: aiResponse.status,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
-      if (aiResponse.status === 402) {
-        return new Response(JSON.stringify({ error: "Payment required, please add funds to your Lovable AI workspace." }), {
-          status: 402,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
-      throw new Error(`AI gateway error: ${aiResponse.status}`);
-    }
 
-    const aiData = await aiResponse.json();
-    const fullResponse = aiData.choices[0].message.content;
+      const openaiResponse = await fetch("https://api.openai.com/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${OPENAI_API_KEY}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          model: "gpt-4o-mini",
+          messages: [
+            { role: "system", content: "You are a spiritual guide providing comforting and faith-inspiring messages." },
+            { role: "user", content: prompt }
+          ],
+        }),
+      });
+
+      if (!openaiResponse.ok) {
+        throw new Error(`OpenAI fallback error: ${openaiResponse.status}`);
+      }
+
+      const openaiData = await openaiResponse.json();
+      fullResponse = openaiData.choices[0].message.content;
+      console.log("Using OpenAI fallback response");
+    } else if (!aiResponse.ok) {
+      throw new Error(`AI gateway error: ${aiResponse.status}`);
+    } else {
+      const aiData = await aiResponse.json();
+      fullResponse = aiData.choices[0].message.content;
+    }
 
     console.log("AI response generated successfully");
 

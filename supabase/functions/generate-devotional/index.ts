@@ -130,7 +130,7 @@ Sé cálido, alentador y relevante para la vida moderna.${previousVerses.length 
     console.log('Using system prompt for language:', language);
     console.log('Calling Lovable AI for devotional generation...');
     
-    const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
+    let response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${lovableApiKey}`,
@@ -146,26 +146,59 @@ Sé cálido, alentador y relevante para la vida moderna.${previousVerses.length 
       }),
     });
 
-    if (!response.ok) {
+    let devotionalContent = "";
+    
+    // Check if Lovable AI failed with 402 or 429 - use OpenAI fallback
+    if (!response.ok && (response.status === 402 || response.status === 429)) {
+      console.log(`Lovable AI returned ${response.status}, using OpenAI fallback...`);
+      
+      const OPENAI_API_KEY = Deno.env.get("OPENAI_API_KEY");
+      if (!OPENAI_API_KEY) {
+        throw new Error(response.status === 429 ? "Rate limits exceeded, please try again later." : "Payment required, please add funds to your Lovable AI workspace.");
+      }
+
+      const openaiResponse = await fetch("https://api.openai.com/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${OPENAI_API_KEY}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          model: "gpt-4o-mini",
+          messages: [
+            { role: 'system', content: systemPrompt },
+            { role: 'user', content: userPrompt }
+          ],
+        }),
+      });
+
+      if (!openaiResponse.ok) {
+        throw new Error(`OpenAI fallback error: ${openaiResponse.status}`);
+      }
+
+      const openaiData = await openaiResponse.json();
+      devotionalContent = openaiData.choices[0].message.content;
+      console.log("Using OpenAI fallback response");
+    } else if (!response.ok) {
       const errorText = await response.text();
       console.error('Lovable AI error:', response.status, errorText);
       throw new Error(`AI service error: ${response.status}`);
-    }
+    } else {
+      const rawText = await response.text();
+      console.log('Raw AI response:', rawText);
 
-    const rawText = await response.text();
-    console.log('Raw AI response:', rawText);
+      let data;
+      try {
+        data = JSON.parse(rawText);
+      } catch (parseError) {
+        console.error('JSON parse error:', parseError, 'Raw text:', rawText);
+        throw new Error('Failed to parse AI response');
+      }
 
-    let data;
-    try {
-      data = JSON.parse(rawText);
-    } catch (parseError) {
-      console.error('JSON parse error:', parseError, 'Raw text:', rawText);
-      throw new Error('Failed to parse AI response');
-    }
-
-    const devotionalContent = data.choices?.[0]?.message?.content;
-    if (!devotionalContent) {
-      throw new Error('No content in AI response');
+      devotionalContent = data.choices?.[0]?.message?.content;
+      if (!devotionalContent) {
+        throw new Error('No content in AI response');
+      }
     }
 
     // Save devotional to database

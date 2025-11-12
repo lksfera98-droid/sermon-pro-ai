@@ -18,19 +18,43 @@ export const HearGodSpeak = () => {
   } | null>(null);
 
   const handleHearGodSpeak = async () => {
+    console.log('🔍 Buscando mensagem de Deus...');
     setIsLoading(true);
     try {
       const { data, error } = await supabase.functions.invoke('hear-god-speak', {
         body: { language }
       });
 
-      if (error) throw error;
+      console.log('📥 Resposta recebida:', { data, error });
 
+      if (error) {
+        console.error('❌ Erro da edge function:', error);
+        
+        if (error.message?.includes('429') || error.message?.includes('Rate limit')) {
+          throw new Error(language === "pt" 
+            ? "Você atingiu o limite de uso. Aguarde alguns minutos e tente novamente." 
+            : language === "en"
+            ? "Rate limit exceeded. Please wait a few minutes and try again."
+            : "Límite de uso alcanzado. Espere unos minutos e intente nuevamente.");
+        }
+        
+        if (error.message?.includes('402') || error.message?.includes('Payment')) {
+          throw new Error(language === "pt" 
+            ? "Créditos esgotados. Por favor, adicione créditos ao seu workspace Lovable." 
+            : language === "en"
+            ? "Credits exhausted. Please add credits to your Lovable workspace."
+            : "Créditos agotados. Por favor, agregue créditos a su workspace Lovable.");
+        }
+        
+        throw error;
+      }
+
+      console.log('✅ Mensagem recebida com sucesso!');
       setResult(data);
       setShowDialog(true);
-    } catch (error) {
-      console.error("Error:", error);
-      toast.error(t('error'));
+    } catch (error: any) {
+      console.error('💥 Erro final:', error);
+      toast.error(error.message || t('error'));
     } finally {
       setIsLoading(false);
     }

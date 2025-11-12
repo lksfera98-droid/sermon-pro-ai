@@ -91,7 +91,7 @@ Sé profundo, claro y espiritual. Usa lenguaje accesible pero teológicamente pr
 
     console.log("Generating Bible study with AI...");
 
-    const aiResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    let aiResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
       headers: {
         Authorization: `Bearer ${LOVABLE_API_KEY}`,
@@ -107,30 +107,53 @@ Sé profundo, claro y espiritual. Usa lenguaje accesible pero teológicamente pr
       }),
     });
 
-    if (!aiResponse.ok) {
-      if (aiResponse.status === 429) {
-        return new Response(JSON.stringify({ error: "Rate limits exceeded, please try again later." }), {
-          status: 429,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
-      if (aiResponse.status === 402) {
-        return new Response(JSON.stringify({ error: "Payment required, please add funds to your Lovable AI workspace." }), {
-          status: 402,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
-      throw new Error(`AI gateway error: ${aiResponse.status}`);
-    }
-
-    const raw = await aiResponse.text();
     let study = "";
-    try {
-      const aiData = JSON.parse(raw);
-      study = aiData.choices?.[0]?.message?.content ?? "";
-    } catch (e) {
-      console.error("Failed to parse AI JSON. Raw response:", raw);
-      throw new Error("AI gateway returned invalid JSON");
+    
+    // Check if Lovable AI failed with 402 or 429 - use OpenAI fallback
+    if (!aiResponse.ok && (aiResponse.status === 402 || aiResponse.status === 429)) {
+      console.log(`Lovable AI returned ${aiResponse.status}, using OpenAI fallback...`);
+      
+      const OPENAI_API_KEY = Deno.env.get("OPENAI_API_KEY");
+      if (!OPENAI_API_KEY) {
+        return new Response(JSON.stringify({ error: aiResponse.status === 429 ? "Rate limits exceeded, please try again later." : "Payment required, please add funds to your Lovable AI workspace." }), {
+          status: aiResponse.status,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      const openaiResponse = await fetch("https://api.openai.com/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${OPENAI_API_KEY}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          model: "gpt-4o-mini",
+          messages: [
+            { role: "system", content: "You are a biblical scholar and theologian providing deep, comprehensive Bible studies. Your studies should be thorough, theologically sound, and spiritually enriching." },
+            { role: "user", content: prompt }
+          ],
+        }),
+      });
+
+      if (!openaiResponse.ok) {
+        throw new Error(`OpenAI fallback error: ${openaiResponse.status}`);
+      }
+
+      const openaiData = await openaiResponse.json();
+      study = openaiData.choices[0].message.content;
+      console.log("Using OpenAI fallback response");
+    } else if (!aiResponse.ok) {
+      throw new Error(`AI gateway error: ${aiResponse.status}`);
+    } else {
+      const raw = await aiResponse.text();
+      try {
+        const aiData = JSON.parse(raw);
+        study = aiData.choices?.[0]?.message?.content ?? "";
+      } catch (e) {
+        console.error("Failed to parse AI JSON. Raw response:", raw);
+        throw new Error("AI gateway returned invalid JSON");
+      }
     }
 
     console.log("Bible study generated successfully");

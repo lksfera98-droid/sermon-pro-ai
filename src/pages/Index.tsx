@@ -33,39 +33,57 @@ const Index = () => {
   const [viewingSermon, setViewingSermon] = useState<{title: string; content: string} | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [user, setUser] = useState<User | null>(null);
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
   const { t, language } = useLanguage();
   const navigate = useNavigate();
 
   // Auth state and session management
   // Check authentication
   useEffect(() => {
-    // Set up auth state listener FIRST
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
-        console.log('Auth event:', event, 'Session:', session ? 'Active' : 'None');
+    let mounted = true;
+    
+    const initAuth = async () => {
+      console.log('🔐 Verificando autenticação...');
+      setIsCheckingAuth(true);
+      
+      // PRIMEIRO: Verificar sessão existente
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (mounted) {
+        console.log('📋 Sessão:', session ? 'Ativa' : 'Nenhuma');
         setSession(session);
         setUser(session?.user ?? null);
         
-        // Only redirect to auth if explicitly signed out
-        if (event === 'SIGNED_OUT') {
+        if (!session) {
+          console.log('➡️ Redirecionando para /auth');
           navigate("/auth");
+        }
+        
+        setIsCheckingAuth(false);
+      }
+    };
+    
+    // SEGUNDO: Configurar listener de mudanças
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        if (mounted) {
+          console.log('🔄 Auth event:', event);
+          setSession(session);
+          setUser(session?.user ?? null);
+          
+          if (event === 'SIGNED_OUT') {
+            navigate("/auth");
+          }
         }
       }
     );
-
-    // THEN check for existing session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      console.log('Initial session check:', session ? 'User logged in' : 'No session');
-      setSession(session);
-      setUser(session?.user ?? null);
-      
-      if (!session) {
-        navigate("/auth");
-      }
-    });
-
-    // Cleanup subscription
-    return () => subscription?.unsubscribe();
+    
+    initAuth();
+    
+    return () => {
+      mounted = false;
+      subscription?.unsubscribe();
+    };
   }, [navigate]);
 
   // Load saved sermons from localStorage
@@ -191,6 +209,20 @@ const Index = () => {
       setIsLoading(false);
     }
   };
+
+  // Loading state durante verificação de autenticação
+  if (isCheckingAuth) {
+    return (
+      <div className="h-screen flex items-center justify-center bg-background">
+        <div className="text-center space-y-4">
+          <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-primary mx-auto"></div>
+          <p className="text-lg text-muted-foreground">
+            {language === 'pt' ? 'Carregando...' : language === 'en' ? 'Loading...' : 'Cargando...'}
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="h-[100svh] bg-background overflow-hidden">

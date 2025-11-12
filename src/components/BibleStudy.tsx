@@ -20,6 +20,8 @@ export const BibleStudy = () => {
   const { language, t } = useLanguage();
 
   const handleGenerateStudy = async () => {
+    console.log('🔍 Iniciando geração de estudo bíblico para:', verseReference);
+    
     if (!verseReference.trim()) {
       toast.error(language === "pt" ? "Por favor, digite um versículo" : language === "en" ? "Please enter a verse" : "Por favor, ingrese un versículo");
       return;
@@ -29,20 +31,47 @@ export const BibleStudy = () => {
     setStudy(null);
 
     try {
+      console.log('📡 Chamando edge function bible-study...');
+      
       const { data, error } = await supabase.functions.invoke('bible-study', {
         body: { verseReference: verseReference.trim(), language }
       });
 
-      if (error) throw error;
+      console.log('📥 Resposta recebida:', { data, error });
+
+      // Tratamento específico de erros de rate limit e créditos
+      if (error) {
+        console.error('❌ Erro da edge function:', error);
+        
+        if (error.message?.includes('429') || error.message?.includes('Rate limit')) {
+          throw new Error(language === "pt" 
+            ? "Você atingiu o limite de uso. Aguarde alguns minutos e tente novamente." 
+            : language === "en"
+            ? "Rate limit exceeded. Please wait a few minutes and try again."
+            : "Límite de uso alcanzado. Espere unos minutos e intente nuevamente.");
+        }
+        
+        if (error.message?.includes('402') || error.message?.includes('Payment')) {
+          throw new Error(language === "pt" 
+            ? "Créditos esgotados. Por favor, adicione créditos ao seu workspace Lovable." 
+            : language === "en"
+            ? "Credits exhausted. Please add credits to your Lovable workspace."
+            : "Créditos agotados. Por favor, agregue créditos a su workspace Lovable.");
+        }
+        
+        throw error;
+      }
 
       if (!data || data.error) {
+        console.error('❌ Erro nos dados:', data?.error);
         throw new Error(data?.error || (language === "pt" ? "Versículo não encontrado" : language === "en" ? "Verse not found" : "Versículo no encontrado"));
       }
 
+      console.log('✅ Estudo gerado com sucesso!');
       setStudy(data);
       toast.success(language === "pt" ? "Estudo gerado!" : language === "en" ? "Study generated!" : "¡Estudio generado!");
     } catch (error: any) {
-      console.error('Error generating Bible study:', error);
+      console.error('💥 Erro final:', error);
       toast.error(error.message || (language === "pt" ? "Erro ao gerar estudo" : language === "en" ? "Error generating study" : "Error al generar estudio"));
     } finally {
       setIsLoading(false);

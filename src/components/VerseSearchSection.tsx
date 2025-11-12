@@ -99,6 +99,8 @@ export const VerseSearchSection = () => {
   };
 
   const handleSearch = async () => {
+    console.log('🔍 Buscando versículos para:', word);
+    
     if (!word.trim()) {
       toast.error(language === 'pt' ? 'Digite uma palavra' : language === 'en' ? 'Enter a word' : 'Escribe una palabra');
       return;
@@ -110,23 +112,49 @@ export const VerseSearchSection = () => {
     setOpenVerses(new Set());
 
     try {
+      console.log('📡 Chamando edge function search-verses...');
+      
       const { data, error } = await supabase.functions.invoke('search-verses', {
         body: { word: word.trim(), language }
       });
 
-      if (error) throw error;
+      console.log('📥 Resposta recebida:', { data, error });
+
+      if (error) {
+        console.error('❌ Erro:', error);
+        
+        if (error.message?.includes('429') || error.message?.includes('Rate limit')) {
+          throw new Error(language === 'pt' 
+            ? 'Limite de uso atingido. Aguarde alguns minutos.' 
+            : language === 'en'
+            ? 'Rate limit exceeded. Please wait.'
+            : 'Límite de uso alcanzado. Espere unos minutos.');
+        }
+        
+        if (error.message?.includes('402') || error.message?.includes('Payment')) {
+          throw new Error(language === 'pt' 
+            ? 'Créditos esgotados. Adicione créditos ao workspace.' 
+            : language === 'en'
+            ? 'Credits exhausted. Please add credits.'
+            : 'Créditos agotados. Agregue créditos.');
+        }
+        
+        throw error;
+      }
 
       if (data.error) {
         throw new Error(data.error);
       }
 
       const { verses: parsedVerses, intro } = parseVerses(data.verses);
+      console.log('✅ Versículos encontrados:', parsedVerses.length);
+      
       setVerses(parsedVerses);
       setIntroText(intro);
       toast.success(t('search') + "!");
-    } catch (error) {
-      console.error('Erro ao pesquisar versículos:', error);
-      toast.error("Erro ao pesquisar versículos. Tente novamente.");
+    } catch (error: any) {
+      console.error('💥 Erro ao pesquisar:', error);
+      toast.error(error.message || (language === 'pt' ? "Erro ao pesquisar versículos. Tente novamente." : language === 'en' ? "Error searching verses. Try again." : "Error al buscar versículos. Inténtelo de nuevo."));
     } finally {
       setIsLoading(false);
     }

@@ -31,14 +31,32 @@ serve(async (req) => {
     );
 
     const token = authHeader.replace(/^Bearer\s+/i, '');
+    console.log('🔐 Verificando autenticação...');
+    console.log('Token recebido:', token ? 'Presente (primeiros 20 chars): ' + token.substring(0, 20) + '...' : 'AUSENTE');
+    
     const { data: { user }, error: userError } = await supabaseClient.auth.getUser(token);
+    
+    if (userError) {
+      console.error('❌ Erro ao verificar usuário:', userError);
+      console.error('Detalhes do erro:', JSON.stringify(userError, null, 2));
+    }
+    
+    if (!user) {
+      console.error('❌ Usuário não encontrado apesar de token válido');
+    }
+    
     if (userError || !user) {
       console.error('Auth error:', userError);
-      return new Response(JSON.stringify({ error: 'User not authenticated' }), {
+      return new Response(JSON.stringify({ 
+        error: 'User not authenticated',
+        details: userError?.message || 'No user found'
+      }), {
         status: 401,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
+    
+    console.log('✅ Usuário autenticado:', user.id);
 
     const { language = 'pt' } = await req.json();
 

@@ -35,8 +35,40 @@ const DailyDevotional = () => {
   };
 
   const handleGenerate = async () => {
-    console.log('🔍 Gerando devocional diário...');
+    console.log('🔍 Verificando sessão antes de gerar devocional...');
+    
+    // Verificar sessão antes de fazer a chamada
+    const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+    
+    if (sessionError || !session) {
+      console.error('❌ Sessão inválida:', sessionError);
+      
+      // Tentar refresh da sessão
+      const { data: { session: refreshedSession }, error: refreshError } = await supabase.auth.refreshSession();
+      
+      if (refreshError || !refreshedSession) {
+        console.error('❌ Falha ao renovar sessão:', refreshError);
+        toast({
+          title: t('error'),
+          description: language === 'pt' 
+            ? 'Sua sessão expirou. Por favor, faça login novamente.' 
+            : language === 'en'
+            ? 'Your session has expired. Please login again.'
+            : 'Su sesión ha expirado. Por favor, inicie sesión nuevamente.',
+          variant: "destructive",
+        });
+        setTimeout(() => {
+          window.location.href = '/auth';
+        }, 2000);
+        return;
+      }
+      
+      console.log('✅ Sessão renovada com sucesso');
+    }
+    
+    console.log('✅ Sessão válida, prosseguindo com geração...');
     setIsLoading(true);
+    
     try {
       const { data, error } = await supabase.functions.invoke('generate-devotional', {
         body: { language }
@@ -46,6 +78,23 @@ const DailyDevotional = () => {
 
       if (error) {
         console.error('❌ Erro da edge function:', error);
+        
+        // Tratamento específico para 401 (não autenticado)
+        if (error.message?.includes('401') || error.message?.includes('not authenticated')) {
+          toast({
+            title: t('error'),
+            description: language === "pt" 
+              ? "Sessão expirada. Redirecionando para login..." 
+              : language === "en"
+              ? "Session expired. Redirecting to login..."
+              : "Sesión expirada. Redirigiendo al inicio de sesión...",
+            variant: "destructive",
+          });
+          setTimeout(() => {
+            window.location.href = '/auth';
+          }, 2000);
+          return;
+        }
         
         if (error.message?.includes('429') || error.message?.includes('Rate limit')) {
           throw new Error(language === "pt" 

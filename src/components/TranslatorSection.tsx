@@ -25,6 +25,38 @@ export const TranslatorSection = () => {
     e?.preventDefault();
     if (!word.trim()) return;
 
+    console.log('🔍 Verificando sessão antes de traduzir palavra...');
+    
+    // Verificar sessão antes de fazer a chamada
+    const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+    
+    if (sessionError || !session) {
+      console.error('❌ Sessão inválida:', sessionError);
+      
+      // Tentar refresh da sessão
+      const { data: { session: refreshedSession }, error: refreshError } = await supabase.auth.refreshSession();
+      
+      if (refreshError || !refreshedSession) {
+        console.error('❌ Falha ao renovar sessão:', refreshError);
+        toast.error(
+          language === 'pt' 
+            ? 'Sua sessão expirou. Por favor, faça login novamente.' 
+            : language === 'en'
+            ? 'Your session has expired. Please login again.'
+            : 'Su sesión ha expirado. Por favor, inicie sesión nuevamente.'
+        );
+        setTimeout(() => {
+          window.location.href = '/auth';
+        }, 2000);
+        return;
+      }
+      
+      console.log('✅ Sessão renovada com sucesso');
+    }
+    
+    console.log('✅ Sessão válida, prosseguindo com tradução...');
+    console.log('📝 Palavra a traduzir:', word.trim());
+    
     setIsLoading(true);
     setTranslation(null);
 
@@ -36,16 +68,63 @@ export const TranslatorSection = () => {
         }
       });
 
-      if (error) throw error;
+      if (error) {
+        console.error('❌ Erro da edge function:', error);
+        
+        // Tratamento específico para 401
+        if (error.message?.includes('401') || error.message?.includes('not authenticated')) {
+          toast.error(
+            language === "pt" 
+              ? "Sessão expirada. Redirecionando para login..." 
+              : language === "en"
+              ? "Session expired. Redirecting to login..."
+              : "Sesión expirada. Redirigiendo al inicio de sesión..."
+          );
+          setTimeout(() => {
+            window.location.href = '/auth';
+          }, 2000);
+          return;
+        }
+        
+        // Tratamento para rate limit (429)
+        if (error.message?.includes('429') || error.message?.includes('Rate limit')) {
+          toast.error(
+            language === "pt"
+              ? "Limite de uso excedido. Por favor, tente novamente mais tarde."
+              : language === "en"
+              ? "Rate limit exceeded. Please try again later."
+              : "Límite de uso excedido. Por favor, inténtelo de nuevo más tarde."
+          );
+          setIsLoading(false);
+          return;
+        }
+        
+        // Tratamento para créditos esgotados (402)
+        if (error.message?.includes('402') || error.message?.includes('Payment required')) {
+          toast.error(
+            language === "pt"
+              ? "Créditos esgotados. Por favor, adicione créditos ao seu workspace."
+              : language === "en"
+              ? "Credits exhausted. Please add credits to your workspace."
+              : "Créditos agotados. Por favor, agregue créditos a su workspace."
+          );
+          setIsLoading(false);
+          return;
+        }
+        
+        throw error;
+      }
 
       if (data.error) {
+        console.error('❌ Erro retornado pela edge function:', data.error);
         throw new Error(data.error);
       }
 
+      console.log('✅ Tradução recebida com sucesso');
       setTranslation(data);
       toast.success(language === 'pt' ? "Tradução concluída!" : language === 'en' ? "Translation completed!" : "¡Traducción completada!");
     } catch (error) {
-      console.error('Erro ao traduzir palavra:', error);
+      console.error('❌ Erro ao traduzir palavra:', error);
       toast.error(language === 'pt' ? "Erro ao traduzir" : language === 'en' ? "Translation error" : "Error al traducir");
     } finally {
       setIsLoading(false);

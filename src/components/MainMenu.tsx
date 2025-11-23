@@ -140,6 +140,13 @@ export const MainMenu = ({ onNavigate }: MainMenuProps) => {
       iconColor: "text-indigo-600 dark:text-indigo-400"
     },
     { 
+      id: "translator" as View, 
+      label: language === 'pt' ? 'Significado de Nomes Bíblicos' : language === 'es' ? 'Significado de Nombres Bíblicos' : 'Biblical Names Meaning', 
+      icon: Languages,
+      color: "bg-orange-100 dark:bg-orange-900/30",
+      iconColor: "text-orange-600 dark:text-orange-400"
+    },
+    { 
       id: "new-sermon" as View, 
       label: language === 'pt' ? 'Crie seu novo sermão' : language === 'es' ? 'Crea tu nuevo sermón' : 'Create your new sermon', 
       icon: FileText,
@@ -166,13 +173,6 @@ export const MainMenu = ({ onNavigate }: MainMenuProps) => {
       icon: Search,
       color: "bg-purple-100 dark:bg-purple-900/30",
       iconColor: "text-purple-600 dark:text-purple-400"
-    },
-    { 
-      id: "translator" as View, 
-      label: language === 'pt' ? 'Tradutor Bíblico' : language === 'es' ? 'Traductor Bíblico' : 'Biblical Translator', 
-      icon: Languages,
-      color: "bg-orange-100 dark:bg-orange-900/30",
-      iconColor: "text-orange-600 dark:text-orange-400"
     },
     { 
       id: "prayer-requests" as View, 

@@ -11,6 +11,17 @@ interface Translations {
 }
 
 const translations: Translations = {
+  // Navigation
+  backToList: {
+    pt: 'Voltar para a Lista',
+    en: 'Back to List',
+    es: 'Volver a la Lista'
+  },
+  clickToView: {
+    pt: 'Clique para ver',
+    en: 'Click to view',
+    es: 'Clic para ver'
+  },
   // Welcome
   welcome: {
     pt: 'O App que foi criado para te aproximar de Deus',

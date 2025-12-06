@@ -254,7 +254,7 @@ export const MainMenu = ({ onNavigate }: MainMenuProps) => {
             return (
               <Card
                 key={item.id}
-                className="p-4 cursor-pointer hover:shadow-lg transition-all hover:scale-[1.02] border-2 hover:border-primary"
+                className="p-4 cursor-pointer hover:shadow-lg transition-all border-2 hover:border-primary"
                 onClick={() => onNavigate(item.id)}
               >
                 <div className="flex items-center gap-4">

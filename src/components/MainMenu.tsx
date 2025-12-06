@@ -119,6 +119,20 @@ export const MainMenu = ({ onNavigate }: MainMenuProps) => {
 
   const menuItems = [
     { 
+      id: "prayer-requests" as View, 
+      label: language === 'pt' ? 'Fazer um Pedido de Oração' : language === 'es' ? 'Hacer una Petición de Oración' : 'Make a Prayer Request', 
+      icon: Heart,
+      color: "bg-red-100 dark:bg-red-900/30",
+      iconColor: "text-red-600 dark:text-red-400"
+    },
+    { 
+      id: "prayer-gallery" as View, 
+      label: language === 'pt' ? 'Pedidos de Oração Feitos' : language === 'es' ? 'Peticiones de Oración Hechas' : 'Prayer Requests Made', 
+      icon: Globe,
+      color: "bg-pink-100 dark:bg-pink-900/30",
+      iconColor: "text-pink-600 dark:text-pink-400"
+    },
+    { 
       id: "hear-god-speak" as View, 
       label: language === 'pt' ? 'Ouvir Deus Falar Comigo' : language === 'es' ? 'Escuchar a Dios Hablarme' : 'Hear God Speak to Me', 
       icon: Ear,
@@ -173,20 +187,6 @@ export const MainMenu = ({ onNavigate }: MainMenuProps) => {
       icon: Search,
       color: "bg-purple-100 dark:bg-purple-900/30",
       iconColor: "text-purple-600 dark:text-purple-400"
-    },
-    { 
-      id: "prayer-requests" as View, 
-      label: language === 'pt' ? 'Fazer um Pedido de Oração' : language === 'es' ? 'Hacer una Petición de Oración' : 'Make a Prayer Request', 
-      icon: Heart,
-      color: "bg-red-100 dark:bg-red-900/30",
-      iconColor: "text-red-600 dark:text-red-400"
-    },
-    { 
-      id: "prayer-gallery" as View, 
-      label: language === 'pt' ? 'Pedidos de Oração Feitos' : language === 'es' ? 'Peticiones de Oración Hechas' : 'Prayer Requests Made', 
-      icon: Globe,
-      color: "bg-pink-100 dark:bg-pink-900/30",
-      iconColor: "text-pink-600 dark:text-pink-400"
     }
   ];
 

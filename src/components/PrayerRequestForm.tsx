@@ -8,7 +8,7 @@ import { Label } from "./ui/label";
 import { Switch } from "./ui/switch";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card";
 import { toast } from "@/hooks/use-toast";
-import { Loader2, Upload } from "lucide-react";
+import { Loader2, Upload, Camera, X, Check } from "lucide-react";
 
 interface PrayerRequestFormProps {
   onSuccess?: () => void;
@@ -198,30 +198,66 @@ export const PrayerRequestForm = ({ onSuccess }: PrayerRequestFormProps) => {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="image">
-              {t('image')} ({t('optional')})
-            </Label>
-            <div className="flex items-center gap-2">
-              <Input
-                id="image"
-                type="file"
-                accept="image/*"
-                onChange={handleImageChange}
-                disabled={isSubmitting}
-                className="cursor-pointer"
-              />
-              {image && (
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setImage(null)}
+            <Label>{t('image')} ({t('optional')})</Label>
+            
+            {!image ? (
+              <label 
+                htmlFor="image" 
+                className="flex flex-col items-center justify-center w-full p-6 border-2 border-dashed border-muted-foreground/30 rounded-lg cursor-pointer hover:border-primary/50 hover:bg-muted/30 transition-all"
+              >
+                <div className="flex flex-col items-center gap-3 text-center">
+                  <div className="p-3 rounded-full bg-primary/10">
+                    <Camera className="h-8 w-8 text-primary" />
+                  </div>
+                  <div>
+                    <p className="font-medium text-foreground">
+                      {t('tapToAddPhoto')}
+                    </p>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      {t('selectFromGallery')}
+                    </p>
+                  </div>
+                  <p className="text-xs text-muted-foreground/70 max-w-[250px]">
+                    {t('photoWillBeVisible')}
+                  </p>
+                </div>
+                <Input
+                  id="image"
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageChange}
                   disabled={isSubmitting}
-                >
-                  {t('remove')}
-                </Button>
-              )}
-            </div>
+                  className="hidden"
+                />
+              </label>
+            ) : (
+              <div className="relative border rounded-lg overflow-hidden bg-muted/20">
+                <img 
+                  src={URL.createObjectURL(image)} 
+                  alt="Preview" 
+                  className="w-full h-48 object-cover"
+                />
+                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-3">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2 text-white">
+                      <Check className="h-4 w-4" />
+                      <span className="text-sm font-medium">{t('photoSelected')}</span>
+                    </div>
+                    <Button
+                      type="button"
+                      variant="destructive"
+                      size="sm"
+                      onClick={() => setImage(null)}
+                      disabled={isSubmitting}
+                      className="h-8"
+                    >
+                      <X className="h-4 w-4 mr-1" />
+                      {t('removePhoto')}
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
 
           <Button type="submit" className="w-full" disabled={isSubmitting}>

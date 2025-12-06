@@ -461,6 +461,32 @@ const translations: Translations = {
     pt: 'Entenda a verdade completa sobre qualquer versículo',
     en: 'Understand the complete truth about any verse',
     es: 'Comprende la verdad completa sobre cualquier versículo'
+  },
+  // Image Upload
+  tapToAddPhoto: {
+    pt: 'Toque aqui para adicionar uma foto',
+    en: 'Tap here to add a photo',
+    es: 'Toca aquí para añadir una foto'
+  },
+  selectFromGallery: {
+    pt: 'Selecione da galeria do seu celular',
+    en: 'Select from your phone gallery',
+    es: 'Selecciona de la galería de tu celular'
+  },
+  photoWillBeVisible: {
+    pt: 'A foto será visível para todos que orarem por você',
+    en: 'The photo will be visible to everyone who prays for you',
+    es: 'La foto será visible para todos los que oren por ti'
+  },
+  photoSelected: {
+    pt: 'Foto selecionada',
+    en: 'Photo selected',
+    es: 'Foto seleccionada'
+  },
+  removePhoto: {
+    pt: 'Remover foto',
+    en: 'Remove photo',
+    es: 'Eliminar foto'
   }
 };
 

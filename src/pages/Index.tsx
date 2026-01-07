@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { MainMenu } from "@/components/MainMenu";
 import { SermonForm } from "@/components/SermonForm";
 import { SermonDisplay } from "@/components/SermonDisplay";
@@ -30,6 +30,7 @@ const Index = () => {
   const [recentSermons, setRecentSermons] = useState<Array<{ title: string; date: string; content: string }>>([]);
   const [viewingSermon, setViewingSermon] = useState<{title: string; content: string} | null>(null);
   const { t } = useLanguage();
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   // Load saved sermons from localStorage
   useEffect(() => {
@@ -150,7 +151,7 @@ const Index = () => {
       {isLoading && <LoadingProgress />}
       
       <div className="h-[100svh] flex flex-col">
-        <div className="flex-1 overflow-y-auto overscroll-contain pb-[88px] md:pb-0" style={{ WebkitOverflowScrolling: 'touch' }}>
+        <div ref={scrollContainerRef} className="flex-1 overflow-y-auto overscroll-contain pb-[88px] md:pb-0" style={{ WebkitOverflowScrolling: 'touch' }}>
           {currentView === 'dashboard' && <MainMenu onNavigate={setCurrentView} />}
           
           {currentView === 'new-sermon' && (
@@ -402,7 +403,10 @@ const Index = () => {
             <Button
               variant={currentView === 'dashboard' ? 'default' : 'outline'}
               size="lg"
-              onClick={() => setCurrentView('dashboard')}
+              onClick={() => {
+                setCurrentView('dashboard');
+                scrollContainerRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
+              }}
               className="flex flex-col gap-1.5 h-auto py-1.5 rounded-none touch-manipulation px-12"
             >
               <Home className="h-5 w-5" />

@@ -25,36 +25,6 @@ export const TranslatorSection = () => {
     e?.preventDefault();
     if (!word.trim()) return;
 
-    console.log('🔍 Verificando sessão antes de traduzir palavra...');
-    
-    // Verificar sessão antes de fazer a chamada
-    const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-    
-    if (sessionError || !session) {
-      console.error('❌ Sessão inválida:', sessionError);
-      
-      // Tentar refresh da sessão
-      const { data: { session: refreshedSession }, error: refreshError } = await supabase.auth.refreshSession();
-      
-      if (refreshError || !refreshedSession) {
-        console.error('❌ Falha ao renovar sessão:', refreshError);
-        toast.error(
-          language === 'pt' 
-            ? 'Sua sessão expirou. Por favor, faça login novamente.' 
-            : language === 'en'
-            ? 'Your session has expired. Please login again.'
-            : 'Su sesión ha expirado. Por favor, inicie sesión nuevamente.'
-        );
-        setTimeout(() => {
-          window.location.href = '/auth';
-        }, 2000);
-        return;
-      }
-      
-      console.log('✅ Sessão renovada com sucesso');
-    }
-    
-    console.log('✅ Sessão válida, prosseguindo com tradução...');
     console.log('📝 Palavra a traduzir:', word.trim());
     
     setIsLoading(true);
@@ -71,22 +41,6 @@ export const TranslatorSection = () => {
       if (error) {
         console.error('❌ Erro da edge function:', error);
         
-        // Tratamento específico para 401
-        if (error.message?.includes('401') || error.message?.includes('not authenticated')) {
-          toast.error(
-            language === "pt" 
-              ? "Sessão expirada. Redirecionando para login..." 
-              : language === "en"
-              ? "Session expired. Redirecting to login..."
-              : "Sesión expirada. Redirigiendo al inicio de sesión..."
-          );
-          setTimeout(() => {
-            window.location.href = '/auth';
-          }, 2000);
-          return;
-        }
-        
-        // Tratamento para rate limit (429)
         if (error.message?.includes('429') || error.message?.includes('Rate limit')) {
           toast.error(
             language === "pt"
@@ -99,7 +53,6 @@ export const TranslatorSection = () => {
           return;
         }
         
-        // Tratamento para créditos esgotados (402)
         if (error.message?.includes('402') || error.message?.includes('Payment required')) {
           toast.error(
             language === "pt"

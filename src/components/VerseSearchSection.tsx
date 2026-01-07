@@ -99,31 +99,9 @@ export const VerseSearchSection = () => {
   };
 
   const handleSearch = async () => {
-    console.log('🔍 Verificando sessão...');
-    
     if (!word.trim()) {
       toast.error(language === 'pt' ? 'Digite uma palavra' : language === 'en' ? 'Enter a word' : 'Escribe una palabra');
       return;
-    }
-
-    const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-    
-    if (sessionError || !session) {
-      console.error('❌ Sessão inválida:', sessionError);
-      
-      const { data: { session: refreshedSession }, error: refreshError } = await supabase.auth.refreshSession();
-      
-      if (refreshError || !refreshedSession) {
-        toast.error(language === 'pt' 
-          ? 'Sessão expirada. Faça login novamente.' 
-          : language === 'en'
-          ? 'Session expired. Please login again.'
-          : 'Sesión expirada. Inicie sesión nuevamente.');
-        setTimeout(() => {
-          window.location.href = '/auth';
-        }, 2000);
-        return;
-      }
     }
 
     console.log('🔍 Buscando versículos para:', word);
@@ -143,18 +121,6 @@ export const VerseSearchSection = () => {
 
       if (error) {
         console.error('❌ Erro:', error);
-        
-        if (error.message?.includes('401') || error.message?.includes('not authenticated')) {
-          toast.error(language === 'pt' 
-            ? 'Sessão expirada. Redirecionando...' 
-            : language === 'en'
-            ? 'Session expired. Redirecting...'
-            : 'Sesión expirada. Redirigiendo...');
-          setTimeout(() => {
-            window.location.href = '/auth';
-          }, 2000);
-          return;
-        }
         
         if (error.message?.includes('429') || error.message?.includes('Rate limit')) {
           throw new Error(language === 'pt' 

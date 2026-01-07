@@ -20,35 +20,9 @@ export const BibleStudy = () => {
   const { language, t } = useLanguage();
 
   const handleGenerateStudy = async () => {
-    console.log('🔍 Verificando sessão antes de gerar estudo bíblico...');
-    
     if (!verseReference.trim()) {
       toast.error(language === "pt" ? "Por favor, digite um versículo" : language === "en" ? "Please enter a verse" : "Por favor, ingrese un versículo");
       return;
-    }
-
-    // Verificar sessão antes de fazer a chamada
-    const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-    
-    if (sessionError || !session) {
-      console.error('❌ Sessão inválida:', sessionError);
-      
-      const { data: { session: refreshedSession }, error: refreshError } = await supabase.auth.refreshSession();
-      
-      if (refreshError || !refreshedSession) {
-        console.error('❌ Falha ao renovar sessão:', refreshError);
-        toast.error(language === 'pt' 
-          ? 'Sua sessão expirou. Faça login novamente.' 
-          : language === 'en'
-          ? 'Your session expired. Please login again.'
-          : 'Su sesión expiró. Inicie sesión nuevamente.');
-        setTimeout(() => {
-          window.location.href = '/auth';
-        }, 2000);
-        return;
-      }
-      
-      console.log('✅ Sessão renovada');
     }
 
     setIsLoading(true);
@@ -65,18 +39,6 @@ export const BibleStudy = () => {
 
       if (error) {
         console.error('❌ Erro da edge function:', error);
-        
-        if (error.message?.includes('401') || error.message?.includes('not authenticated')) {
-          toast.error(language === "pt" 
-            ? "Sessão expirada. Redirecionando..." 
-            : language === "en"
-            ? "Session expired. Redirecting..."
-            : "Sesión expirada. Redirigiendo...");
-          setTimeout(() => {
-            window.location.href = '/auth';
-          }, 2000);
-          return;
-        }
         
         if (error.message?.includes('429') || error.message?.includes('Rate limit')) {
           throw new Error(language === "pt" 

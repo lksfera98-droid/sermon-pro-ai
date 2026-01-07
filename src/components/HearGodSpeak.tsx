@@ -18,28 +18,6 @@ export const HearGodSpeak = () => {
   } | null>(null);
 
   const handleHearGodSpeak = async () => {
-    console.log('🔍 Verificando sessão...');
-    
-    const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-    
-    if (sessionError || !session) {
-      console.error('❌ Sessão inválida:', sessionError);
-      
-      const { data: { session: refreshedSession }, error: refreshError } = await supabase.auth.refreshSession();
-      
-      if (refreshError || !refreshedSession) {
-        toast.error(language === 'pt' 
-          ? 'Sessão expirada. Faça login novamente.' 
-          : language === 'en'
-          ? 'Session expired. Please login again.'
-          : 'Sesión expirada. Inicie sesión nuevamente.');
-        setTimeout(() => {
-          window.location.href = '/auth';
-        }, 2000);
-        return;
-      }
-    }
-    
     console.log('🔍 Buscando mensagem de Deus...');
     setIsLoading(true);
     try {
@@ -51,18 +29,6 @@ export const HearGodSpeak = () => {
 
       if (error) {
         console.error('❌ Erro da edge function:', error);
-        
-        if (error.message?.includes('401') || error.message?.includes('not authenticated')) {
-          toast.error(language === "pt" 
-            ? "Sessão expirada. Redirecionando..." 
-            : language === "en"
-            ? "Session expired. Redirecting..."
-            : "Sesión expirada. Redirigiendo...");
-          setTimeout(() => {
-            window.location.href = '/auth';
-          }, 2000);
-          return;
-        }
         
         if (error.message?.includes('429') || error.message?.includes('Rate limit')) {
           throw new Error(language === "pt" 

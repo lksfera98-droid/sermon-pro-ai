@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Download, X } from "lucide-react";
-import { useLanguage } from "@/contexts/LanguageContext";
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>;
@@ -12,7 +11,6 @@ interface BeforeInstallPromptEvent extends Event {
 export const InstallPrompt = () => {
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [showPrompt, setShowPrompt] = useState(false);
-  const { language } = useLanguage();
 
   useEffect(() => {
     const handler = (e: Event) => {
@@ -56,26 +54,18 @@ export const InstallPrompt = () => {
       <div className="flex items-start gap-3">
         <div className="flex-1">
           <h3 className="font-bold text-lg mb-1">
-            {language === 'pt' && '📱 Instalar App'}
-            {language === 'en' && '📱 Install App'}
-            {language === 'es' && '📱 Instalar App'}
+            📱 Instalar App
           </h3>
           <p className="text-sm text-muted-foreground mb-3">
-            {language === 'pt' && 'Instale o SermonPro no seu dispositivo para acesso rápido e uso offline!'}
-            {language === 'en' && 'Install SermonPro on your device for quick access and offline use!'}
-            {language === 'es' && '¡Instala SermonPro en tu dispositivo para acceso rápido y uso sin conexión!'}
+            Instale o SermonPro no seu dispositivo para acesso rápido e uso offline!
           </p>
           <div className="flex gap-2">
             <Button onClick={handleInstall} size="sm" className="flex-1">
               <Download className="h-4 w-4 mr-2" />
-              {language === 'pt' && 'Instalar'}
-              {language === 'en' && 'Install'}
-              {language === 'es' && 'Instalar'}
+              Instalar
             </Button>
             <Button onClick={handleDismiss} variant="ghost" size="sm">
-              {language === 'pt' && 'Agora não'}
-              {language === 'en' && 'Not now'}
-              {language === 'es' && 'Ahora no'}
+              Agora não
             </Button>
           </div>
         </div>

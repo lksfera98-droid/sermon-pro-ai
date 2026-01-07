@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
 import { MainMenu } from "@/components/MainMenu";
 import { SermonForm } from "@/components/SermonForm";
 import { SermonDisplay } from "@/components/SermonDisplay";
@@ -14,11 +13,10 @@ import DailyDevotional from "@/components/DailyDevotional";
 import { LoadingProgress } from "@/components/LoadingProgress";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Home, Trash2, LogOut, Check, ArrowLeft } from "lucide-react";
+import { Home, Trash2, Check, ArrowLeft } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useLanguage } from "@/contexts/LanguageContext";
-import type { Session, User } from '@supabase/supabase-js';
 
 type View = "dashboard" | "new-sermon" | "translator" | "my-sermons" | "verse-search" | "public-gallery" | "prayer-requests" | "prayer-gallery" | "hear-god-speak" | "bible-study" | "daily-devotional";
 
@@ -31,60 +29,7 @@ const Index = () => {
   const [currentView, setCurrentView] = useState<View>("dashboard");
   const [recentSermons, setRecentSermons] = useState<Array<{ title: string; date: string; content: string }>>([]);
   const [viewingSermon, setViewingSermon] = useState<{title: string; content: string} | null>(null);
-  const [session, setSession] = useState<Session | null>(null);
-  const [user, setUser] = useState<User | null>(null);
-  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
-  const { t, language } = useLanguage();
-  const navigate = useNavigate();
-
-  // Auth state and session management
-  // Check authentication
-  useEffect(() => {
-    let mounted = true;
-    
-    const initAuth = async () => {
-      console.log('🔐 Verificando autenticação...');
-      setIsCheckingAuth(true);
-      
-      // PRIMEIRO: Verificar sessão existente
-      const { data: { session } } = await supabase.auth.getSession();
-      
-      if (mounted) {
-        console.log('📋 Sessão:', session ? 'Ativa' : 'Nenhuma');
-        setSession(session);
-        setUser(session?.user ?? null);
-        
-        if (!session) {
-          console.log('➡️ Redirecionando para /auth');
-          navigate("/auth");
-        }
-        
-        setIsCheckingAuth(false);
-      }
-    };
-    
-    // SEGUNDO: Configurar listener de mudanças
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
-        if (mounted) {
-          console.log('🔄 Auth event:', event);
-          setSession(session);
-          setUser(session?.user ?? null);
-          
-          if (event === 'SIGNED_OUT') {
-            navigate("/auth");
-          }
-        }
-      }
-    );
-    
-    initAuth();
-    
-    return () => {
-      mounted = false;
-      subscription?.unsubscribe();
-    };
-  }, [navigate]);
+  const { t } = useLanguage();
 
   // Load saved sermons from localStorage
   useEffect(() => {
@@ -101,11 +46,6 @@ const Index = () => {
     }
   }, [recentSermons]);
 
-  const handleLogout = async () => {
-    await supabase.auth.signOut();
-    navigate("/auth");
-  };
-
   const handleDeleteSermon = (index: number) => {
     const newSermons = recentSermons.filter((_, i) => i !== index);
     setRecentSermons(newSermons);
@@ -113,7 +53,7 @@ const Index = () => {
   };
 
   const handleSaveToPublicGallery = async () => {
-    if (!sermon || !currentSermonData || !user) {
+    if (!sermon || !currentSermonData) {
       toast.error(t('error'));
       return;
     }
@@ -126,8 +66,8 @@ const Index = () => {
           content: sermon,
           theme: currentSermonData.tema,
           verse: currentSermonData.versiculo,
-          language: currentSermonData.language,
-          user_id: user.id
+          language: 'pt',
+          user_id: null
         });
 
       if (error) throw error;
@@ -146,11 +86,6 @@ const Index = () => {
     tempo: number;
     language: string;
   }) => {
-    if (!user) {
-      toast.error(t('error'));
-      return;
-    }
-
     setIsLoading(true);
     setSermon(null);
     setSavedToGallery(false);
@@ -162,7 +97,7 @@ const Index = () => {
           tema: data.tema,
           versiculo: data.versiculo,
           tempo: data.tempo,
-          language: data.language
+          language: 'pt'
         }
       });
 
@@ -183,8 +118,8 @@ const Index = () => {
           content: sermonContent,
           theme: data.tema,
           verse: data.versiculo,
-          language: language,
-          user_id: user.id
+          language: 'pt',
+          user_id: null
         });
 
       if (insertError) {
@@ -196,7 +131,7 @@ const Index = () => {
       // Add to recent sermons
       const newSermon = {
         title: data.tema,
-        date: new Date().toLocaleDateString(language === 'pt' ? 'pt-BR' : language === 'es' ? 'es-ES' : 'en-US'),
+        date: new Date().toLocaleDateString('pt-BR'),
         content: sermonContent,
       };
       setRecentSermons((prev) => [newSermon, ...prev].slice(0, 10));
@@ -209,20 +144,6 @@ const Index = () => {
       setIsLoading(false);
     }
   };
-
-  // Loading state durante verificação de autenticação
-  if (isCheckingAuth) {
-    return (
-      <div className="h-screen flex items-center justify-center bg-background">
-        <div className="text-center space-y-4">
-          <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-primary mx-auto"></div>
-          <p className="text-lg text-muted-foreground">
-            {language === 'pt' ? 'Carregando...' : language === 'en' ? 'Loading...' : 'Cargando...'}
-          </p>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="h-[100svh] bg-background overflow-hidden">
@@ -417,7 +338,7 @@ const Index = () => {
                 {t('home')}
               </Button>
               <h1 className="text-3xl font-bold mb-6 text-center">
-                {language === 'pt' ? '🙏 Pedidos de Oração Feitos' : language === 'es' ? '🙏 Peticiones de Oración Hechas' : '🙏 Prayer Requests Made'}
+                🙏 Pedidos de Oração Feitos
               </h1>
               <PrayerRequestsGallery />
             </div>
@@ -477,28 +398,15 @@ const Index = () => {
             bottom: '-24px'
           }}
         >
-          <div className="grid grid-cols-2 gap-3 p-2.5 max-w-md mx-auto select-none">
+          <div className="flex justify-center p-2.5 max-w-md mx-auto select-none">
             <Button
               variant={currentView === 'dashboard' ? 'default' : 'outline'}
               size="lg"
               onClick={() => setCurrentView('dashboard')}
-              className="flex flex-col gap-1.5 h-auto py-1.5 rounded-none touch-manipulation"
+              className="flex flex-col gap-1.5 h-auto py-1.5 rounded-none touch-manipulation px-12"
             >
               <Home className="h-5 w-5" />
-              <span className="text-[12px] font-bold">
-                {language === 'pt' ? 'Início' : language === 'es' ? 'Inicio' : 'Home'}
-              </span>
-            </Button>
-            <Button
-              variant="outline"
-              size="lg"
-              onClick={handleLogout}
-              className="flex flex-col gap-1.5 h-auto py-1.5 rounded-none border-destructive/30 text-destructive hover:bg-destructive hover:text-destructive-foreground touch-manipulation"
-            >
-              <LogOut className="h-5 w-5" />
-              <span className="text-[12px] font-bold">
-                {language === 'pt' ? 'Sair' : language === 'es' ? 'Salir' : 'Logout'}
-              </span>
+              <span className="text-[12px] font-bold">Início</span>
             </Button>
           </div>
         </nav>

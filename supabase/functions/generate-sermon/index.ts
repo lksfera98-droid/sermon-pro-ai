@@ -18,14 +18,14 @@ serve(async (req) => {
       tema: z.string().trim().min(1, "Tema é obrigatório").max(200, "Tema muito longo"),
       versiculo: z.string().trim().max(100, "Versículo muito longo").optional().default(''),
       tempo: z.number().int().min(10, "Tempo mínimo: 10 minutos").max(120, "Tempo máximo: 120 minutos"),
-      language: z.enum(['pt', 'en', 'es']).default('pt')
+      language: z.string().optional().default('pt')
     });
 
     const rawData = await req.json();
     const validated = sermonSchema.parse(rawData);
-    const { tema, versiculo, tempo, language } = validated;
+    const { tema, versiculo, tempo } = validated;
     
-    console.log('Gerando sermão com:', { tema, versiculo, tempo, language });
+    console.log('Gerando sermão com:', { tema, versiculo, tempo });
 
     const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
     
@@ -33,291 +33,85 @@ serve(async (req) => {
       throw new Error('OPENAI_API_KEY não configurada');
     }
 
-    // Language-specific system instructions
-    const languageSystemMessages = {
-      pt: 'Você é SermonPro, um assistente especializado em criar sermões bíblicos completos e estruturados para pregadores cristãos.',
-      en: 'You are SermonPro, an assistant specialized in creating complete and structured biblical sermons for Christian preachers.',
-      es: 'Eres SermonPro, un asistente especializado en crear sermones bíblicos completos y estructurados para predicadores cristianos.'
-    };
-
-    // Language-specific detail levels
-    const detailLevelTexts = {
-      pt: {
-        short: "conciso",
-        medium: "moderado",
-        long: "detalhado",
-        veryLong: "muito detalhado"
-      },
-      en: {
-        short: "concise",
-        medium: "moderate",
-        long: "detailed",
-        veryLong: "very detailed"
-      },
-      es: {
-        short: "conciso",
-        medium: "moderado",
-        long: "detallado",
-        veryLong: "muy detallado"
-      }
-    };
-
-    // Language-specific instructions
-    const additionalInstructionsTexts = {
-      pt: {
-        short: "Mantenha as explicações objetivas e diretas.",
-        medium: "Inclua explicações teológicas e aplicações práticas.",
-        long: "Inclua explicações teológicas aprofundadas, múltiplas ilustrações e aplicações práticas detalhadas.",
-        veryLong: "Crie um sermão EXTENSO e PROFUNDO com análise exegética completa, múltiplas ilustrações, contexto histórico-cultural, aplicações práticas detalhadas para diferentes grupos (jovens, adultos, idosos), e sub-pontos para cada ponto principal."
-      },
-      en: {
-        short: "Keep explanations objective and direct.",
-        medium: "Include theological explanations and practical applications.",
-        long: "Include deep theological explanations, multiple illustrations, and detailed practical applications.",
-        veryLong: "Create an EXTENSIVE and DEEP sermon with complete exegetical analysis, multiple illustrations, historical-cultural context, detailed practical applications for different groups (youth, adults, elderly), and sub-points for each main point."
-      },
-      es: {
-        short: "Mantén las explicaciones objetivas y directas.",
-        medium: "Incluye explicaciones teológicas y aplicaciones prácticas.",
-        long: "Incluye explicaciones teológicas profundas, múltiples ilustraciones y aplicaciones prácticas detalladas.",
-        veryLong: "Crea un sermón EXTENSO y PROFUNDO con análisis exegético completo, múltiples ilustraciones, contexto histórico-cultural, aplicaciones prácticas detalladas para diferentes grupos (jóvenes, adultos, ancianos), y sub-puntos para cada punto principal."
-      }
-    };
-
-    const lang = language as 'pt' | 'en' | 'es';
-    const systemMessage = languageSystemMessages[lang] || languageSystemMessages.pt;
-    const detailTexts = detailLevelTexts[lang] || detailLevelTexts.pt;
-    const instructionTexts = additionalInstructionsTexts[lang] || additionalInstructionsTexts.pt;
-
     // Determine the level of detail based on sermon duration
-    let detailLevel = detailTexts.short;
+    let detailLevel = "conciso";
     let numberOfPoints = 3;
-    let additionalInstructions = instructionTexts.short;
+    let additionalInstructions = "Mantenha as explicações objetivas e diretas.";
     let maxTokens = 2000;
     
     if (tempo <= 20) {
-      detailLevel = detailTexts.short;
+      detailLevel = "conciso";
       numberOfPoints = 3;
-      additionalInstructions = instructionTexts.short;
+      additionalInstructions = "Mantenha as explicações objetivas e diretas.";
       maxTokens = 1500;
     } else if (tempo <= 40) {
-      detailLevel = detailTexts.medium;
+      detailLevel = "moderado";
       numberOfPoints = 3;
-      additionalInstructions = instructionTexts.medium;
+      additionalInstructions = "Inclua explicações teológicas e aplicações práticas.";
       maxTokens = 2500;
     } else if (tempo <= 60) {
-      detailLevel = detailTexts.long;
+      detailLevel = "detalhado";
       numberOfPoints = 4;
-      additionalInstructions = instructionTexts.long;
+      additionalInstructions = "Inclua explicações teológicas aprofundadas, múltiplas ilustrações e aplicações práticas detalhadas.";
       maxTokens = 3500;
     } else {
-      detailLevel = detailTexts.veryLong;
+      detailLevel = "muito detalhado";
       numberOfPoints = 5;
-      additionalInstructions = instructionTexts.veryLong;
+      additionalInstructions = "Crie um sermão EXTENSO e PROFUNDO com análise exegética completa, múltiplas ilustrações, contexto histórico-cultural, aplicações práticas detalhadas para diferentes grupos (jovens, adultos, idosos), e sub-pontos para cada ponto principal.";
       maxTokens = 4000;
     }
 
-    // Language-specific prompts
-    const promptTemplates = {
-      pt: {
-        data: "### DADOS DO SERMÃO:",
-        theme: "- Tema:",
-        verse: "- Versículo base:",
-        chooseVerse: "Escolha um versículo apropriado",
-        time: "- Tempo de pregação:",
-        minutes: "minutos",
-        detailLevel: "- Nível de detalhe:",
-        instructions: "### INSTRUÇÕES:",
-        format: "### FORMATO DE SAÍDA OBRIGATÓRIO:",
-        title: "TÍTULO DO SERMÃO (em maiúsculas e negrito)",
-        baseText: "**Texto Base:**",
-        bibleCitation: "[Citação bíblica completa entre aspas]",
-        introduction: "**INTRODUÇÃO**",
-        contextShort: "[1-2 parágrafos de contextualização]",
-        contextLong: "[2-3 parágrafos com contextualização histórica e cultural]",
-        secondIllustration: "- Inclua uma segunda ilustração impactante",
-        development: "**DESENVOLVIMENTO**",
-        mainPoint: "[Título do Ponto Principal em Negrito]",
-        explanation: "- Explicação",
-        clearBiblical: "bíblica clara",
-        theological: "teológica e exegética",
-        biblicalQuotes: "citações bíblicas entre \"aspas\"",
-        practicalApp: "- Aplicação prática",
-        forDifferent: "para diferentes públicos",
-        illustrations: "ilustrações ou exemplos",
-        subPoints: "- Sub-pontos para aprofundar",
-        conclusion: "**CONCLUSÃO**",
-        recap: "[Recapitulação dos pontos principais]",
-        appeal: "[Apelo ou desafio]",
-        specificAppeal: "[Apelo específico e personalizado]",
-        finalIllustration: "[Ilustração final impactante]",
-        hopeMessage: "[Mensagem de esperança]",
-        finalPrayer: "**ORAÇÃO FINAL**",
-        themedPrayer: "Oração detalhada e temática",
-        relatedPrayer: "Oração relacionada ao tema",
-        formatRules: "### REGRAS DE FORMATAÇÃO:",
-        useBold: "- Use **negrito** para todos os títulos de seções e pontos principais",
-        allQuotes: "- Coloque TODAS as citações bíblicas entre \"aspas\"",
-        highlightKeys: "- Destaque palavras-chave importantes com **negrito**",
-        keepParagraphs: "- Mantenha parágrafos",
-        organized: "bem desenvolvidos mas organizados",
-        shortObjective: "curtos e objetivos",
-        beDeep: "- Seja profundo, inspirador e prático",
-        touchHeart: "- O sermão deve tocar o coração e transformar vidas",
-        generate: "Gere o sermão completo agora seguindo EXATAMENTE este formato."
-      },
-      en: {
-        data: "### SERMON DATA:",
-        theme: "- Theme:",
-        verse: "- Base verse:",
-        chooseVerse: "Choose an appropriate verse",
-        time: "- Preaching time:",
-        minutes: "minutes",
-        detailLevel: "- Detail level:",
-        instructions: "### INSTRUCTIONS:",
-        format: "### REQUIRED OUTPUT FORMAT:",
-        title: "SERMON TITLE (in capital letters and bold)",
-        baseText: "**Base Text:**",
-        bibleCitation: "[Complete biblical citation in quotes]",
-        introduction: "**INTRODUCTION**",
-        contextShort: "[1-2 contextualization paragraphs]",
-        contextLong: "[2-3 paragraphs with historical and cultural contextualization]",
-        secondIllustration: "- Include a second impactful illustration",
-        development: "**DEVELOPMENT**",
-        mainPoint: "[Main Point Title in Bold]",
-        explanation: "- Explanation",
-        clearBiblical: "clear biblical",
-        theological: "theological and exegetical",
-        biblicalQuotes: "biblical quotes in \"quotes\"",
-        practicalApp: "- Practical application",
-        forDifferent: "for different audiences",
-        illustrations: "illustrations or examples",
-        subPoints: "- Sub-points to deepen",
-        conclusion: "**CONCLUSION**",
-        recap: "[Recap of main points]",
-        appeal: "[Appeal or challenge]",
-        specificAppeal: "[Specific and personalized appeal]",
-        finalIllustration: "[Final impactful illustration]",
-        hopeMessage: "[Message of hope]",
-        finalPrayer: "**FINAL PRAYER**",
-        themedPrayer: "Detailed and thematic prayer",
-        relatedPrayer: "Prayer related to the theme",
-        formatRules: "### FORMATTING RULES:",
-        useBold: "- Use **bold** for all section titles and main points",
-        allQuotes: "- Put ALL biblical quotes in \"quotes\"",
-        highlightKeys: "- Highlight important keywords with **bold**",
-        keepParagraphs: "- Keep paragraphs",
-        organized: "well developed but organized",
-        shortObjective: "short and objective",
-        beDeep: "- Be deep, inspiring and practical",
-        touchHeart: "- The sermon should touch hearts and transform lives",
-        generate: "Generate the complete sermon now following EXACTLY this format."
-      },
-      es: {
-        data: "### DATOS DEL SERMÓN:",
-        theme: "- Tema:",
-        verse: "- Versículo base:",
-        chooseVerse: "Elija un versículo apropiado",
-        time: "- Tiempo de predicación:",
-        minutes: "minutos",
-        detailLevel: "- Nivel de detalle:",
-        instructions: "### INSTRUCCIONES:",
-        format: "### FORMATO DE SALIDA OBLIGATORIO:",
-        title: "TÍTULO DEL SERMÓN (en mayúsculas y negrita)",
-        baseText: "**Texto Base:**",
-        bibleCitation: "[Cita bíblica completa entre comillas]",
-        introduction: "**INTRODUCCIÓN**",
-        contextShort: "[1-2 párrafos de contextualización]",
-        contextLong: "[2-3 párrafos con contextualización histórica y cultural]",
-        secondIllustration: "- Incluya una segunda ilustración impactante",
-        development: "**DESARROLLO**",
-        mainPoint: "[Título del Punto Principal en Negrita]",
-        explanation: "- Explicación",
-        clearBiblical: "bíblica clara",
-        theological: "teológica y exegética",
-        biblicalQuotes: "citas bíblicas entre \"comillas\"",
-        practicalApp: "- Aplicación práctica",
-        forDifferent: "para diferentes públicos",
-        illustrations: "ilustraciones o ejemplos",
-        subPoints: "- Sub-puntos para profundizar",
-        conclusion: "**CONCLUSIÓN**",
-        recap: "[Recapitulación de los puntos principales]",
-        appeal: "[Apelación o desafío]",
-        specificAppeal: "[Apelación específica y personalizada]",
-        finalIllustration: "[Ilustración final impactante]",
-        hopeMessage: "[Mensaje de esperanza]",
-        finalPrayer: "**ORACIÓN FINAL**",
-        themedPrayer: "Oración detallada y temática",
-        relatedPrayer: "Oración relacionada con el tema",
-        formatRules: "### REGLAS DE FORMATO:",
-        useBold: "- Use **negrita** para todos los títulos de secciones y puntos principales",
-        allQuotes: "- Coloque TODAS las citas bíblicas entre \"comillas\"",
-        highlightKeys: "- Destaque palabras clave importantes con **negrita**",
-        keepParagraphs: "- Mantenga párrafos",
-        organized: "bien desarrollados pero organizados",
-        shortObjective: "cortos y objetivos",
-        beDeep: "- Sea profundo, inspirador y práctico",
-        touchHeart: "- El sermón debe tocar el corazón y transformar vidas",
-        generate: "Genere el sermón completo ahora siguiendo EXACTAMENTE este formato."
-      }
-    };
+    const prompt = `Você é um assistente especializado em criar sermões bíblicos completos e estruturados para pregadores cristãos.
 
-    const template = promptTemplates[lang] || promptTemplates.pt;
+DADOS DO SERMÃO:
+- Tema: ${tema}
+- Versículo base: ${versiculo || 'Escolha um versículo apropriado'}
+- Tempo de pregação: ${tempo} minutos
+- Nível de detalhe: ${detailLevel}
 
-    const prompt = `
-${systemMessage}
-
-${template.data}
-${template.theme} ${tema}
-${template.verse} ${versiculo || template.chooseVerse}
-${template.time} ${tempo} ${template.minutes}
-${template.detailLevel} ${detailLevel}
-
-${template.instructions}
+INSTRUÇÕES:
 ${additionalInstructions}
 
-${template.format}
+FORMATO OBRIGATÓRIO DO SERMÃO:
 
-${template.title}
+Escreva o título do sermão em maiúsculas no início.
 
-${template.baseText} ${template.bibleCitation}
+Em seguida, escreva "Texto Base:" seguido da citação bíblica completa.
 
-${template.introduction}
-${tempo > 40 ? template.contextLong : template.contextShort}
-${tempo > 60 ? template.secondIllustration : ''}
+INTRODUÇÃO
+Escreva ${tempo > 40 ? '2-3 parágrafos com contextualização histórica e cultural' : '1-2 parágrafos de contextualização'}.
+${tempo > 60 ? 'Inclua uma segunda ilustração impactante.' : ''}
 
-${template.development}
+DESENVOLVIMENTO
 
 ${Array.from({ length: numberOfPoints }, (_, i) => `
-**${i + 1}. ${template.mainPoint}**
-   ${template.explanation} ${tempo > 40 ? template.theological : template.clearBiblical}
-   - ${tempo > 60 ? '3-4' : tempo > 40 ? '2-3' : '1-2'} ${template.biblicalQuotes}
-   ${template.practicalApp} ${tempo > 60 ? template.forDifferent : ''}
-   - ${tempo > 40 ? '2' : '1'} ${template.illustrations}
-   ${tempo > 60 ? template.subPoints : ''}
+${i + 1}. Escreva o título do ponto ${i + 1} aqui
+   - Explicação ${tempo > 40 ? 'teológica e exegética' : 'bíblica clara'}
+   - ${tempo > 60 ? '3-4' : tempo > 40 ? '2-3' : '1-2'} citações bíblicas relevantes
+   - Aplicação prática ${tempo > 60 ? 'para diferentes públicos' : ''}
+   - ${tempo > 40 ? '2' : '1'} ilustrações ou exemplos
+   ${tempo > 60 ? '- Sub-pontos para aprofundar' : ''}
 `).join('\n')}
 
-${template.conclusion}
-${template.recap}
-${tempo > 40 ? template.specificAppeal : template.appeal}
-${tempo > 60 ? template.finalIllustration : ''}
-${template.hopeMessage}
+CONCLUSÃO
+- Recapitulação dos pontos principais
+- ${tempo > 40 ? 'Apelo específico e personalizado' : 'Apelo ou desafio'}
+${tempo > 60 ? '- Ilustração final impactante' : ''}
+- Mensagem de esperança
 
-${template.finalPrayer}
-[${tempo > 40 ? template.themedPrayer : template.relatedPrayer}]
+ORAÇÃO FINAL
+Escreva uma ${tempo > 40 ? 'oração detalhada e temática' : 'oração relacionada ao tema'}.
 
-${template.formatRules}
-${template.useBold}
-${template.allQuotes}
-${template.highlightKeys}
-${template.keepParagraphs} ${tempo > 60 ? template.organized : template.shortObjective}
-${template.beDeep}
-${template.touchHeart}
+REGRAS IMPORTANTES:
+1. NÃO use asteriscos ou símbolos de formatação como ** ou *
+2. NÃO escreva instruções de formatação no texto (como "negrito", "itálico", etc.)
+3. Escreva o conteúdo de forma natural e limpa
+4. Use aspas normais para citações bíblicas
+5. Seja profundo, inspirador e prático
+6. O sermão deve tocar o coração e transformar vidas
+7. Escreva TUDO em português brasileiro
 
-${template.generate}
-
-IMPORTANT: Generate the ENTIRE sermon in ${lang === 'pt' ? 'Portuguese (Português)' : lang === 'en' ? 'English' : 'Spanish (Español)'} language. All content, explanations, and text must be in ${lang === 'pt' ? 'Portuguese' : lang === 'en' ? 'English' : 'Spanish'}.
-`;
+Gere o sermão completo agora.`;
 
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
@@ -330,7 +124,7 @@ IMPORTANT: Generate the ENTIRE sermon in ${lang === 'pt' ? 'Portuguese (Portugu�
         messages: [
           {
             role: 'system',
-            content: systemMessage
+            content: 'Você é SermonPro, um assistente especializado em criar sermões bíblicos completos e estruturados para pregadores cristãos. Escreva sempre em português brasileiro de forma clara e natural, sem usar formatação markdown como asteriscos ou símbolos especiais.'
           },
           {
             role: 'user',
@@ -349,7 +143,16 @@ IMPORTANT: Generate the ENTIRE sermon in ${lang === 'pt' ? 'Portuguese (Portugu�
     }
 
     const data = await response.json();
-    const sermao = data.choices[0].message.content;
+    let sermao = data.choices[0].message.content;
+
+    // Limpar qualquer formatação markdown residual
+    sermao = sermao
+      .replace(/\*\*/g, '')  // Remove **
+      .replace(/\*/g, '')    // Remove *
+      .replace(/#{1,6}\s/g, '') // Remove # headers
+      .replace(/`/g, '')     // Remove backticks
+      .replace(/\[|\]/g, '') // Remove brackets
+      .trim();
 
     console.log('Sermão gerado com sucesso');
 

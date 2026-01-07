@@ -1,503 +1,311 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState } from 'react';
 
-type Language = 'pt' | 'en' | 'es';
+type Language = 'pt';
 
 interface Translations {
   [key: string]: {
     pt: string;
-    en: string;
-    es: string;
   };
 }
 
 const translations: Translations = {
   // Navigation
   backToList: {
-    pt: 'Voltar para a Lista',
-    en: 'Back to List',
-    es: 'Volver a la Lista'
+    pt: 'Voltar para a Lista'
   },
   clickToView: {
-    pt: 'Clique para ver',
-    en: 'Click to view',
-    es: 'Clic para ver'
+    pt: 'Clique para ver'
   },
   // Welcome
   welcome: {
-    pt: 'O App que foi criado para te aproximar de Deus',
-    en: 'The App created to bring you closer to God',
-    es: 'La App creada para acercarte a Dios'
+    pt: 'O App que foi criado para te aproximar de Deus'
   },
   welcomeSubtitle: {
-    pt: 'Tudo o que você precisa para se conectar com a Palavra de DEUS',
-    en: 'Your complete assistant for creating biblical sermons',
-    es: 'Tu asistente completo para crear sermones bíblicos'
+    pt: 'Tudo o que você precisa para se conectar com a Palavra de DEUS'
   },
   chooseLanguage: {
-    pt: 'Clique abaixo e escolha o melhor idioma para você',
-    en: 'Click below and choose the best language for you',
-    es: 'Haz clic abajo y elige el mejor idioma para ti'
+    pt: 'Clique abaixo e escolha o melhor idioma para você'
   },
   // Menu items
   mainMenu: {
-    pt: 'Menu Principal',
-    en: 'Main Menu',
-    es: 'Menú Principal'
+    pt: 'Menu Principal'
   },
   createSermon: {
-    pt: 'Crie seu novo sermão',
-    en: 'Create your new sermon',
-    es: 'Crea tu nuevo sermón'
+    pt: 'Crie seu novo sermão'
   },
   bibleTranslator: {
-    pt: 'Tradutor Bíblico',
-    en: 'Bible Translator',
-    es: 'Traductor Bíblico'
+    pt: 'Tradutor Bíblico'
   },
   bibleStudies: {
-    pt: 'Estudos Bíblicos',
-    en: 'Bible Studies',
-    es: 'Estudios Bíblicos'
+    pt: 'Estudos Bíblicos'
   },
   bibleDictionaries: {
-    pt: 'Dicionários Bíblicos',
-    en: 'Bible Dictionaries',
-    es: 'Diccionarios Bíblicos'
+    pt: 'Dicionários Bíblicos'
   },
   studyBibles: {
-    pt: 'Bíblias de Estudo',
-    en: 'Study Bibles',
-    es: 'Biblias de Estudio'
+    pt: 'Bíblias de Estudo'
   },
   // PWA
   installApp: {
-    pt: 'Instale o App no seu Celular',
-    en: 'Install App on your Phone',
-    es: 'Instala la App en tu Celular'
+    pt: 'Instale o App no seu Celular'
   },
   installAndroid: {
-    pt: 'Instalar no Android',
-    en: 'Install on Android',
-    es: 'Instalar en Android'
+    pt: 'Instalar no Android'
   },
   installIPhone: {
-    pt: 'Como Instalar no iPhone',
-    en: 'How to Install on iPhone',
-    es: 'Cómo Instalar en iPhone'
+    pt: 'Como Instalar no iPhone'
   },
   // Language
   selectLanguage: {
-    pt: 'Selecione o Idioma',
-    en: 'Select Language',
-    es: 'Seleccionar Idioma'
+    pt: 'Selecione o Idioma'
   },
   // Sermon Form
   sermonTheme: {
-    pt: 'Tema do Sermão',
-    en: 'Sermon Theme',
-    es: 'Tema del Sermón'
+    pt: 'Tema do Sermão'
   },
   baseVerse: {
-    pt: 'Versículo Base (Opcional)',
-    en: 'Base Verse (Optional)',
-    es: 'Versículo Base (Opcional)'
+    pt: 'Versículo Base (Opcional)'
   },
   sermonTime: {
-    pt: 'Tempo do Sermão',
-    en: 'Sermon Time',
-    es: 'Tiempo del Sermón'
+    pt: 'Tempo do Sermão'
   },
   generateSermon: {
-    pt: 'Gerar Sermão',
-    en: 'Generate Sermon',
-    es: 'Generar Sermón'
+    pt: 'Gerar Sermão'
   },
   generating: {
-    pt: 'Gerando Sermão...',
-    en: 'Generating Sermon...',
-    es: 'Generando Sermón...'
+    pt: 'Gerando Sermão...'
   },
   // Actions
   home: {
-    pt: 'Início',
-    en: 'Home',
-    es: 'Inicio'
+    pt: 'Início'
   },
   copy: {
-    pt: 'Copiar',
-    en: 'Copy',
-    es: 'Copiar'
+    pt: 'Copiar'
   },
   copied: {
-    pt: 'Copiado!',
-    en: 'Copied!',
-    es: '¡Copiado!'
+    pt: 'Copiado!'
   },
   download: {
-    pt: 'Baixar',
-    en: 'Download',
-    es: 'Descargar'
+    pt: 'Baixar'
   },
   downloadPDF: {
-    pt: 'Baixar PDF',
-    en: 'Download PDF',
-    es: 'Descargar PDF'
+    pt: 'Baixar PDF'
   },
   yourSermon: {
-    pt: 'Seu Sermão',
-    en: 'Your Sermon',
-    es: 'Tu Sermón'
+    pt: 'Seu Sermão'
   },
   // Translator
   wordOrName: {
-    pt: 'Palavra ou Nome',
-    en: 'Word or Name',
-    es: 'Palabra o Nombre'
+    pt: 'Palavra ou Nome'
   },
   translate: {
-    pt: 'Traduzir',
-    en: 'Translate',
-    es: 'Traducir'
+    pt: 'Traduzir'
   },
   translating: {
-    pt: 'Traduzindo...',
-    en: 'Translating...',
-    es: 'Traduciendo...'
+    pt: 'Traduzindo...'
   },
   translationResult: {
-    pt: 'Resultado da Tradução',
-    en: 'Translation Result',
-    es: 'Resultado de la Traducción'
+    pt: 'Resultado da Tradução'
   },
   hebrew: {
-    pt: 'Hebraico',
-    en: 'Hebrew',
-    es: 'Hebreo'
+    pt: 'Hebraico'
   },
   greek: {
-    pt: 'Grego',
-    en: 'Greek',
-    es: 'Griego'
+    pt: 'Grego'
   },
   aramaic: {
-    pt: 'Aramaico',
-    en: 'Aramaic',
-    es: 'Arameo'
+    pt: 'Aramaico'
   },
   etymology: {
-    pt: 'Etimologia',
-    en: 'Etymology',
-    es: 'Etimología'
+    pt: 'Etimologia'
   },
   wordHistory: {
-    pt: 'História da Palavra',
-    en: 'Word History',
-    es: 'Historia de la Palabra'
+    pt: 'História da Palavra'
   },
   // Resources
   accessResources: {
-    pt: 'Acessar Recursos',
-    en: 'Access Resources',
-    es: 'Acceder a Recursos'
+    pt: 'Acessar Recursos'
   },
   bibleStudiesDesc: {
-    pt: 'Acesse uma coleção completa de estudos bíblicos para enriquecer suas pregações',
-    en: 'Access a complete collection of Bible studies to enrich your preaching',
-    es: 'Accede a una colección completa de estudios bíblicos para enriquecer tus predicaciones'
+    pt: 'Acesse uma coleção completa de estudos bíblicos para enriquecer suas pregações'
   },
   dictionariesDesc: {
-    pt: 'Consulte dicionários bíblicos para aprofundar seu conhecimento teológico',
-    en: 'Consult Bible dictionaries to deepen your theological knowledge',
-    es: 'Consulta diccionarios bíblicos para profundizar tu conocimiento teológico'
+    pt: 'Consulte dicionários bíblicos para aprofundar seu conhecimento teológico'
   },
   studyBiblesDesc: {
-    pt: 'Baixe diferentes versões de Bíblias de estudo para suas pesquisas',
-    en: 'Download different versions of study Bibles for your research',
-    es: 'Descarga diferentes versiones de Biblias de estudio para tus investigaciones'
+    pt: 'Baixe diferentes versões de Bíblias de estudo para suas pesquisas'
   },
   recentSermons: {
-    pt: 'Sermões Recentes',
-    en: 'Recent Sermons',
-    es: 'Sermones Recientes'
+    pt: 'Sermões Recentes'
   },
   noSermons: {
-    pt: 'Nenhum sermão criado ainda',
-    en: 'No sermons created yet',
-    es: 'Ningún sermón creado aún'
+    pt: 'Nenhum sermão criado ainda'
   },
   createFirstSermon: {
-    pt: 'Crie seu primeiro sermão para começar!',
-    en: 'Create your first sermon to get started!',
-    es: '¡Crea tu primer sermón para empezar!'
+    pt: 'Crie seu primeiro sermão para começar!'
   },
   fillDataBelow: {
-    pt: 'Preencha os dados abaixo para gerar seu sermão',
-    en: 'Fill in the data below to generate your sermon',
-    es: 'Completa los datos a continuación para generar tu sermón'
+    pt: 'Preencha os dados abaixo para gerar seu sermão'
   },
   mySermons: {
-    pt: 'Seus Sermões Criados',
-    en: 'Your Created Sermons',
-    es: 'Tus Sermones Creados'
+    pt: 'Seus Sermões Criados'
   },
   deleteSermon: {
-    pt: 'Apagar',
-    en: 'Delete',
-    es: 'Eliminar'
+    pt: 'Apagar'
   },
   noSavedSermons: {
-    pt: 'Nenhum sermão salvo ainda',
-    en: 'No saved sermons yet',
-    es: 'Ningún sermón guardado aún'
+    pt: 'Nenhum sermão salvo ainda'
   },
   verseSearch: {
-    pt: 'Pesquisar Versículos',
-    en: 'Search Bible Verses',
-    es: 'Buscar Versículos'
+    pt: 'Pesquisar Versículos'
   },
   searchWord: {
-    pt: 'Digite uma palavra (ex: amor)',
-    en: 'Enter a word (ex: love)',
-    es: 'Escribe una palabra (ej: amor)'
+    pt: 'Digite uma palavra (ex: amor)'
   },
   search: {
-    pt: 'Pesquisar',
-    en: 'Search',
-    es: 'Buscar'
+    pt: 'Pesquisar'
   },
   searching: {
-    pt: 'Pesquisando...',
-    en: 'Searching...',
-    es: 'Buscando...'
+    pt: 'Pesquisando...'
   },
   verseResults: {
-    pt: 'Versículos e Referências',
-    en: 'Verses and References',
-    es: 'Versículos y Referencias'
+    pt: 'Versículos e Referências'
   },
   copyAction: {
-    pt: 'Copiar Texto',
-    en: 'Copy Text',
-    es: 'Copiar Texto'
+    pt: 'Copiar Texto'
   },
   downloadAction: {
-    pt: 'Baixar TXT',
-    en: 'Download TXT',
-    es: 'Descargar TXT'
+    pt: 'Baixar TXT'
   },
   downloadPDFAction: {
-    pt: 'Baixar PDF',
-    en: 'Download PDF',
-    es: 'Descargar PDF'
+    pt: 'Baixar PDF'
   },
   logout: {
-    pt: 'Sair',
-    en: 'Logout',
-    es: 'Cerrar Sesión'
+    pt: 'Sair'
   },
   sermonsGallery: {
-    pt: 'Galeria de Sermões',
-    en: 'Sermons Gallery',
-    es: 'Galería de Sermones'
+    pt: 'Galeria de Sermões'
   },
   saveToGallery: {
-    pt: 'Salve na Galeria Publica e deixe Deus falar com alguém',
-    en: 'Save to Public Gallery and let God speak to someone',
-    es: 'Guarde en la Galería Pública y deje que Dios hable con alguien'
+    pt: 'Salve na Galeria Publica e deixe Deus falar com alguém'
   },
   // Prayer Requests
   prayerRequests: {
-    pt: 'Pedidos de Oração',
-    en: 'Prayer Requests',
-    es: 'Pedidos de Oración'
+    pt: 'Pedidos de Oração'
   },
   newPrayerRequest: {
-    pt: 'Novo Pedido de Oração',
-    en: 'New Prayer Request',
-    es: 'Nueva Petición de Oración'
+    pt: 'Novo Pedido de Oração'
   },
   sharePrayerRequest: {
-    pt: 'Compartilhe seu pedido de oração com a comunidade',
-    en: 'Share your prayer request with the community',
-    es: 'Comparte tu petición de oración con la comunidad'
+    pt: 'Compartilhe seu pedido de oração com a comunidade'
   },
   sendAnonymously: {
-    pt: 'Enviar anonimamente',
-    en: 'Send anonymously',
-    es: 'Enviar anónimamente'
+    pt: 'Enviar anonimamente'
   },
   yourName: {
-    pt: 'Seu Nome',
-    en: 'Your Name',
-    es: 'Tu Nombre'
+    pt: 'Seu Nome'
   },
   enterYourName: {
-    pt: 'Digite seu nome',
-    en: 'Enter your name',
-    es: 'Escribe tu nombre'
+    pt: 'Digite seu nome'
   },
   prayerRequest: {
-    pt: 'Pedido de Oração',
-    en: 'Prayer Request',
-    es: 'Petición de Oración'
+    pt: 'Pedido de Oração'
   },
   writeYourRequest: {
-    pt: 'Escreva seu pedido de oração...',
-    en: 'Write your prayer request...',
-    es: 'Escribe tu petición de oración...'
+    pt: 'Escreva seu pedido de oração...'
   },
   image: {
-    pt: 'Imagem',
-    en: 'Image',
-    es: 'Imagen'
+    pt: 'Imagem'
   },
   optional: {
-    pt: 'opcional',
-    en: 'optional',
-    es: 'opcional'
+    pt: 'opcional'
   },
   remove: {
-    pt: 'Remover',
-    en: 'Remove',
-    es: 'Eliminar'
+    pt: 'Remover'
   },
   sending: {
-    pt: 'Enviando...',
-    en: 'Sending...',
-    es: 'Enviando...'
+    pt: 'Enviando...'
   },
   sendRequest: {
-    pt: 'Enviar Pedido',
-    en: 'Send Request',
-    es: 'Enviar Petición'
+    pt: 'Enviar Pedido'
   },
   success: {
-    pt: 'Sucesso',
-    en: 'Success',
-    es: 'Éxito'
+    pt: 'Sucesso'
   },
   error: {
-    pt: 'Erro',
-    en: 'Error',
-    es: 'Error'
+    pt: 'Erro'
   },
   fillAllFields: {
-    pt: 'Por favor preencha todos os campos obrigatórios',
-    en: 'Please fill all required fields',
-    es: 'Por favor completa todos los campos obligatorios'
+    pt: 'Por favor preencha todos os campos obrigatórios'
   },
   tryAgain: {
-    pt: 'Algo deu errado. Tente novamente.',
-    en: 'Something went wrong. Please try again.',
-    es: 'Algo salió mal. Por favor intenta de nuevo.'
+    pt: 'Algo deu errado. Tente novamente.'
   },
   prayerRequestSent: {
-    pt: 'Seu pedido de oração foi compartilhado',
-    en: 'Your prayer request has been shared',
-    es: 'Tu petición de oración ha sido compartida'
+    pt: 'Seu pedido de oração foi compartilhado'
   },
   noPrayerRequests: {
-    pt: 'Nenhum pedido de oração ainda. Seja o primeiro a compartilhar!',
-    en: 'No prayer requests yet. Be the first to share!',
-    es: '¡Aún no hay peticiones de oración. Sé el primero en compartir!'
+    pt: 'Nenhum pedido de oração ainda. Seja o primeiro a compartilhar!'
   },
   anonymous: {
-    pt: 'Anônimo',
-    en: 'Anonymous',
-    es: 'Anónimo'
+    pt: 'Anônimo'
   },
   confirmDelete: {
-    pt: 'Confirmar Exclusão',
-    en: 'Confirm Delete',
-    es: 'Confirmar Eliminación'
+    pt: 'Confirmar Exclusão'
   },
   confirmDeleteRequest: {
-    pt: 'Tem certeza que deseja excluir este pedido de oração?',
-    en: 'Are you sure you want to delete this prayer request?',
-    es: '¿Estás seguro de que quieres eliminar esta petición de oración?'
+    pt: 'Tem certeza que deseja excluir este pedido de oração?'
   },
   cancel: {
-    pt: 'Cancelar',
-    en: 'Cancel',
-    es: 'Cancelar'
+    pt: 'Cancelar'
   },
   delete: {
-    pt: 'Excluir',
-    en: 'Delete',
-    es: 'Eliminar'
+    pt: 'Excluir'
   },
   requestDeleted: {
-    pt: 'Pedido de oração excluído',
-    en: 'Prayer request deleted',
-    es: 'Petición de oración eliminada'
+    pt: 'Pedido de oração excluído'
   },
   // Hear God Speak
   hearGodSpeak: {
-    pt: 'Ouvir Deus Falar Comigo',
-    en: 'Hear God Speak to Me',
-    es: 'Escuchar a Dios Hablarme'
+    pt: 'Ouvir Deus Falar Comigo'
   },
   hearGodSpeakDesc: {
-    pt: 'Receba um versículo especial e uma mensagem inspiradora de Deus',
-    en: 'Receive a special verse and an inspiring message from God',
-    es: 'Recibe un versículo especial y un mensaje inspirador de Dios'
+    pt: 'Receba um versículo especial e uma mensagem inspiradora de Deus'
   },
   hearGodSpeakBtn: {
-    pt: 'Ouvir Deus Falar',
-    en: 'Hear God Speak',
-    es: 'Escuchar a Dios'
+    pt: 'Ouvir Deus Falar'
   },
   hearGodSpeakLoading: {
-    pt: 'Preparando mensagem...',
-    en: 'Preparing message...',
-    es: 'Preparando mensaje...'
+    pt: 'Preparando mensagem...'
   },
   hearGodSpeakTitle: {
-    pt: 'Deus falou com você',
-    en: 'God spoke to you',
-    es: 'Dios te habló'
+    pt: 'Deus falou com você'
   },
   amen: {
-    pt: 'Amém',
-    en: 'Amen',
-    es: 'Amén'
+    pt: 'Amém'
   },
   // Bible Study
   bibleStudy: {
-    pt: 'Estudo Bíblico Profundo',
-    en: 'Deep Bible Study',
-    es: 'Estudio Bíblico Profundo'
+    pt: 'Estudo Bíblico Profundo'
   },
   bibleStudySubtitle: {
-    pt: 'Entenda a verdade completa sobre qualquer versículo',
-    en: 'Understand the complete truth about any verse',
-    es: 'Comprende la verdad completa sobre cualquier versículo'
+    pt: 'Entenda a verdade completa sobre qualquer versículo'
   },
   // Image Upload
   tapToAddPhoto: {
-    pt: 'Toque aqui para adicionar uma foto',
-    en: 'Tap here to add a photo',
-    es: 'Toca aquí para añadir una foto'
+    pt: 'Toque aqui para adicionar uma foto'
   },
   selectFromGallery: {
-    pt: 'Selecione da galeria do seu celular',
-    en: 'Select from your phone gallery',
-    es: 'Selecciona de la galería de tu celular'
+    pt: 'Selecione da galeria do seu celular'
   },
   photoWillBeVisible: {
-    pt: 'A foto será visível para todos que orarem por você',
-    en: 'The photo will be visible to everyone who prays for you',
-    es: 'La foto será visible para todos los que oren por ti'
+    pt: 'A foto será visível para todos que orarem por você'
   },
   photoSelected: {
-    pt: 'Foto selecionada',
-    en: 'Photo selected',
-    es: 'Foto seleccionada'
+    pt: 'Foto selecionada'
   },
   removePhoto: {
-    pt: 'Remover foto',
-    en: 'Remove photo',
-    es: 'Eliminar foto'
+    pt: 'Remover foto'
   }
 };
 
@@ -510,26 +318,22 @@ interface LanguageContextType {
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
 
 export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [language, setLanguage] = useState<Language>('pt');
-
-  useEffect(() => {
-    const saved = localStorage.getItem('language') as Language;
-    if (saved && ['pt', 'en', 'es'].includes(saved)) {
-      setLanguage(saved);
-    }
-  }, []);
-
-  const handleSetLanguage = (lang: Language) => {
-    setLanguage(lang);
-    localStorage.setItem('language', lang);
-  };
+  const [language] = useState<Language>('pt');
 
   const t = (key: string): string => {
-    return translations[key]?.[language] || key;
+    if (translations[key] && translations[key][language]) {
+      return translations[key][language];
+    }
+    console.warn(`Translation missing for key: ${key}`);
+    return key;
+  };
+
+  const setLanguage = () => {
+    // Language is fixed to Portuguese, no-op
   };
 
   return (
-    <LanguageContext.Provider value={{ language, setLanguage: handleSetLanguage, t }}>
+    <LanguageContext.Provider value={{ language, setLanguage, t }}>
       {children}
     </LanguageContext.Provider>
   );
@@ -537,8 +341,8 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
 export const useLanguage = () => {
   const context = useContext(LanguageContext);
-  if (!context) {
-    throw new Error('useLanguage must be used within LanguageProvider');
+  if (context === undefined) {
+    throw new Error('useLanguage must be used within a LanguageProvider');
   }
   return context;
 };

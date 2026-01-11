@@ -19,19 +19,19 @@ export type Database = {
           content: string
           created_at: string
           id: string
-          user_id: string
+          user_id: string | null
         }
         Insert: {
           content: string
           created_at?: string
           id?: string
-          user_id: string
+          user_id?: string | null
         }
         Update: {
           content?: string
           created_at?: string
           id?: string
-          user_id?: string
+          user_id?: string | null
         }
         Relationships: []
       }

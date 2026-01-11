@@ -13,58 +13,20 @@ serve(async (req) => {
   }
 
   try {
-    const authHeader = req.headers.get('Authorization');
-    if (!authHeader) {
-      return new Response(JSON.stringify({ error: 'Missing Authorization header' }), {
-        status: 401,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
-    }
-
     const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_ANON_KEY') ?? '',
-      { 
-        global: { headers: { Authorization: authHeader } },
-        auth: { persistSession: false }
-      }
+      Deno.env.get('SUPABASE_ANON_KEY') ?? ''
     );
-
-    const token = authHeader.replace(/^Bearer\s+/i, '');
-    console.log('🔐 Verificando autenticação...');
-    console.log('Token recebido:', token ? 'Presente (primeiros 20 chars): ' + token.substring(0, 20) + '...' : 'AUSENTE');
-    
-    const { data: { user }, error: userError } = await supabaseClient.auth.getUser(token);
-    
-    if (userError) {
-      console.error('❌ Erro ao verificar usuário:', userError);
-      console.error('Detalhes do erro:', JSON.stringify(userError, null, 2));
-    }
-    
-    if (!user) {
-      console.error('❌ Usuário não encontrado apesar de token válido');
-    }
-    
-    if (userError || !user) {
-      console.error('Auth error:', userError);
-      return new Response(JSON.stringify({ 
-        error: 'User not authenticated',
-        details: userError?.message || 'No user found'
-      }), {
-        status: 401,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
-    }
-    
-    console.log('✅ Usuário autenticado:', user.id);
 
     const { language = 'pt' } = await req.json();
 
-    // Buscar devocionais anteriores do usuário para evitar repetição
+    console.log('📖 Gerando devocional sem autenticação obrigatória...');
+    console.log('Language:', language);
+
+    // Buscar devocionais anteriores globalmente para evitar repetição
     const { data: previousDevotionals } = await supabaseClient
       .from('devotionals')
       .select('content')
-      .eq('user_id', user.id)
       .order('created_at', { ascending: false })
       .limit(10);
 
@@ -73,7 +35,6 @@ serve(async (req) => {
       throw new Error('LOVABLE_API_KEY not configured');
     }
 
-
     // Extrair versículos dos devocionais anteriores
     const previousVerses = previousDevotionals?.map(dev => {
       const verseMatch = dev.content.match(/\*\*Versículo do Dia:\*\*.*?(?:\*\*|$)/s) || 
@@ -81,10 +42,6 @@ serve(async (req) => {
                         dev.content.match(/\*\*Versículo del Día:\*\*.*?(?:\*\*|$)/s);
       return verseMatch ? verseMatch[0].substring(0, 150) : '';
     }).filter(v => v).slice(0, 5) || [];
-
-    const avoidanceNote = previousVerses.length > 0 
-      ? `\n\nIMPORTANTE: NÃO use nenhum destes versículos que já foram usados recentemente:\n${previousVerses.join('\n')}\nEscolha um versículo DIFERENTE e um tema NOVO.`
-      : '';
 
     const prompts: Record<string, string> = {
       pt: `Você é um assistente espiritual cristão. Gere um devocional diário inspirador e edificante seguindo esta estrutura:
@@ -144,8 +101,6 @@ Sé cálido, alentador y relevante para la vida moderna.${previousVerses.length 
 
     const userPrompt = userPrompts[language] || userPrompts.pt;
 
-    console.log('Language received:', language);
-    console.log('Using system prompt for language:', language);
     console.log('Calling Lovable AI for devotional generation...');
     
     let response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
@@ -219,20 +174,22 @@ Sé cálido, alentador y relevante para la vida moderna.${previousVerses.length 
       }
     }
 
-    // Save devotional to database
+    // Save devotional to database without user_id (anonymous)
     const { error: insertError } = await supabaseClient
       .from('devotionals')
       .insert({
-        user_id: user.id,
+        user_id: null,
         content: devotionalContent
       });
 
     if (insertError) {
       console.error('Error saving devotional:', insertError);
-      throw insertError;
+      // Continue even if save fails - return content to user
+    } else {
+      console.log('Devotional saved successfully');
     }
 
-    console.log('Devotional generated and saved successfully');
+    console.log('Devotional generated successfully');
 
     return new Response(
       JSON.stringify({ content: devotionalContent }),

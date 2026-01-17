@@ -11,7 +11,6 @@ serve(async (req) => {
   }
 
   try {
-    const { language } = await req.json();
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     
     if (!LOVABLE_API_KEY) {
@@ -29,9 +28,7 @@ serve(async (req) => {
     
     console.log("Verse fetched:", reference);
 
-    // Generate inspirational message with AI
-    const languagePrompts: Record<string, string> = {
-      pt: `Com base neste versículo bíblico:
+    const prompt = `Com base neste versículo bíblico:
 "${verse}" - ${reference}
 
 Por favor, faça duas coisas:
@@ -44,38 +41,7 @@ Seja breve, tocante e espiritual.
 Retorne no formato:
 VERSÍCULO TRADUZIDO: [versículo em português]
 ---
-MENSAGEM: [mensagem inspiradora em português]`,
-      en: `Based on this Bible verse:
-"${verse}" - ${reference}
-
-Please do two things:
-1. Keep the verse as it is (it's already in English)
-2. Generate a message from God to the person based on this verse
-
-The message should convey faith, hope, peace, trust and strength.
-Be brief, touching and spiritual.
-
-Return in the format:
-TRANSLATED VERSE: ${verse}
----
-MESSAGE: [inspirational message in English]`,
-      es: `Con base en este versículo bíblico:
-"${verse}" - ${reference}
-
-Por favor, haz dos cosas:
-1. Traduce el versículo arriba al español (manteniendo la referencia ${reference})
-2. Genera un mensaje de Dios para la persona basado en este versículo
-
-El mensaje debe transmitir fe, esperanza, paz, confianza y fuerza.
-Sé breve, conmovedor y espiritual.
-
-Retorna en el formato:
-VERSÍCULO TRADUCIDO: [versículo en español]
----
-MENSAJE: [mensaje inspirador en español]`
-    };
-
-    const prompt = languagePrompts[language] || languagePrompts.en;
+MENSAGEM: [mensagem inspiradora em português]`;
 
     console.log("Generating AI message...");
 
@@ -88,7 +54,7 @@ MENSAJE: [mensaje inspirador en español]`
       body: JSON.stringify({
         model: "google/gemini-2.5-flash",
         messages: [
-          { role: "system", content: "You are a spiritual guide providing comforting and faith-inspiring messages." },
+          { role: "system", content: "You are a spiritual guide providing comforting and faith-inspiring messages. Always respond in Portuguese." },
           { role: "user", content: prompt }
         ],
       }),
@@ -117,7 +83,7 @@ MENSAJE: [mensaje inspirador en español]`
         body: JSON.stringify({
           model: "gpt-4o-mini",
           messages: [
-            { role: "system", content: "You are a spiritual guide providing comforting and faith-inspiring messages." },
+            { role: "system", content: "You are a spiritual guide providing comforting and faith-inspiring messages. Always respond in Portuguese." },
             { role: "user", content: prompt }
           ],
         }),
@@ -149,14 +115,14 @@ MENSAJE: [mensaje inspirador en español]`
         const versePart = parts[0].trim();
         const messagePart = parts[1].trim();
         
-        // Extract verse from "VERSÍCULO TRADUZIDO:" or similar
-        const verseMatch = versePart.match(/(?:VERSÍCULO TRADUZIDO|TRANSLATED VERSE|VERSÍCULO TRADUCIDO):\s*(.+)/s);
+        // Extract verse from "VERSÍCULO TRADUZIDO:"
+        const verseMatch = versePart.match(/VERSÍCULO TRADUZIDO:\s*(.+)/s);
         if (verseMatch) {
           translatedVerse = verseMatch[1].trim();
         }
         
-        // Extract message from "MENSAGEM:" or similar
-        const messageMatch = messagePart.match(/(?:MENSAGEM|MESSAGE|MENSAJE):\s*(.+)/s);
+        // Extract message from "MENSAGEM:"
+        const messageMatch = messagePart.match(/MENSAGEM:\s*(.+)/s);
         if (messageMatch) {
           message = messageMatch[1].trim();
         }

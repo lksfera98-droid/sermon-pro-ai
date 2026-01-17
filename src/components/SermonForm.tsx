@@ -8,7 +8,7 @@ import { Loader2, Sparkles } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 interface SermonFormProps {
-  onGenerate: (data: { tema: string; versiculo: string; tempo: number; language: string }) => void;
+  onGenerate: (data: { tema: string; versiculo: string; tempo: number }) => void;
   isLoading: boolean;
 }
 
@@ -16,12 +16,12 @@ export const SermonForm = ({ onGenerate, isLoading }: SermonFormProps) => {
   const [tema, setTema] = useState("");
   const [versiculo, setVersiculo] = useState("");
   const [tempo, setTempo] = useState(30);
-  const { t, language } = useLanguage();
+  const { t } = useLanguage();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!tema.trim()) return;
-    onGenerate({ tema, versiculo, tempo, language });
+    onGenerate({ tema, versiculo, tempo });
   };
 
   return (
@@ -33,7 +33,7 @@ export const SermonForm = ({ onGenerate, isLoading }: SermonFormProps) => {
             id="tema"
             value={tema}
             onChange={(e) => setTema(e.target.value)}
-            placeholder={language === 'pt' ? "Ex: O Amor de Deus" : language === 'en' ? "Ex: God's Love" : "Ej: El Amor de Dios"}
+            placeholder="Ex: O Amor de Deus"
             required
             className="h-10 md:h-11 text-base"
           />
@@ -45,14 +45,14 @@ export const SermonForm = ({ onGenerate, isLoading }: SermonFormProps) => {
             id="versiculo"
             value={versiculo}
             onChange={(e) => setVersiculo(e.target.value)}
-            placeholder={language === 'pt' ? "Ex: João 3:16" : language === 'en' ? "Ex: John 3:16" : "Ej: Juan 3:16"}
+            placeholder="Ex: João 3:16"
             className="h-10 md:h-11 text-base"
           />
         </div>
 
         <div className="space-y-2">
           <Label htmlFor="tempo" className="text-sm md:text-base">
-            {t('sermonTime')}: {tempo}+ {language === 'pt' ? 'minutos' : language === 'en' ? 'minutes' : 'minutos'}
+            {t('sermonTime')}: {tempo}+ minutos
           </Label>
           <Slider
             id="tempo"
@@ -64,11 +64,7 @@ export const SermonForm = ({ onGenerate, isLoading }: SermonFormProps) => {
             className="w-full touch-none"
           />
           <p className="text-xs md:text-sm text-muted-foreground">
-            {language === 'pt' 
-              ? 'Arraste para ajustar a duração desejada (quanto mais tempo, mais detalhado será o sermão)' 
-              : language === 'en' 
-              ? 'Drag to adjust desired duration (more time = more detailed sermon)' 
-              : 'Arrastra para ajustar la duración deseada (más tiempo = sermón más detallado)'}
+            Arraste para ajustar a duração desejada (quanto mais tempo, mais detalhado será o sermão)
           </p>
         </div>
 
@@ -80,7 +76,7 @@ export const SermonForm = ({ onGenerate, isLoading }: SermonFormProps) => {
           {isLoading ? (
             <>
               <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-              {language === 'pt' ? 'Gerando sermão...' : language === 'en' ? 'Generating sermon...' : 'Generando sermón...'}
+              Gerando sermão...
             </>
           ) : (
             <>

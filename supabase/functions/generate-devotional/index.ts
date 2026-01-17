@@ -18,10 +18,7 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_ANON_KEY') ?? ''
     );
 
-    const { language = 'pt' } = await req.json();
-
-    console.log('📖 Gerando devocional sem autenticação obrigatória...');
-    console.log('Language:', language);
+    console.log('📖 Gerando devocional...');
 
     // Buscar devocionais anteriores globalmente para evitar repetição
     const { data: previousDevotionals } = await supabaseClient
@@ -37,14 +34,11 @@ serve(async (req) => {
 
     // Extrair versículos dos devocionais anteriores
     const previousVerses = previousDevotionals?.map(dev => {
-      const verseMatch = dev.content.match(/\*\*Versículo do Dia:\*\*.*?(?:\*\*|$)/s) || 
-                        dev.content.match(/\*\*Verse of the Day:\*\*.*?(?:\*\*|$)/s) ||
-                        dev.content.match(/\*\*Versículo del Día:\*\*.*?(?:\*\*|$)/s);
+      const verseMatch = dev.content.match(/\*\*Versículo do Dia:\*\*.*?(?:\*\*|$)/s);
       return verseMatch ? verseMatch[0].substring(0, 150) : '';
     }).filter(v => v).slice(0, 5) || [];
 
-    const prompts: Record<string, string> = {
-      pt: `Você é um assistente espiritual cristão. Gere um devocional diário inspirador e edificante seguindo esta estrutura:
+    const systemPrompt = `Você é um assistente espiritual cristão. Gere um devocional diário inspirador e edificante seguindo esta estrutura:
 
 **Título:** [Um título inspirador para o devocional]
 
@@ -58,48 +52,9 @@ serve(async (req) => {
 
 **Desafio do Dia:** [Um desafio prático para o leitor colocar em prática hoje]
 
-Seja caloroso, encorajador e relevante para a vida moderna.${previousVerses.length > 0 ? `\n\nIMPORTANTE: NÃO use nenhum destes versículos que já foram usados recentemente:\n${previousVerses.join('\n')}\nEscolha um versículo DIFERENTE e um tema NOVO.` : ''}`,
-      en: `You are a Christian spiritual assistant. Generate an inspiring daily devotional following this structure:
+Seja caloroso, encorajador e relevante para a vida moderna.${previousVerses.length > 0 ? `\n\nIMPORTANTE: NÃO use nenhum destes versículos que já foram usados recentemente:\n${previousVerses.join('\n')}\nEscolha um versículo DIFERENTE e um tema NOVO.` : ''}`;
 
-**Title:** [An inspiring title for the devotional]
-
-**Verse of the Day:** [Quote a relevant Bible verse with reference]
-
-**Reflection:** [A deep and practical reflection on the verse, connecting with the reader's daily life. 3-4 paragraphs]
-
-**Practical Application:** [Suggest concrete ways to apply the teaching in daily life]
-
-**Prayer:** [A short, personal prayer related to the theme]
-
-**Daily Challenge:** [A practical challenge for the reader to implement today]
-
-Be warm, encouraging and relevant to modern life.${previousVerses.length > 0 ? `\n\nIMPORTANT: DO NOT use any of these verses that were recently used:\n${previousVerses.join('\n')}\nChoose a DIFFERENT verse and a NEW theme.` : ''}`,
-      es: `Eres un asistente espiritual cristiano. Genera un devocional diario inspirador siguiendo esta estructura:
-
-**Título:** [Un título inspirador para el devocional]
-
-**Versículo del Día:** [Cita un versículo bíblico relevante con la referencia]
-
-**Reflexión:** [Una reflexión profunda y práctica sobre el versículo, conectando con la vida diaria del lector. 3-4 párrafos]
-
-**Aplicación Práctica:** [Sugiere formas concretas de aplicar la enseñanza en la vida diaria]
-
-**Oración:** [Una oración corta y personal relacionada con el tema]
-
-**Desafío del Día:** [Un desafío práctico para que el lector implemente hoy]
-
-Sé cálido, alentador y relevante para la vida moderna.${previousVerses.length > 0 ? `\n\nIMPORTANTE: NO uses ninguno de estos versículos que ya fueron usados recientemente:\n${previousVerses.join('\n')}\nElige un versículo DIFERENTE y un tema NUEVO.` : ''}`
-    };
-
-    const systemPrompt = prompts[language] || prompts.pt;
-
-    const userPrompts: Record<string, string> = {
-      pt: 'Gere um devocional diário para hoje.',
-      en: 'Generate a daily devotional for today.',
-      es: 'Genera un devocional diario para hoy.'
-    };
-
-    const userPrompt = userPrompts[language] || userPrompts.pt;
+    const userPrompt = 'Gere um devocional diário para hoje.';
 
     console.log('Calling Lovable AI for devotional generation...');
     

@@ -10,7 +10,7 @@ import { toast } from "sonner";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 export const TranslatorSection = () => {
-  const { t, language } = useLanguage();
+  const { t } = useLanguage();
   const [word, setWord] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [translation, setTranslation] = useState<{
@@ -32,35 +32,20 @@ export const TranslatorSection = () => {
 
     try {
       const { data, error } = await supabase.functions.invoke('translate-word', {
-        body: { 
-          word: word.trim(),
-          language
-        }
+        body: { word: word.trim() }
       });
 
       if (error) {
         console.error('❌ Erro da edge function:', error);
         
         if (error.message?.includes('429') || error.message?.includes('Rate limit')) {
-          toast.error(
-            language === "pt"
-              ? "Limite de uso excedido. Por favor, tente novamente mais tarde."
-              : language === "en"
-              ? "Rate limit exceeded. Please try again later."
-              : "Límite de uso excedido. Por favor, inténtelo de nuevo más tarde."
-          );
+          toast.error("Limite de uso excedido. Por favor, tente novamente mais tarde.");
           setIsLoading(false);
           return;
         }
         
         if (error.message?.includes('402') || error.message?.includes('Payment required')) {
-          toast.error(
-            language === "pt"
-              ? "Créditos esgotados. Por favor, adicione créditos ao seu workspace."
-              : language === "en"
-              ? "Credits exhausted. Please add credits to your workspace."
-              : "Créditos agotados. Por favor, agregue créditos a su workspace."
-          );
+          toast.error("Créditos esgotados. Por favor, adicione créditos ao seu workspace.");
           setIsLoading(false);
           return;
         }
@@ -75,10 +60,10 @@ export const TranslatorSection = () => {
 
       console.log('✅ Tradução recebida com sucesso');
       setTranslation(data);
-      toast.success(language === 'pt' ? "Tradução concluída!" : language === 'en' ? "Translation completed!" : "¡Traducción completada!");
+      toast.success("Tradução concluída!");
     } catch (error) {
       console.error('❌ Erro ao traduzir palavra:', error);
-      toast.error(language === 'pt' ? "Erro ao traduzir" : language === 'en' ? "Translation error" : "Error al traducir");
+      toast.error("Erro ao traduzir");
     } finally {
       setIsLoading(false);
     }
@@ -87,13 +72,7 @@ export const TranslatorSection = () => {
   return (
     <>
       {isLoading && (
-        <LoadingProgress 
-          message={
-            language === "pt" ? "Traduzindo palavra..." :
-            language === "en" ? "Translating word..." :
-            "Traduciendo palabra..."
-          }
-        />
+        <LoadingProgress message="Traduzindo palavra..." />
       )}
       <div className="space-y-6 md:space-y-8">
       {/* Translation Form */}
@@ -119,9 +98,7 @@ export const TranslatorSection = () => {
                 {isLoading ? (
                   <>
                     <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                    <span className="hidden md:inline">
-                      {language === 'pt' ? 'Traduzindo...' : language === 'en' ? 'Translating...' : 'Traduciendo...'}
-                    </span>
+                    <span className="hidden md:inline">Traduzindo...</span>
                   </>
                 ) : (
                   <>

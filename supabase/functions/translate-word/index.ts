@@ -15,15 +15,14 @@ serve(async (req) => {
   try {
     // Input validation schema
     const translateSchema = z.object({
-      word: z.string().trim().min(1, "Palavra é obrigatória").max(100, "Palavra muito longa"),
-      language: z.enum(['pt', 'en', 'es']).default('pt')
+      word: z.string().trim().min(1, "Palavra é obrigatória").max(100, "Palavra muito longa")
     });
 
     const rawData = await req.json();
     const validated = translateSchema.parse(rawData);
-    const { word, language } = validated;
+    const { word } = validated;
     
-    console.log('Traduzindo palavra:', word, 'idioma:', language);
+    console.log('Traduzindo palavra:', word);
 
     const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
     
@@ -31,45 +30,10 @@ serve(async (req) => {
       throw new Error('OPENAI_API_KEY não configurada');
     }
 
-    const languageInstructions = {
-      pt: {
-        instruction: 'Responda em PORTUGUÊS BRASILEIRO.',
-        example: {
-          hebrew: "אַהֲבָה (ahavah) - forma hebraica",
-          greek: "ἀγάπη (agape) - forma grega",
-          aramaic: "חוּבָּא (khubba) - forma aramaica",
-          etymology: "A palavra 'amor' tem raízes profundas nas línguas semíticas... [continuar com pelo menos 150 palavras]",
-          history: "No contexto bíblico, o conceito de amor evoluiu... [continuar com pelo menos 200 palavras]"
-        }
-      },
-      en: {
-        instruction: 'Respond in ENGLISH.',
-        example: {
-          hebrew: "אַהֲבָה (ahavah) - Hebrew form",
-          greek: "ἀγάπη (agape) - Greek form",
-          aramaic: "חוּבָּא (khubba) - Aramaic form",
-          etymology: "The word 'love' has deep roots in Semitic languages... [continue with at least 150 words]",
-          history: "In the biblical context, the concept of love evolved... [continue with at least 200 words]"
-        }
-      },
-      es: {
-        instruction: 'Responda en ESPAÑOL.',
-        example: {
-          hebrew: "אַהֲבָה (ahavah) - forma hebrea",
-          greek: "ἀγάπη (agape) - forma griega",
-          aramaic: "חוּבָּא (khubba) - forma aramea",
-          etymology: "La palabra 'amor' tiene raíces profundas en las lenguas semíticas... [continuar con al menos 150 palabras]",
-          history: "En el contexto bíblico, el concepto de amor evolucionó... [continuar con al menos 200 palabras]"
-        }
-      }
-    };
-
-    const langConfig = languageInstructions[language as keyof typeof languageInstructions] || languageInstructions.pt;
-
     const prompt = `
 You are an expert in biblical languages (Hebrew, Greek, and Aramaic) and biblical etymology.
 
-${langConfig.instruction}
+Responda em PORTUGUÊS BRASILEIRO.
 
 Word/Name to translate: "${word}"
 
@@ -107,7 +71,13 @@ Return the response in JSON format with keys: hebrew, greek, aramaic, etymology,
 ALL fields are MANDATORY. Provide rich and educational content.
 
 Example format:
-${JSON.stringify(langConfig.example, null, 2)}
+{
+  "hebrew": "אַהֲבָה (ahavah) - forma hebraica",
+  "greek": "ἀγάπη (agape) - forma grega",
+  "aramaic": "חוּבָּא (khubba) - forma aramaica",
+  "etymology": "A palavra 'amor' tem raízes profundas nas línguas semíticas... [continuar com pelo menos 150 palavras]",
+  "history": "No contexto bíblico, o conceito de amor evoluiu... [continuar com pelo menos 200 palavras]"
+}
 `;
 
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
@@ -121,7 +91,7 @@ ${JSON.stringify(langConfig.example, null, 2)}
         messages: [
           {
             role: 'system',
-            content: 'Você é um especialista em línguas bíblicas e etimologia. Sempre responda em formato JSON válido.'
+            content: 'Você é um especialista em línguas bíblicas e etimologia. Sempre responda em formato JSON válido e em português brasileiro.'
           },
           {
             role: 'user',

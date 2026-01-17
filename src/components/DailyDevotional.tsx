@@ -14,7 +14,7 @@ const DailyDevotional = () => {
   const [savedDevotionals, setSavedDevotionals] = useState<any[]>([]);
   const [viewingId, setViewingId] = useState<string | null>(null);
   const { toast } = useToast();
-  const { language, t } = useLanguage();
+  const { t } = useLanguage();
 
   useEffect(() => {
     loadSavedDevotionals();
@@ -40,7 +40,7 @@ const DailyDevotional = () => {
     
     try {
       const { data, error } = await supabase.functions.invoke('generate-devotional', {
-        body: { language }
+        body: {}
       });
 
       console.log('📥 Resposta recebida:', { data, error });
@@ -49,19 +49,11 @@ const DailyDevotional = () => {
         console.error('❌ Erro da edge function:', error);
         
         if (error.message?.includes('429') || error.message?.includes('Rate limit')) {
-          throw new Error(language === "pt" 
-            ? "Você atingiu o limite de uso. Aguarde alguns minutos e tente novamente." 
-            : language === "en"
-            ? "Rate limit exceeded. Please wait a few minutes and try again."
-            : "Límite de uso alcanzado. Espere unos minutos e intente nuevamente.");
+          throw new Error("Você atingiu o limite de uso. Aguarde alguns minutos e tente novamente.");
         }
         
         if (error.message?.includes('402') || error.message?.includes('Payment')) {
-          throw new Error(language === "pt" 
-            ? "Créditos esgotados. Por favor, adicione créditos ao seu workspace Lovable." 
-            : language === "en"
-            ? "Credits exhausted. Please add credits to your Lovable workspace."
-            : "Créditos agotados. Por favor, agregue créditos a su workspace Lovable.");
+          throw new Error("Créditos esgotados. Por favor, adicione créditos ao seu workspace Lovable.");
         }
         
         throw error;
@@ -73,16 +65,14 @@ const DailyDevotional = () => {
         await loadSavedDevotionals();
         toast({
           title: t('success'),
-          description: language === 'pt' ? 'Devocional gerado com sucesso!' : 
-                      language === 'es' ? '¡Devocional generado con éxito!' : 
-                      'Devotional generated successfully!',
+          description: 'Devocional gerado com sucesso!',
         });
       }
     } catch (error: any) {
       console.error('💥 Erro final:', error);
       toast({
         title: t('error'),
-        description: error.message || (language === 'pt' ? 'Erro ao gerar devocional' : language === 'en' ? 'Error generating devotional' : 'Error al generar devocional'),
+        description: error.message || 'Erro ao gerar devocional',
         variant: "destructive",
       });
     } finally {
@@ -173,9 +163,7 @@ const DailyDevotional = () => {
       
       toast({
         title: t('success'),
-        description: language === 'pt' ? 'Devocional excluído!' : 
-                    language === 'es' ? '¡Devocional eliminado!' : 
-                    'Devotional deleted!',
+        description: 'Devocional excluído!',
       });
     } catch (error: any) {
       console.error('Error deleting devotional:', error);
@@ -197,14 +185,10 @@ const DailyDevotional = () => {
             </div>
             <div>
               <h2 className="text-2xl md:text-3xl font-bold text-foreground">
-                {language === 'pt' ? 'Devocional Diário' : 
-                 language === 'es' ? 'Devocional Diario' : 
-                 'Daily Devotional'}
+                Devocional Diário
               </h2>
               <p className="text-sm text-muted-foreground">
-                {language === 'pt' ? 'Alimento espiritual para sua alma' : 
-                 language === 'es' ? 'Alimento espiritual para tu alma' : 
-                 'Spiritual food for your soul'}
+                Alimento espiritual para sua alma
               </p>
             </div>
           </div>
@@ -219,7 +203,7 @@ const DailyDevotional = () => {
               }}
               className="mb-4 w-fit"
             >
-              {language === 'pt' ? '← Voltar' : language === 'es' ? '← Volver' : '← Back'}
+              ← Voltar
             </Button>
           )}
 
@@ -230,16 +214,14 @@ const DailyDevotional = () => {
               className="w-full mb-6 h-14 text-lg font-semibold bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 shadow-lg hover:shadow-xl transition-all duration-300"
             >
               <Sparkles className="w-5 h-5 mr-2" />
-              {language === 'pt' ? 'Gerar Meu Devocional' : 
-               language === 'es' ? 'Generar Mi Devocional' : 
-               'Generate My Devotional'}
+              Gerar Meu Devocional
             </Button>
           )}
 
           {isLoading && (
             <div className="w-full mb-6 h-14 flex items-center justify-center rounded-xl border-2 border-primary/20 bg-primary/5 text-primary font-semibold">
               <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-              {language === 'pt' ? 'Gerando...' : language === 'es' ? 'Generando...' : 'Generating...'}
+              Gerando...
             </div>
           )}
 
@@ -252,9 +234,7 @@ const DailyDevotional = () => {
                   className="flex-1 min-w-[140px] border-2 hover:bg-primary/5"
                 >
                   <Download className="w-4 h-4 mr-2" />
-                  {language === 'pt' ? 'Baixar PDF' : 
-                   language === 'es' ? 'Descargar PDF' : 
-                   'Download PDF'}
+                  Baixar PDF
                 </Button>
                 <Button
                   onClick={downloadTXT}
@@ -262,9 +242,7 @@ const DailyDevotional = () => {
                   className="flex-1 min-w-[140px] border-2 hover:bg-primary/5"
                 >
                   <FileText className="w-4 h-4 mr-2" />
-                  {language === 'pt' ? 'Baixar TXT' : 
-                   language === 'es' ? 'Descargar TXT' : 
-                   'Download TXT'}
+                  Baixar TXT
                 </Button>
               </div>
 
@@ -280,9 +258,7 @@ const DailyDevotional = () => {
         {!devotional && savedDevotionals.length > 0 && (
           <Card className="p-6 md:p-8 bg-card/95 backdrop-blur-sm border-2 shadow-xl">
             <h3 className="text-xl font-bold mb-4 text-foreground">
-              {language === 'pt' ? 'Devocionais Salvos' : 
-               language === 'es' ? 'Devocionales Guardados' : 
-               'Saved Devotionals'}
+              Devocionais Salvos
             </h3>
             <div className="space-y-3">
               {savedDevotionals.map((dev) => (
@@ -296,7 +272,7 @@ const DailyDevotional = () => {
                   >
                     <div className="flex items-center gap-2 text-sm text-muted-foreground">
                       <Calendar className="w-4 h-4" />
-                      {new Date(dev.created_at).toLocaleDateString(language === 'pt' ? 'pt-BR' : language === 'es' ? 'es-ES' : 'en-US')}
+                      {new Date(dev.created_at).toLocaleDateString('pt-BR')}
                     </div>
                     <p className="mt-1 text-foreground/70 line-clamp-2">
                       {dev.content.substring(0, 100)}...
@@ -309,7 +285,7 @@ const DailyDevotional = () => {
                     className="mt-2 w-full text-destructive hover:text-destructive hover:bg-destructive/10"
                   >
                     <Trash2 className="w-4 h-4 mr-2" />
-                    {language === 'pt' ? 'Excluir' : language === 'es' ? 'Eliminar' : 'Delete'}
+                    Excluir
                   </Button>
                 </div>
               ))}

@@ -35,11 +35,24 @@ export const MainMenu = ({ onNavigate }: MainMenuProps) => {
   const { t } = useLanguage();
 
   const handleAndroidInstall = async () => {
-    const installed = await installPWA();
-    if (installed) {
-      toast.success("App instalado com sucesso! 🎉");
-    } else if (!isInstallable) {
-      toast.info("App já está instalado ou não pode ser instalado neste dispositivo");
+    // Se já está em modo standalone, o app já está instalado
+    if (isInStandaloneMode()) {
+      toast.success("Você já está usando o app instalado! 🎉");
+      return;
+    }
+    
+    // Se o deferredPrompt existe, tentar instalar
+    if (isInstallable) {
+      const installed = await installPWA();
+      if (installed) {
+        toast.success("App instalado com sucesso! 🎉");
+      }
+    } else {
+      // Se não tem o prompt, mostrar instruções manuais
+      toast.info(
+        "Para instalar: toque nos 3 pontinhos (⋮) do navegador e selecione 'Adicionar à tela inicial'",
+        { duration: 6000 }
+      );
     }
   };
 

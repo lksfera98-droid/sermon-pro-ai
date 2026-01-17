@@ -25,7 +25,7 @@ export const VerseSearchSection = () => {
   const [verses, setVerses] = useState<Verse[]>([]);
   const [introText, setIntroText] = useState<string>("");
   const [openVerses, setOpenVerses] = useState<Set<number>>(new Set());
-  const { language, t } = useLanguage();
+  const { t } = useLanguage();
 
   const parseVerses = (text: string): { verses: Verse[], intro: string } => {
     const parsed: Verse[] = [];
@@ -45,10 +45,6 @@ export const VerseSearchSection = () => {
       if (block.includes('Como um especialista') || 
           block.includes('grande satisfação') ||
           block.includes('Aqui estão') ||
-          block.includes('Versículos Bíblicos sobre') ||
-          block.includes('As a biblical expert') ||
-          block.includes('Bible Verses about') ||
-          block.includes('Como experto bíblico') ||
           block.includes('Versículos Bíblicos sobre')) {
         continue;
       }
@@ -70,7 +66,7 @@ export const VerseSearchSection = () => {
       }
       
       // Extract explanation
-      const explMatch = block.match(/\*(?:Explicação|Explanation|Explicación):\*?\s*(.+)/s);
+      const explMatch = block.match(/\*(?:Explicação):\*?\s*(.+)/s);
       if (explMatch) {
         explanation = explMatch[1].trim();
       }
@@ -100,7 +96,7 @@ export const VerseSearchSection = () => {
 
   const handleSearch = async () => {
     if (!word.trim()) {
-      toast.error(language === 'pt' ? 'Digite uma palavra' : language === 'en' ? 'Enter a word' : 'Escribe una palabra');
+      toast.error('Digite uma palavra');
       return;
     }
 
@@ -114,7 +110,7 @@ export const VerseSearchSection = () => {
       console.log('📡 Chamando edge function search-verses...');
       
       const { data, error } = await supabase.functions.invoke('search-verses', {
-        body: { word: word.trim(), language }
+        body: { word: word.trim() }
       });
 
       console.log('📥 Resposta recebida:', { data, error });
@@ -123,19 +119,11 @@ export const VerseSearchSection = () => {
         console.error('❌ Erro:', error);
         
         if (error.message?.includes('429') || error.message?.includes('Rate limit')) {
-          throw new Error(language === 'pt' 
-            ? 'Limite de uso atingido. Aguarde alguns minutos.' 
-            : language === 'en'
-            ? 'Rate limit exceeded. Please wait.'
-            : 'Límite de uso alcanzado. Espere unos minutos.');
+          throw new Error('Limite de uso atingido. Aguarde alguns minutos.');
         }
         
         if (error.message?.includes('402') || error.message?.includes('Payment')) {
-          throw new Error(language === 'pt' 
-            ? 'Créditos esgotados. Adicione créditos ao workspace.' 
-            : language === 'en'
-            ? 'Credits exhausted. Please add credits.'
-            : 'Créditos agotados. Agregue créditos.');
+          throw new Error('Créditos esgotados. Adicione créditos ao workspace.');
         }
         
         throw error;
@@ -153,7 +141,7 @@ export const VerseSearchSection = () => {
       toast.success(t('search') + "!");
     } catch (error: any) {
       console.error('💥 Erro ao pesquisar:', error);
-      toast.error(error.message || (language === 'pt' ? "Erro ao pesquisar versículos. Tente novamente." : language === 'en' ? "Error searching verses. Try again." : "Error al buscar versículos. Inténtelo de nuevo."));
+      toast.error(error.message || "Erro ao pesquisar versículos. Tente novamente.");
     } finally {
       setIsLoading(false);
     }
@@ -172,13 +160,7 @@ export const VerseSearchSection = () => {
   return (
     <>
       {isLoading && (
-        <LoadingProgress 
-          message={
-            language === "pt" ? "Buscando versículos..." :
-            language === "en" ? "Searching verses..." :
-            "Buscando versículos..."
-          }
-        />
+        <LoadingProgress message="Buscando versículos..." />
       )}
       <div className="space-y-6">
       <Card className="p-6">
@@ -190,7 +172,7 @@ export const VerseSearchSection = () => {
             <Input
               value={word}
               onChange={(e) => setWord(e.target.value)}
-              placeholder={language === 'pt' ? 'amor, fé, esperança...' : language === 'en' ? 'love, faith, hope...' : 'amor, fe, esperanza...'}
+              placeholder="amor, fé, esperança..."
               onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
             />
           </div>
@@ -203,7 +185,7 @@ export const VerseSearchSection = () => {
             {isLoading ? (
               <>
                 <Search className="h-4 w-4 animate-pulse" />
-                {language === 'pt' ? 'Buscando versículos...' : language === 'en' ? 'Searching verses...' : 'Buscando versículos...'}
+                Buscando versículos...
               </>
             ) : (
               <>
@@ -257,9 +239,7 @@ export const VerseSearchSection = () => {
                       {verse.explanation && (
                         <div className="pt-2 border-t border-border">
                           <p className="text-xs md:text-sm text-muted-foreground">
-                            <span className="font-semibold text-primary">
-                              {language === 'pt' ? 'Explicação: ' : language === 'en' ? 'Explanation: ' : 'Explicación: '}
-                            </span>
+                            <span className="font-semibold text-primary">Explicação: </span>
                             {verse.explanation}
                           </p>
                         </div>

@@ -15,21 +15,19 @@ serve(async (req) => {
   try {
     // Input validation schema
     const verseSchema = z.object({
-      word: z.string().trim().min(1, "Palavra é obrigatória").max(100, "Palavra muito longa"),
-      language: z.enum(['pt', 'en', 'es']).default('pt')
+      word: z.string().trim().min(1, "Palavra é obrigatória").max(100, "Palavra muito longa")
     });
 
     const rawData = await req.json();
     const validated = verseSchema.parse(rawData);
-    const { word, language } = validated;
+    const { word } = validated;
 
     const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
     if (!LOVABLE_API_KEY) {
       throw new Error('LOVABLE_API_KEY não configurada');
     }
 
-    const promptTemplates = {
-      pt: `Você é um especialista bíblico. Encontre e liste O MÁXIMO POSSÍVEL de versículos relevantes da Bíblia sobre "${word}".
+    const prompt = `Você é um especialista bíblico. Encontre e liste O MÁXIMO POSSÍVEL de versículos relevantes da Bíblia sobre "${word}".
 
 INSTRUÇÕES CRÍTICAS:
 - Liste PELO MENOS 30-50 versículos variados de TODOS os livros bíblicos possíveis (Antigo e Novo Testamento)
@@ -45,55 +43,11 @@ Para cada versículo, forneça EXATAMENTE neste formato (sem texto introdutório
 
 Separe cada versículo com uma linha em branco.
 Organize começando com Antigo Testamento, depois Novo Testamento.
-NÃO inclua frases como "Com certeza!" ou "Aqui estão X versículos" - vá direto aos versículos.`,
-      
-      en: `You are a biblical expert. Find and list AS MANY relevant Bible verses as possible about "${word}".
+NÃO inclua frases como "Com certeza!" ou "Aqui estão X versículos" - vá direto aos versículos.`;
 
-CRITICAL INSTRUCTIONS:
-- List AT LEAST 30-50 varied verses from ALL possible biblical books (Old and New Testament)
-- The more verses, the better! The goal is to provide a COMPLETE and EXHAUSTIVE list
-- Cover different aspects and contexts of the searched word
-- DO NOT limit to just a few verses - list ALL important verses
+    const systemMessage = 'Você é um especialista em estudos bíblicos. Forneça o máximo de versículos possíveis sem textos introdutórios. Sempre responda em português.';
 
-For each verse, provide in EXACTLY this format (without introductory text):
-
-**[Book Chapter:Verse]**
-"[Full text of the verse]"
-*Explanation:* [Brief explanation - 1-2 sentences]
-
-Separate each verse with a blank line.
-Organize starting with Old Testament, then New Testament.
-DO NOT include phrases like "Certainly!" or "Here are X verses" - go straight to the verses.`,
-      
-      es: `Eres un experto bíblico. Encuentra y enumera EL MÁXIMO POSIBLE de versículos relevantes de la Biblia sobre "${word}".
-
-INSTRUCCIONES CRÍTICAS:
-- Enumera AL MENOS 30-50 versículos variados de TODOS los libros bíblicos posibles (Antiguo y Nuevo Testamento)
-- ¡Cuantos más versículos, mejor! El objetivo es proporcionar una lista COMPLETA y EXHAUSTIVA
-- Cubre diferentes aspectos y contextos de la palabra buscada
-- NO te limites a solo algunos versículos - enumera TODOS los versículos importantes
-
-Para cada versículo, proporciona EXACTAMENTE en este formato (sin texto introductorio):
-
-**[Libro Capítulo:Versículo]**
-"[Texto completo del versículo]"
-*Explicación:* [Breve explicación - 1-2 frases]
-
-Separa cada versículo con una línea en blanco.
-Organiza comenzando con Antiguo Testamento, luego Nuevo Testamento.
-NO incluyas frases como "¡Por supuesto!" o "Aquí están X versículos" - ve directo a los versículos.`
-    };
-
-    const systemMessages = {
-      pt: 'Você é um especialista em estudos bíblicos. Forneça o máximo de versículos possíveis sem textos introdutórios.',
-      en: 'You are a Bible study expert. Provide as many verses as possible without introductory text.',
-      es: 'Eres un experto en estudios bíblicos. Proporciona el máximo de versículos posibles sin textos introductorios.'
-    };
-
-    const prompt = promptTemplates[language as keyof typeof promptTemplates] || promptTemplates.pt;
-    const systemMessage = systemMessages[language as keyof typeof systemMessages] || systemMessages.pt;
-
-    console.log('Pesquisando versículos para:', word, 'em', language);
+    console.log('Pesquisando versículos para:', word);
 
     let response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',

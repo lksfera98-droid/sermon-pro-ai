@@ -145,13 +145,21 @@ Gere o sermão completo agora.`;
     const data = await response.json();
     let sermao = data.choices[0].message.content;
 
-    // Limpar qualquer formatação markdown residual
+    // Limpar qualquer formatação markdown e HTML residual
     sermao = sermao
-      .replace(/\*\*/g, '')  // Remove **
-      .replace(/\*/g, '')    // Remove *
+      .replace(/\*\*\*/g, '')  // Remove ***
+      .replace(/\*\*/g, '')    // Remove **
+      .replace(/\*/g, '')      // Remove *
       .replace(/#{1,6}\s/g, '') // Remove # headers
-      .replace(/`/g, '')     // Remove backticks
-      .replace(/\[|\]/g, '') // Remove brackets
+      .replace(/`/g, '')       // Remove backticks
+      .replace(/\[|\]/g, '')   // Remove brackets
+      .replace(/<\/?b>/gi, '') // Remove <b> tags
+      .replace(/<\/?strong>/gi, '') // Remove <strong> tags
+      .replace(/<\/?em>/gi, '') // Remove <em> tags
+      .replace(/<\/?i>/gi, '') // Remove <i> tags
+      .replace(/<\/?u>/gi, '') // Remove <u> tags
+      .replace(/_{2,}/g, '')   // Remove __ underscores
+      .replace(/~{2,}/g, '')   // Remove ~~ strikethrough
       .trim();
 
     console.log('Sermão gerado com sucesso');

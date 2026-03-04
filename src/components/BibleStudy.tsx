@@ -21,7 +21,7 @@ export const BibleStudy = () => {
 
   const handleGenerateStudy = async () => {
     if (!verseReference.trim()) {
-      toast.error(language === "pt" ? "Por favor, digite um versículo" : language === "en" ? "Please enter a verse" : "Por favor, ingrese un versículo");
+      toast.error("Por favor, digite um versículo");
       return;
     }
 
@@ -41,19 +41,11 @@ export const BibleStudy = () => {
         console.error('❌ Erro da edge function:', error);
         
         if (error.message?.includes('429') || error.message?.includes('Rate limit')) {
-          throw new Error(language === "pt" 
-            ? "Você atingiu o limite de uso. Aguarde alguns minutos e tente novamente." 
-            : language === "en"
-            ? "Rate limit exceeded. Please wait a few minutes and try again."
-            : "Límite de uso alcanzado. Espere unos minutos e intente nuevamente.");
+          throw new Error("Você atingiu o limite de uso. Aguarde alguns minutos e tente novamente.");
         }
         
         if (error.message?.includes('402') || error.message?.includes('Payment')) {
-          throw new Error(language === "pt" 
-            ? "Créditos esgotados. Por favor, adicione créditos ao seu workspace Lovable." 
-            : language === "en"
-            ? "Credits exhausted. Please add credits to your Lovable workspace."
-            : "Créditos agotados. Por favor, agregue créditos a su workspace Lovable.");
+          throw new Error("Créditos esgotados. Por favor, adicione créditos ao seu workspace Lovable.");
         }
         
         throw error;
@@ -61,15 +53,15 @@ export const BibleStudy = () => {
 
       if (!data || data.error) {
         console.error('❌ Erro nos dados:', data?.error);
-        throw new Error(data?.error || (language === "pt" ? "Versículo não encontrado" : language === "en" ? "Verse not found" : "Versículo no encontrado"));
+        throw new Error(data?.error || "Versículo não encontrado");
       }
 
       console.log('✅ Estudo gerado com sucesso!');
       setStudy(data);
-      toast.success(language === "pt" ? "Estudo gerado!" : language === "en" ? "Study generated!" : "¡Estudio generado!");
+      toast.success("Estudo gerado!");
     } catch (error: any) {
       console.error('💥 Erro final:', error);
-      toast.error(error.message || (language === "pt" ? "Erro ao gerar estudo" : language === "en" ? "Error generating study" : "Error al generar estudio"));
+      toast.error(error.message || "Erro ao gerar estudo");
     } finally {
       setIsLoading(false);
     }
@@ -81,31 +73,42 @@ export const BibleStudy = () => {
     }
   };
 
+  const cleanText = (text: string) => {
+    return text
+      .replace(/<[^>]*class="[^"]*"[^>]*>/gi, '')
+      .replace(/<\/?\w+[^>]*>/gi, '')
+      .replace(/\*{1,3}/g, '')
+      .replace(/#{1,6}\s/g, '')
+      .replace(/`/g, '')
+      .replace(/_{2,}/g, '')
+      .replace(/~{2,}/g, '');
+  };
+
   const formatStudyText = (text: string) => {
     return text.split('\n').map((line, index) => {
-      // Detect headers with ** or ##
-      if (line.match(/^\*\*.*\*\*/) || line.match(/^#+\s/)) {
-        const cleanLine = line.replace(/^\*\*|\*\*$/g, '').replace(/^#+\s/, '');
+      const cleanLine = cleanText(line);
+      
+      // Section headers (lines ending with : or short uppercase lines)
+      if ((cleanLine.match(/^[A-ZÁÉÍÓÚÂÊÔÃÕ\d][^:]*:$/) && cleanLine.length < 100) ||
+          (cleanLine === cleanLine.toUpperCase() && cleanLine.trim().length > 3 && cleanLine.length < 100)) {
         return (
           <h3 key={index} className="text-xl font-bold text-primary mt-6 mb-3">
             {cleanLine}
           </h3>
         );
       }
-      // Regular text with bold formatting
-      if (line.trim()) {
-        const parts = line.split(/(\*\*.*?\*\*)/g);
-        const formattedLine = parts.map((part, i) => {
-          if (part.match(/^\*\*.*\*\*$/)) {
-            const boldText = part.replace(/^\*\*|\*\*$/g, '');
-            return <strong key={i} className="font-bold">{boldText}</strong>;
-          }
-          return part;
-        });
-        
+      // Numbered points
+      if (cleanLine.match(/^\d+\.\s/)) {
+        return (
+          <div key={index} className="my-3 p-3 bg-muted/30 rounded-lg border-l-4 border-primary">
+            <p className="font-semibold leading-relaxed">{cleanLine}</p>
+          </div>
+        );
+      }
+      if (cleanLine.trim()) {
         return (
           <p key={index} className="mb-3 leading-relaxed">
-            {formattedLine}
+            {cleanLine}
           </p>
         );
       }
@@ -126,7 +129,7 @@ export const BibleStudy = () => {
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
-    toast.success(language === 'pt' ? 'Arquivo TXT baixado!' : language === 'en' ? 'TXT file downloaded!' : '¡Archivo TXT descargado!');
+    toast.success('Arquivo TXT baixado!');
   };
 
   const downloadPDF = () => {
@@ -175,12 +178,12 @@ export const BibleStudy = () => {
     });
 
     doc.save(`estudo-biblico-${study.reference.replace(/\s+/g, '-')}.pdf`);
-    toast.success(language === 'pt' ? 'PDF gerado com sucesso!' : language === 'en' ? 'PDF generated successfully!' : '¡PDF generado con éxito!');
+    toast.success('PDF gerado com sucesso!');
   };
 
   return (
     <div className="w-full max-w-4xl mx-auto space-y-6">
-      {isLoading && <LoadingProgress message={language === "pt" ? "Gerando estudo bíblico..." : language === "en" ? "Generating Bible study..." : "Generando estudio bíblico..."} />}
+      {isLoading && <LoadingProgress message="Gerando estudo bíblico..." />}
       
       <Card className="p-6 md:p-8 bg-gradient-to-br from-card to-card/80 border-2 border-primary/20">
         <div className="flex items-center gap-3 mb-6">
@@ -189,14 +192,10 @@ export const BibleStudy = () => {
           </div>
           <div>
             <h2 className="text-2xl md:text-3xl font-bold text-foreground">
-              {language === "pt" ? "📖 Estudo Bíblico Profundo" : language === "en" ? "📖 Deep Bible Study" : "📖 Estudio Bíblico Profundo"}
+              📖 Estudo Bíblico Profundo
             </h2>
             <p className="text-sm text-muted-foreground">
-              {language === "pt" 
-                ? "Digite a referência do versículo (ex: João 3:16)" 
-                : language === "en" 
-                ? "Enter the verse reference (e.g., John 3:16)" 
-                : "Ingrese la referencia del versículo (ej: Juan 3:16)"}
+              Digite a referência do versículo (ex: João 3:16)
             </p>
           </div>
         </div>
@@ -204,12 +203,12 @@ export const BibleStudy = () => {
         <div className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="verse-reference" className="text-base font-semibold">
-              {language === "pt" ? "Referência do Versículo" : language === "en" ? "Verse Reference" : "Referencia del Versículo"}
+              Referência do Versículo
             </Label>
             <Input
               id="verse-reference"
               type="text"
-              placeholder={language === "pt" ? "Ex: João 3:16, Salmos 23:1, Gênesis 1:1" : language === "en" ? "E.g., John 3:16, Psalm 23:1, Genesis 1:1" : "Ej: Juan 3:16, Salmos 23:1, Génesis 1:1"}
+              placeholder="Ex: João 3:16, Salmos 23:1, Gênesis 1:1"
               value={verseReference}
               onChange={(e) => setVerseReference(e.target.value)}
               onKeyPress={handleKeyPress}
@@ -224,7 +223,7 @@ export const BibleStudy = () => {
             size="lg"
           >
             <Sparkles className="h-5 w-5" />
-            {language === "pt" ? "Gerar Estudo Completo" : language === "en" ? "Generate Complete Study" : "Generar Estudio Completo"}
+            {language === "pt" ? "Gerar Estudo Completo" : "Gerar Estudo Completo"}
           </Button>
         </div>
       </Card>
@@ -245,7 +244,7 @@ export const BibleStudy = () => {
                   className="gap-2"
                 >
                   <Download className="h-4 w-4" />
-                  {language === 'pt' ? 'Baixar PDF' : language === 'en' ? 'Download PDF' : 'Descargar PDF'}
+                  {language === 'pt' ? 'Baixar PDF' : 'Baixar PDF'}
                 </Button>
                 <Button
                   onClick={downloadTXT}
@@ -253,7 +252,7 @@ export const BibleStudy = () => {
                   className="gap-2"
                 >
                   <FileText className="h-4 w-4" />
-                  {language === 'pt' ? 'Baixar TXT' : language === 'en' ? 'Download TXT' : 'Descargar TXT'}
+                  {language === 'pt' ? 'Baixar TXT' : 'Baixar TXT'}
                 </Button>
               </div>
             </div>

@@ -145,21 +145,16 @@ Gere o sermão completo agora.`;
     const data = await response.json();
     let sermao = data.choices[0].message.content;
 
-    // Limpar qualquer formatação markdown e HTML residual
+    // Limpar qualquer formatação markdown, HTML e classes CSS residuais
     sermao = sermao
-      .replace(/\*\*\*/g, '')  // Remove ***
-      .replace(/\*\*/g, '')    // Remove **
-      .replace(/\*/g, '')      // Remove *
-      .replace(/#{1,6}\s/g, '') // Remove # headers
-      .replace(/`/g, '')       // Remove backticks
-      .replace(/\[|\]/g, '')   // Remove brackets
-      .replace(/<\/?b>/gi, '') // Remove <b> tags
-      .replace(/<\/?strong>/gi, '') // Remove <strong> tags
-      .replace(/<\/?em>/gi, '') // Remove <em> tags
-      .replace(/<\/?i>/gi, '') // Remove <i> tags
-      .replace(/<\/?u>/gi, '') // Remove <u> tags
-      .replace(/_{2,}/g, '')   // Remove __ underscores
-      .replace(/~{2,}/g, '')   // Remove ~~ strikethrough
+      .replace(/<[^>]*class="[^"]*"[^>]*>/gi, '') // Remove tags with CSS classes
+      .replace(/<\/?\w+[^>]*>/gi, '')              // Remove ALL HTML tags
+      .replace(/\*{1,3}/g, '')
+      .replace(/#{1,6}\s/g, '')
+      .replace(/`/g, '')
+      .replace(/\[|\]/g, '')
+      .replace(/_{2,}/g, '')
+      .replace(/~{2,}/g, '')
       .trim();
 
     console.log('Sermão gerado com sucesso');

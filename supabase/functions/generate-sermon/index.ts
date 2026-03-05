@@ -102,11 +102,17 @@ ${tempo > 60 ? '- Ilustração final impactante' : ''}
 ORAÇÃO FINAL
 Escreva uma ${tempo > 40 ? 'oração detalhada e temática' : 'oração relacionada ao tema'}.
 
+CITAÇÕES DE TEÓLOGOS:
+Inclua ao longo do sermão citações relevantes de grandes teólogos e pensadores cristãos que estejam em conformidade com o tema abordado. Escolha algumas (não precisa usar todas) dentre estes nomes:
+- Clássicos: Agostinho de Hipona, Tomás de Aquino, Martinho Lutero, João Calvino, Orígenes, Irineu de Lyon
+- Modernos/Contemporâneos: Karl Barth, Dietrich Bonhoeffer, C.S. Lewis, John Stott, Billy Graham, R.C. Sproul, John Piper, Wayne Grudem, Tim Keller, T.D. Jakes
+As citações devem ser inseridas naturalmente no texto, entre aspas, com o nome do autor. Escolha apenas as que se encaixam no tema.
+
 REGRAS IMPORTANTES:
 1. NÃO use asteriscos ou símbolos de formatação como ** ou *
 2. NÃO escreva instruções de formatação no texto (como "negrito", "itálico", etc.)
 3. Escreva o conteúdo de forma natural e limpa
-4. Use aspas normais para citações bíblicas
+4. Use aspas normais para citações bíblicas e de teólogos
 5. Seja profundo, inspirador e prático
 6. O sermão deve tocar o coração e transformar vidas
 7. Escreva TUDO em português brasileiro

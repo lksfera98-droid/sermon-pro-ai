@@ -182,7 +182,7 @@ export const MainMenu = ({ onNavigate }: MainMenuProps) => {
             />
           </div>
           
-          <h1 className="text-3xl md:text-4xl font-bold text-primary">
+          <h1 className="text-3xl md:text-4xl font-bold text-[hsl(215,60%,25%)] dark:text-blue-300">
             {t('welcome')}
           </h1>
           <p className="text-sm md:text-base text-muted-foreground">

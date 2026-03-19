@@ -8,9 +8,18 @@ import { Loader2, ShieldX, RefreshCw, LogOut, Crown, Zap, CheckCircle2 } from 'l
 import { toast } from 'sonner';
 import preacherLogo from '@/assets/preacher-logo.png';
 
+const statusMessages: Record<string, string> = {
+  approved: 'Seu pagamento foi aprovado! Verificando liberação...',
+  pending: 'Pagamento ainda pendente. Conclua o pagamento para liberar o acesso.',
+  cancelled: 'Seu pagamento foi cancelado. Escolha um plano abaixo para reativar.',
+  expired: 'Seu acesso expirou. Renove escolhendo um plano abaixo.',
+  refunded: 'Seu pagamento foi reembolsado. O acesso foi revogado.',
+  not_found: 'Conta não encontrada. Tente sair e entrar novamente.',
+};
+
 const AccessBlocked = () => {
   const { user, signOut } = useAuth();
-  const { hasAccess, loading, recheckAccess } = useAccessCheck();
+  const { hasAccess, accessState, loading, recheckAccess } = useAccessCheck();
   const [isRechecking, setIsRechecking] = useState(false);
   const [isSwitchingAccount, setIsSwitchingAccount] = useState(false);
 
@@ -27,8 +36,12 @@ const AccessBlocked = () => {
   const handleRecheck = async () => {
     setIsRechecking(true);
     const granted = await recheckAccess();
-    if (!granted) {
-      toast.error('Acesso ainda bloqueado. Para liberar agora, escolha um dos planos abaixo.');
+    if (granted) {
+      toast.success('Acesso liberado! Redirecionando...');
+    } else {
+      const reason = accessState?.reason || 'pending';
+      const msg = statusMessages[reason] || 'Acesso ainda bloqueado. Escolha um dos planos abaixo.';
+      toast.error(msg);
     }
     setIsRechecking(false);
   };
@@ -38,6 +51,8 @@ const AccessBlocked = () => {
     await signOut();
     setIsSwitchingAccount(false);
   };
+
+  const reason = accessState?.reason || 'pending';
 
   return (
     <div className="h-[100svh] overflow-y-auto overscroll-contain bg-background" style={{ touchAction: 'pan-y' }}>
@@ -51,7 +66,7 @@ const AccessBlocked = () => {
           <div className="space-y-2">
             <h1 className="text-xl font-bold text-foreground">Seu acesso ainda não está ativo</h1>
             <p className="text-sm text-muted-foreground leading-relaxed max-w-md mx-auto">
-              Se a compra foi feita com outro e-mail, troque de conta abaixo. Se este for o e-mail correto e ainda estiver sem acesso, escolha um dos planos para liberar imediatamente.
+              {statusMessages[reason] || 'Se a compra foi feita com outro e-mail, troque de conta abaixo. Se este for o e-mail correto e ainda estiver sem acesso, escolha um dos planos para liberar imediatamente.'}
             </p>
           </div>
 

@@ -142,22 +142,37 @@ export type Database = {
           access_granted: boolean
           created_at: string
           email: string
+          expires_at: string | null
           id: string
+          plan_status: string | null
+          product: string | null
+          purchased_at: string | null
           updated_at: string
+          user_id: string | null
         }
         Insert: {
           access_granted?: boolean
           created_at?: string
           email: string
+          expires_at?: string | null
           id?: string
+          plan_status?: string | null
+          product?: string | null
+          purchased_at?: string | null
           updated_at?: string
+          user_id?: string | null
         }
         Update: {
           access_granted?: boolean
           created_at?: string
           email?: string
+          expires_at?: string | null
           id?: string
+          plan_status?: string | null
+          product?: string | null
+          purchased_at?: string | null
           updated_at?: string
+          user_id?: string | null
         }
         Relationships: []
       }

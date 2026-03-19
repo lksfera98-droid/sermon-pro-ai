@@ -31,6 +31,7 @@ const Index = () => {
   const [recentSermons, setRecentSermons] = useState<Array<{ title: string; date: string; content: string }>>([]);
   const [viewingSermon, setViewingSermon] = useState<{title: string; content: string} | null>(null);
   const { t } = useLanguage();
+  const { signOut } = useAuth();
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   // Load saved sermons from localStorage

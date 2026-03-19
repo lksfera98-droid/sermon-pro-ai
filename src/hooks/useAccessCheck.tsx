@@ -23,23 +23,28 @@ export const useAccessCheck = () => {
         return false;
       }
 
-      console.log('checking paid_users by email:', normalizedEmail);
+      console.log('[AccessCheck] authenticated email:', normalizedEmail);
 
       const { data, error } = await supabase
-        .from('paid_users')
-        .select('id')
+        .from('user_access')
+        .select('id, email, plan_status, access_granted')
         .ilike('email', normalizedEmail)
-        .eq('status_pagamento', 'COMPRA_APROVADA')
+        .or('plan_status.eq.active,access_granted.eq.true')
         .limit(1);
 
+      console.log('[AccessCheck] records found:', data?.length ?? 0);
+      if (data && data.length > 0) {
+        console.log('[AccessCheck] match:', JSON.stringify(data[0]));
+      }
+
       if (error) {
-        console.error('error checking paid_users:', error);
+        console.error('[AccessCheck] query error:', error);
         setHasAccess(false);
         return false;
       }
 
       const granted = (data?.length ?? 0) > 0;
-      console.log(granted ? 'access released' : 'no active access found');
+      console.log('[AccessCheck] decision:', granted ? 'ACCESS GRANTED ✅' : 'ACCESS DENIED ❌');
       setHasAccess(granted);
       return granted;
     } catch (err) {

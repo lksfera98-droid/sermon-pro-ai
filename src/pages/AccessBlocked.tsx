@@ -26,11 +26,13 @@ const AccessBlocked = () => {
 
   const handleRecheck = async () => {
     setIsRechecking(true);
-    recheck();
-    // Give time for the recheck to complete
-    setTimeout(() => {
-      setIsRechecking(false);
-    }, 2000);
+    const accessGranted = await recheck();
+
+    if (!accessGranted) {
+      toast.error('Ainda não encontramos sua compra neste e-mail.');
+    }
+
+    setIsRechecking(false);
   };
 
   const handleSwitchAccount = async () => {

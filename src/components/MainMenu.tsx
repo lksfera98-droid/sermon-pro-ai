@@ -13,7 +13,8 @@ import {
   Ear,
   BookHeart,
   Search,
-  RefreshCw
+  RefreshCw,
+  LogOut
 } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useState } from "react";
@@ -26,9 +27,10 @@ type View = "dashboard" | "new-sermon" | "translator" | "my-sermons" | "verse-se
 
 interface MainMenuProps {
   onNavigate: (view: View) => void;
+  onSignOut?: () => void;
 }
 
-export const MainMenu = ({ onNavigate }: MainMenuProps) => {
+export const MainMenu = ({ onNavigate, onSignOut }: MainMenuProps) => {
   const [showIOSInstructions, setShowIOSInstructions] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
   const { isInstallable, installPWA } = usePWAInstall();
@@ -326,6 +328,20 @@ export const MainMenu = ({ onNavigate }: MainMenuProps) => {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Logout Button */}
+      {onSignOut && (
+        <div className="pt-4 border-t w-full">
+          <Button
+            variant="outline"
+            className="w-full text-sm text-muted-foreground"
+            onClick={onSignOut}
+          >
+            <LogOut className="h-4 w-4" />
+            Sair da conta
+          </Button>
+        </div>
+      )}
     </div>
   );
 };

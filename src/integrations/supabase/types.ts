@@ -14,6 +14,39 @@ export type Database = {
   }
   public: {
     Tables: {
+      app_users: {
+        Row: {
+          access_status: string
+          created_at: string
+          email: string
+          full_name: string | null
+          id: string
+          payment_status: string
+          plan: string | null
+          updated_at: string
+        }
+        Insert: {
+          access_status?: string
+          created_at?: string
+          email: string
+          full_name?: string | null
+          id: string
+          payment_status?: string
+          plan?: string | null
+          updated_at?: string
+        }
+        Update: {
+          access_status?: string
+          created_at?: string
+          email?: string
+          full_name?: string | null
+          id?: string
+          payment_status?: string
+          plan?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       devotionals: {
         Row: {
           content: string

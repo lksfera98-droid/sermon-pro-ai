@@ -69,8 +69,11 @@ const Auth = () => {
       } else {
         toast.error(error.message || 'Erro ao criar conta');
       }
+      console.error('Erro ao criar usuário no auth:', error.message);
     } else {
-      toast.success('Conta criada com sucesso! Bem-vindo ao ProSermon! 🎉');
+      console.log('Usuário criado no auth com sucesso');
+      console.log('Linha criada automaticamente em public.app_users via trigger');
+      toast.success('Cadastro criado com sucesso! Seu acesso será liberado após a confirmação do pagamento. 🎉');
     }
   };
 

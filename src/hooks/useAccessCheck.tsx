@@ -11,30 +11,34 @@ export const useAccessCheck = () => {
     setChecked(false);
 
     try {
-      let normalizedEmail = emailOverride?.trim().toLowerCase() ?? '';
+      let rawEmail = emailOverride ?? '';
 
-      if (!normalizedEmail) {
+      if (!rawEmail) {
         const { data: { session } } = await supabase.auth.getSession();
-        normalizedEmail = session?.user?.email?.trim().toLowerCase() ?? '';
+        rawEmail = session?.user?.email ?? '';
       }
 
+      const normalizedEmail = rawEmail.trim().toLowerCase();
+
+      console.log('[AccessCheck] raw email:', rawEmail);
+      console.log('[AccessCheck] normalized email:', normalizedEmail);
+
       if (!normalizedEmail) {
+        console.log('[AccessCheck] decision: ACCESS DENIED ❌ (no email)');
         setHasAccess(false);
         return false;
       }
 
-      console.log('[AccessCheck] authenticated email:', normalizedEmail);
-
       const { data, error } = await supabase
-        .from('user_access')
-        .select('id, email, plan_status, access_granted')
+        .from('paid_users')
+        .select('status_pagamento')
         .ilike('email', normalizedEmail)
-        .or('plan_status.eq.active,access_granted.eq.true')
+        .eq('status_pagamento', 'COMPRA_APROVADA')
         .limit(1);
 
       console.log('[AccessCheck] records found:', data?.length ?? 0);
       if (data && data.length > 0) {
-        console.log('[AccessCheck] match:', JSON.stringify(data[0]));
+        console.log('[AccessCheck] status_pagamento:', data[0].status_pagamento);
       }
 
       if (error) {
@@ -48,7 +52,7 @@ export const useAccessCheck = () => {
       setHasAccess(granted);
       return granted;
     } catch (err) {
-      console.error('access check failed:', err);
+      console.error('[AccessCheck] unexpected error:', err);
       setHasAccess(false);
       return false;
     } finally {

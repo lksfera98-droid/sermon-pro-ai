@@ -401,7 +401,7 @@ const Index = () => {
             bottom: '-24px'
           }}
         >
-          <div className="flex justify-center p-2.5 max-w-md mx-auto select-none">
+          <div className="flex justify-center gap-2 p-2.5 max-w-md mx-auto select-none">
             <Button
               variant={currentView === 'dashboard' ? 'default' : 'outline'}
               size="lg"
@@ -413,6 +413,15 @@ const Index = () => {
             >
               <Home className="h-5 w-5" />
               <span className="text-[12px] font-bold">Início</span>
+            </Button>
+            <Button
+              variant="outline"
+              size="lg"
+              onClick={() => signOut()}
+              className="flex flex-col gap-1.5 h-auto py-1.5 rounded-none touch-manipulation px-6"
+            >
+              <LogOut className="h-5 w-5" />
+              <span className="text-[12px] font-bold">Sair</span>
             </Button>
           </div>
         </nav>

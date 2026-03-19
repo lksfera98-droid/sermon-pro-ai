@@ -16,10 +16,14 @@ export const useAccessCheck = () => {
 
     setLoading(true);
     try {
+      const normalizedEmail = user.email.trim();
+
       const { data, error } = await supabase
         .from('user_access')
         .select('access_granted')
-        .eq('email', user.email)
+        .ilike('email', normalizedEmail)
+        .order('updated_at', { ascending: false })
+        .limit(1)
         .maybeSingle();
 
       if (error) {

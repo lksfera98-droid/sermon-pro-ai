@@ -414,15 +414,6 @@ const Index = () => {
               <Home className="h-5 w-5" />
               <span className="text-[12px] font-bold">Início</span>
             </Button>
-            <Button
-              variant="outline"
-              size="lg"
-              onClick={() => signOut()}
-              className="flex flex-col gap-1.5 h-auto py-1.5 rounded-none touch-manipulation px-6"
-            >
-              <LogOut className="h-5 w-5" />
-              <span className="text-[12px] font-bold">Sair</span>
-            </Button>
           </div>
         </nav>
       </div>

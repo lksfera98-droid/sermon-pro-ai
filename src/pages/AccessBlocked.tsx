@@ -26,6 +26,12 @@ const AccessBlocked = () => {
   const [isRechecking, setIsRechecking] = useState(false);
   const [isSwitchingAccount, setIsSwitchingAccount] = useState(false);
 
+  const redirectToApp = () => {
+    console.log('redirecting from /acesso-bloqueado');
+    console.log('redirecting to app');
+    navigate('/', { replace: true });
+  };
+
   useEffect(() => {
     let active = true;
 
@@ -34,8 +40,7 @@ const AccessBlocked = () => {
       if (!active) return;
 
       if (result.granted) {
-        console.log('redirecting from /acesso-bloqueado');
-        navigate('/', { replace: true });
+        redirectToApp();
       }
     };
 
@@ -44,7 +49,7 @@ const AccessBlocked = () => {
     return () => {
       active = false;
     };
-  }, [navigate, recheckAccess]);
+  }, [recheckAccess]);
 
   if (!user) return <Navigate to="/auth" replace />;
 
@@ -58,6 +63,7 @@ const AccessBlocked = () => {
 
   if (hasAccess) {
     console.log('redirecting from /acesso-bloqueado');
+    console.log('redirecting to app');
     return <Navigate to="/" replace />;
   }
 
@@ -68,8 +74,7 @@ const AccessBlocked = () => {
 
     if (result.granted) {
       toast.success('Acesso liberado! Redirecionando...');
-      console.log('redirecting from /acesso-bloqueado');
-      navigate('/', { replace: true });
+      redirectToApp();
       setIsRechecking(false);
       return;
     }

@@ -64,10 +64,12 @@ const extractStatus = (payload: unknown): string =>
   normalizeStatus(
     firstDefined(payload, [
       ["status"],
+      ["plan_status"],
       ["payment_status"],
       ["event"],
       ["type"],
       ["data", "status"],
+      ["data", "plan_status"],
       ["data", "payment_status"],
       ["data", "event"],
       ["payment", "status"],
@@ -76,13 +78,22 @@ const extractStatus = (payload: unknown): string =>
     ]),
   );
 
-const mapStatus = (status: string) => {
+type StatusMap = {
+  accessGranted: boolean;
+  planStatus: string;
+  accessStatus: string;
+  paymentStatus: string;
+  recognized: boolean;
+};
+
+const mapStatus = (status: string): StatusMap => {
   if (["approved", "paid", "completed", "active", "success", "authorized"].includes(status)) {
     return {
       accessGranted: true,
       planStatus: "active",
       accessStatus: "allowed",
       paymentStatus: "approved",
+      recognized: true,
     };
   }
 
@@ -92,6 +103,7 @@ const mapStatus = (status: string) => {
       planStatus: "cancelled",
       accessStatus: "blocked",
       paymentStatus: "cancelled",
+      recognized: true,
     };
   }
 
@@ -101,6 +113,7 @@ const mapStatus = (status: string) => {
       planStatus: "refunded",
       accessStatus: "blocked",
       paymentStatus: "refunded",
+      recognized: true,
     };
   }
 
@@ -110,6 +123,7 @@ const mapStatus = (status: string) => {
       planStatus: "expired",
       accessStatus: "blocked",
       paymentStatus: "expired",
+      recognized: true,
     };
   }
 
@@ -118,6 +132,7 @@ const mapStatus = (status: string) => {
     planStatus: "pending",
     accessStatus: "blocked",
     paymentStatus: "pending",
+    recognized: false,
   };
 };
 
@@ -132,7 +147,13 @@ Deno.serve(async (req) => {
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
     );
 
-    const body = await req.json();
+    let body: unknown = {};
+    try {
+      body = await req.json();
+    } catch {
+      body = {};
+    }
+
     console.log("Payment webhook received:", JSON.stringify(body));
 
     const email = extractEmail(body);
@@ -149,15 +170,11 @@ Deno.serve(async (req) => {
       );
     }
 
-    const mapped = mapStatus(status);
+    let mapped = mapStatus(status);
     const nowIso = new Date().toISOString();
 
     console.log(`Processing payment for email=${email}, status=${status || "unknown"}`);
-
-    if (mapped.planStatus === "active") {
-      console.log("active plan found");
-      console.log("reconciling access_granted=true");
-    }
+    console.log("checking user_access by normalized email");
 
     const { data: appUser, error: appUserLookupError } = await supabase
       .from("app_users")
@@ -171,18 +188,58 @@ Deno.serve(async (req) => {
       console.error("Error looking up app_users by email:", appUserLookupError);
     }
 
-    const linkedUserId = appUser?.id ?? null;
+    const { data: existingAccess, error: existingAccessError } = await supabase
+      .from("user_access")
+      .select("id, user_id, email, plan_status, access_granted")
+      .ilike("email", email)
+      .order("updated_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    if (existingAccessError) {
+      console.error("Error looking up user_access by email:", existingAccessError);
+    }
+
+    if (!mapped.recognized && existingAccess) {
+      const existingActive =
+        normalizeStatus(existingAccess.plan_status) === "active" || existingAccess.access_granted === true;
+
+      mapped = {
+        accessGranted: existingActive,
+        planStatus: existingActive ? "active" : normalizeStatus(existingAccess.plan_status) || "pending",
+        accessStatus: existingActive ? "allowed" : "blocked",
+        paymentStatus: existingActive ? "approved" : normalizeStatus(existingAccess.plan_status) || "pending",
+        recognized: false,
+      };
+    }
+
+    if (mapped.planStatus === "active") {
+      console.log("active plan found");
+      if (!mapped.accessGranted) {
+        console.log("reconciling access_granted=true");
+      }
+      mapped.accessGranted = true;
+      mapped.accessStatus = "allowed";
+      mapped.paymentStatus = "approved";
+    }
+
+    let linkedUserId = appUser?.id ?? null;
+
+    if (!linkedUserId && existingAccess?.user_id) {
+      linkedUserId = existingAccess.user_id;
+    }
+
+    if (!existingAccess?.user_id && linkedUserId) {
+      console.log("reconciling user_id");
+    }
 
     const userAccessPayload: Record<string, unknown> = {
       email,
       plan_status: mapped.planStatus,
       access_granted: mapped.accessGranted,
       updated_at: nowIso,
+      user_id: linkedUserId,
     };
-
-    if (linkedUserId) {
-      userAccessPayload.user_id = linkedUserId;
-    }
 
     if (mapped.accessGranted) {
       userAccessPayload.purchased_at = nowIso;
@@ -229,12 +286,12 @@ Deno.serve(async (req) => {
       if (appUserUpdateError) {
         console.error("Error updating app_users by id:", appUserUpdateError);
       }
-    } else {
-      console.error(`User not found in app_users for email: ${email}. User must register first.`);
     }
 
     if (mapped.accessGranted) {
-      console.log("user access released");
+      console.log("access released");
+    } else {
+      console.log("no active access found");
     }
 
     return new Response(

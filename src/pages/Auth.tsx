@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
-import { Navigate } from 'react-router-dom';
+import { Navigate, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -13,6 +13,7 @@ type AuthView = 'login' | 'signup' | 'forgot-password';
 
 const Auth = () => {
   const { user, loading, signIn, signUp, resetPassword } = useAuth();
+  const navigate = useNavigate();
   const [view, setView] = useState<AuthView>('login');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -39,7 +40,7 @@ const Auth = () => {
       return;
     }
     setIsSubmitting(true);
-    const { error } = await signIn(email, password);
+    const { error, accessGranted } = await signIn(email, password);
     setIsSubmitting(false);
     if (error) {
       if (error.message?.includes('Invalid login credentials')) {
@@ -47,6 +48,12 @@ const Auth = () => {
       } else {
         toast.error(error.message || 'Erro ao fazer login');
       }
+      return;
+    }
+
+    if (accessGranted) {
+      console.log('redirecting to app');
+      navigate('/', { replace: true });
     }
   };
 

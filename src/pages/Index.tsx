@@ -13,16 +13,16 @@ import DailyDevotional from "@/components/DailyDevotional";
 import { LoadingProgress } from "@/components/LoadingProgress";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Home, Trash2, Check, ArrowLeft, LogOut } from "lucide-react";
+import { Home, Trash2, Check, ArrowLeft } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { useAuth } from "@/contexts/AuthContext";
+
 
 type View = "dashboard" | "new-sermon" | "translator" | "my-sermons" | "verse-search" | "public-gallery" | "prayer-requests" | "prayer-gallery" | "hear-god-speak" | "bible-study" | "daily-devotional";
 
 const Index = () => {
-  const { signOut } = useAuth();
+  
   const [isLoading, setIsLoading] = useState(false);
   const [sermon, setSermon] = useState<string | null>(null);
   const [currentSermonTitle, setCurrentSermonTitle] = useState<string>("");
@@ -154,7 +154,7 @@ const Index = () => {
       
       <div className="h-[100svh] flex flex-col">
         <div ref={scrollContainerRef} className="flex-1 overflow-y-auto overscroll-contain pb-[88px] md:pb-0" style={{ WebkitOverflowScrolling: 'touch' }}>
-          {currentView === 'dashboard' && <MainMenu onNavigate={setCurrentView} onSignOut={signOut} />}
+          {currentView === 'dashboard' && <MainMenu onNavigate={setCurrentView} />}
           
           {currentView === 'new-sermon' && (
             <div className="container max-w-4xl mx-auto p-4">
@@ -413,15 +413,6 @@ const Index = () => {
             >
               <Home className="h-5 w-5" />
               <span className="text-[12px] font-bold">Início</span>
-            </Button>
-            <Button
-              variant="outline"
-              size="lg"
-              onClick={() => signOut()}
-              className="flex flex-col gap-1.5 h-auto py-1.5 rounded-none touch-manipulation px-6"
-            >
-              <LogOut className="h-5 w-5" />
-              <span className="text-[12px] font-bold">Sair</span>
             </Button>
           </div>
         </nav>

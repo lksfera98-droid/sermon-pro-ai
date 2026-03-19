@@ -329,6 +329,20 @@ export const MainMenu = ({ onNavigate, onSignOut }: MainMenuProps) => {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Logout Button */}
+      {onSignOut && (
+        <div className="pt-4 border-t w-full">
+          <Button
+            variant="outline"
+            className="w-full text-sm text-muted-foreground"
+            onClick={onSignOut}
+          >
+            <LogOut className="h-4 w-4" />
+            Sair da conta
+          </Button>
+        </div>
+      )}
     </div>
   );
 };

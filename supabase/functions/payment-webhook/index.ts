@@ -335,7 +335,21 @@ Deno.serve(async (req) => {
       console.log(`paid_users upserted: email=${email}, status=${paidUserStatus}`);
     }
 
+    // Insert into compradores table (source of truth for new access logic)
     if (mapped.accessGranted) {
+      const { error: compradoresError } = await supabase
+        .from("compradores")
+        .insert({ email })
+        .select()
+        .maybeSingle();
+
+      // Ignore unique constraint violations (already exists)
+      if (compradoresError && !compradoresError.message?.includes("duplicate")) {
+        console.error("Error inserting into compradores:", compradoresError);
+      } else {
+        console.log(`compradores upserted: email=${email}`);
+      }
+
       console.log("access released");
     } else {
       console.log("no active access found");

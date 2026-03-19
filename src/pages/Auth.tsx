@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card } from '@/components/ui/card';
 import { toast } from 'sonner';
-import { Loader2, Eye, EyeOff, Mail, Lock, User, Info, ArrowLeft } from 'lucide-react';
+import { Loader2, Eye, EyeOff, Mail, Lock, User, Info, ArrowLeft, UserPlus, LogIn } from 'lucide-react';
 import preacherLogo from '@/assets/preacher-logo.png';
 
 type AuthView = 'login' | 'signup' | 'forgot-password';
@@ -44,8 +44,6 @@ const Auth = () => {
     if (error) {
       if (error.message?.includes('Invalid login credentials')) {
         toast.error('Email ou senha incorretos. Verifique seus dados e tente novamente.');
-      } else if (error.message?.includes('Email not confirmed')) {
-        toast.error('Confirme seu email antes de fazer login. Verifique sua caixa de entrada.');
       } else {
         toast.error(error.message || 'Erro ao fazer login');
       }
@@ -72,8 +70,7 @@ const Auth = () => {
         toast.error(error.message || 'Erro ao criar conta');
       }
     } else {
-      toast.success('Cadastro realizado! Verifique seu email para confirmar a conta.');
-      setView('login');
+      toast.success('Conta criada com sucesso! Bem-vindo ao ProSermon! 🎉');
     }
   };
 
@@ -102,264 +99,278 @@ const Auth = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background flex flex-col items-center justify-center p-4">
-      <div className="w-full max-w-md space-y-6">
-        {/* Logo */}
-        <div className="text-center space-y-3">
-          <img
-            src={preacherLogo}
-            alt="ProSermon"
-            className="w-28 h-28 object-contain mx-auto rounded-lg"
-          />
-          <h1 className="text-2xl font-bold text-primary">ProSermon</h1>
-        </div>
+    <div className="min-h-screen bg-background overflow-y-auto">
+      <div className="min-h-screen flex flex-col items-center justify-start py-8 px-4">
+        <div className="w-full max-w-md space-y-5">
+          {/* Logo */}
+          <div className="text-center space-y-2">
+            <img
+              src={preacherLogo}
+              alt="ProSermon"
+              className="w-24 h-24 object-contain mx-auto rounded-lg"
+            />
+            <h1 className="text-2xl font-bold text-primary">ProSermon</h1>
+          </div>
 
-        {/* Info Banner for returning users */}
-        {(view === 'login' || view === 'signup') && (
-          <Card className="p-4 border-2 border-accent/30 bg-accent/5">
-            <div className="flex gap-3">
-              <Info className="h-5 w-5 text-accent shrink-0 mt-0.5" />
-              <div className="space-y-1">
-                <p className="font-semibold text-sm text-foreground">
-                  Tudo novo por aqui?
-                </p>
-                <p className="text-sm text-muted-foreground leading-relaxed">
-                  Se você já comprou o acesso anteriormente, basta criar seu cadastro usando o <strong>mesmo email utilizado na compra</strong> e definir sua senha. Depois disso, você poderá entrar normalmente no aplicativo.
-                </p>
-              </div>
-            </div>
-          </Card>
-        )}
-
-        {/* Login Form */}
-        {view === 'login' && (
-          <Card className="p-6 shadow-lg">
-            <form onSubmit={handleLogin} className="space-y-4">
-              <div className="text-center mb-2">
-                <h2 className="text-xl font-bold text-foreground">Entrar</h2>
-                <p className="text-sm text-muted-foreground">Acesse sua conta</p>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="login-email">Email</Label>
-                <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    id="login-email"
-                    type="email"
-                    placeholder="seu@email.com"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className="pl-10 h-12"
-                    required
-                  />
+          {/* Prominent Signup CTA for returning users */}
+          {view === 'login' && (
+            <Card className="p-5 border-2 border-primary bg-primary/5 shadow-md">
+              <div className="flex gap-3">
+                <div className="bg-primary/10 rounded-full p-2 shrink-0 h-fit">
+                  <Info className="h-5 w-5 text-primary" />
+                </div>
+                <div className="space-y-2">
+                  <p className="font-bold text-base text-foreground">
+                    🎉 Tudo novo por aqui?
+                  </p>
+                  <p className="text-sm text-foreground/80 leading-relaxed">
+                    Se você já comprou o acesso anteriormente, basta criar seu cadastro usando o <strong className="text-primary">mesmo email utilizado na compra</strong> e definir sua senha. Depois disso, você poderá entrar normalmente!
+                  </p>
+                  <Button
+                    onClick={() => { resetForm(); setView('signup'); }}
+                    className="w-full h-12 text-base font-bold mt-2 gap-2"
+                  >
+                    <UserPlus className="h-5 w-5" />
+                    Criar Meu Cadastro Agora
+                  </Button>
                 </div>
               </div>
+            </Card>
+          )}
 
-              <div className="space-y-2">
-                <Label htmlFor="login-password">Senha</Label>
-                <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    id="login-password"
-                    type={showPassword ? 'text' : 'password'}
-                    placeholder="Sua senha"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className="pl-10 pr-10 h-12"
-                    required
-                  />
+          {/* Login Form */}
+          {view === 'login' && (
+            <Card className="p-6 shadow-lg">
+              <form onSubmit={handleLogin} className="space-y-4">
+                <div className="text-center mb-2">
+                  <h2 className="text-xl font-bold text-foreground">Já tenho conta</h2>
+                  <p className="text-sm text-muted-foreground">Faça login para acessar o app</p>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="login-email">Email</Label>
+                  <div className="relative">
+                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      id="login-email"
+                      type="email"
+                      placeholder="seu@email.com"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      className="pl-10 h-12"
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="login-password">Senha</Label>
+                  <div className="relative">
+                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      id="login-password"
+                      type={showPassword ? 'text' : 'password'}
+                      placeholder="Sua senha"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      className="pl-10 pr-10 h-12"
+                      required
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                    >
+                      {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    </button>
+                  </div>
+                </div>
+
+                <Button type="submit" variant="outline" className="w-full h-12 text-base font-semibold border-2 gap-2" disabled={isSubmitting}>
+                  {isSubmitting ? (
+                    <>
+                      <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                      Entrando...
+                    </>
+                  ) : (
+                    <>
+                      <LogIn className="h-5 w-5" />
+                      Entrar
+                    </>
+                  )}
+                </Button>
+
+                <div className="text-center">
                   <button
                     type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                    onClick={() => { resetForm(); setView('forgot-password'); }}
+                    className="text-sm text-primary hover:underline"
                   >
-                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    Esqueci minha senha
                   </button>
                 </div>
-              </div>
+              </form>
+            </Card>
+          )}
 
-              <Button type="submit" className="w-full h-12 text-base font-semibold" disabled={isSubmitting}>
-                {isSubmitting ? (
-                  <>
-                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                    Entrando...
-                  </>
-                ) : (
-                  'Entrar'
-                )}
-              </Button>
+          {/* Signup Form */}
+          {view === 'signup' && (
+            <>
+              <Card className="p-4 border-2 border-primary bg-primary/5">
+                <div className="flex gap-2 items-center">
+                  <Info className="h-4 w-4 text-primary shrink-0" />
+                  <p className="text-sm text-foreground font-medium">
+                    Use o <strong className="text-primary">mesmo email da compra</strong> para liberar seu acesso.
+                  </p>
+                </div>
+              </Card>
 
-              <div className="text-center space-y-2">
+              <Card className="p-6 shadow-lg">
+                <form onSubmit={handleSignup} className="space-y-4">
+                  <div className="text-center mb-2">
+                    <h2 className="text-xl font-bold text-foreground">Criar Cadastro</h2>
+                    <p className="text-sm text-muted-foreground">Preencha seus dados abaixo</p>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="signup-name">Nome Completo</Label>
+                    <div className="relative">
+                      <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                      <Input
+                        id="signup-name"
+                        type="text"
+                        placeholder="Seu nome completo"
+                        value={fullName}
+                        onChange={(e) => setFullName(e.target.value)}
+                        className="pl-10 h-12"
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="signup-email">Email</Label>
+                    <div className="relative">
+                      <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                      <Input
+                        id="signup-email"
+                        type="email"
+                        placeholder="seu@email.com"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        className="pl-10 h-12"
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="signup-password">Senha</Label>
+                    <div className="relative">
+                      <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                      <Input
+                        id="signup-password"
+                        type={showPassword ? 'text' : 'password'}
+                        placeholder="Mínimo 6 caracteres"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        className="pl-10 pr-10 h-12"
+                        minLength={6}
+                        required
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                      >
+                        {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                      </button>
+                    </div>
+                  </div>
+
+                  <Button type="submit" className="w-full h-14 text-lg font-bold gap-2" disabled={isSubmitting}>
+                    {isSubmitting ? (
+                      <>
+                        <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                        Criando conta...
+                      </>
+                    ) : (
+                      <>
+                        <UserPlus className="h-5 w-5" />
+                        Criar Minha Conta
+                      </>
+                    )}
+                  </Button>
+                </form>
+
+                <div className="mt-6 pt-4 border-t text-center">
+                  <button
+                    type="button"
+                    onClick={() => { resetForm(); setView('login'); }}
+                    className="text-sm text-primary hover:underline flex items-center justify-center gap-1 mx-auto"
+                  >
+                    <ArrowLeft className="h-3 w-3" />
+                    Já tenho conta, fazer login
+                  </button>
+                </div>
+              </Card>
+            </>
+          )}
+
+          {/* Forgot Password Form */}
+          {view === 'forgot-password' && (
+            <Card className="p-6 shadow-lg">
+              <form onSubmit={handleForgotPassword} className="space-y-4">
+                <div className="text-center mb-2">
+                  <h2 className="text-xl font-bold text-foreground">Recuperar Senha</h2>
+                  <p className="text-sm text-muted-foreground">
+                    Digite seu email e enviaremos um link para redefinir sua senha.
+                  </p>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="reset-email">Email</Label>
+                  <div className="relative">
+                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      id="reset-email"
+                      type="email"
+                      placeholder="seu@email.com"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      className="pl-10 h-12"
+                      required
+                    />
+                  </div>
+                </div>
+
+                <Button type="submit" className="w-full h-12 text-base font-semibold" disabled={isSubmitting}>
+                  {isSubmitting ? (
+                    <>
+                      <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                      Enviando...
+                    </>
+                  ) : (
+                    'Enviar Link de Recuperação'
+                  )}
+                </Button>
+              </form>
+
+              <div className="mt-6 pt-4 border-t text-center">
                 <button
                   type="button"
-                  onClick={() => { resetForm(); setView('forgot-password'); }}
-                  className="text-sm text-primary hover:underline"
+                  onClick={() => { resetForm(); setView('login'); }}
+                  className="text-sm text-primary hover:underline flex items-center justify-center gap-1 mx-auto"
                 >
-                  Esqueci minha senha
+                  <ArrowLeft className="h-3 w-3" />
+                  Voltar para o login
                 </button>
               </div>
-            </form>
+            </Card>
+          )}
 
-            <div className="mt-6 pt-4 border-t text-center space-y-2">
-              <p className="text-sm text-muted-foreground">Ainda não tem conta?</p>
-              <Button
-                variant="outline"
-                className="w-full h-12 text-base font-semibold border-2 border-primary/30"
-                onClick={() => { resetForm(); setView('signup'); }}
-              >
-                Criar Cadastro
-              </Button>
-              <p className="text-xs text-accent font-medium">
-                Use o mesmo email da compra para liberar seu acesso.
-              </p>
-            </div>
-          </Card>
-        )}
-
-        {/* Signup Form */}
-        {view === 'signup' && (
-          <Card className="p-6 shadow-lg">
-            <form onSubmit={handleSignup} className="space-y-4">
-              <div className="text-center mb-2">
-                <h2 className="text-xl font-bold text-foreground">Criar Cadastro</h2>
-                <p className="text-sm text-accent font-medium">
-                  Use o mesmo email da compra para liberar seu acesso.
-                </p>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="signup-name">Nome Completo</Label>
-                <div className="relative">
-                  <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    id="signup-name"
-                    type="text"
-                    placeholder="Seu nome completo"
-                    value={fullName}
-                    onChange={(e) => setFullName(e.target.value)}
-                    className="pl-10 h-12"
-                    required
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="signup-email">Email</Label>
-                <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    id="signup-email"
-                    type="email"
-                    placeholder="seu@email.com"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className="pl-10 h-12"
-                    required
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="signup-password">Senha</Label>
-                <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    id="signup-password"
-                    type={showPassword ? 'text' : 'password'}
-                    placeholder="Mínimo 6 caracteres"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className="pl-10 pr-10 h-12"
-                    minLength={6}
-                    required
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                  >
-                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                  </button>
-                </div>
-              </div>
-
-              <Button type="submit" className="w-full h-12 text-base font-semibold" disabled={isSubmitting}>
-                {isSubmitting ? (
-                  <>
-                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                    Criando conta...
-                  </>
-                ) : (
-                  'Criar Minha Conta'
-                )}
-              </Button>
-            </form>
-
-            <div className="mt-6 pt-4 border-t text-center">
-              <button
-                type="button"
-                onClick={() => { resetForm(); setView('login'); }}
-                className="text-sm text-primary hover:underline flex items-center justify-center gap-1 mx-auto"
-              >
-                <ArrowLeft className="h-3 w-3" />
-                Já tenho conta, fazer login
-              </button>
-            </div>
-          </Card>
-        )}
-
-        {/* Forgot Password Form */}
-        {view === 'forgot-password' && (
-          <Card className="p-6 shadow-lg">
-            <form onSubmit={handleForgotPassword} className="space-y-4">
-              <div className="text-center mb-2">
-                <h2 className="text-xl font-bold text-foreground">Recuperar Senha</h2>
-                <p className="text-sm text-muted-foreground">
-                  Digite seu email e enviaremos um link para redefinir sua senha.
-                </p>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="reset-email">Email</Label>
-                <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    id="reset-email"
-                    type="email"
-                    placeholder="seu@email.com"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className="pl-10 h-12"
-                    required
-                  />
-                </div>
-              </div>
-
-              <Button type="submit" className="w-full h-12 text-base font-semibold" disabled={isSubmitting}>
-                {isSubmitting ? (
-                  <>
-                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                    Enviando...
-                  </>
-                ) : (
-                  'Enviar Link de Recuperação'
-                )}
-              </Button>
-            </form>
-
-            <div className="mt-6 pt-4 border-t text-center">
-              <button
-                type="button"
-                onClick={() => { resetForm(); setView('login'); }}
-                className="text-sm text-primary hover:underline flex items-center justify-center gap-1 mx-auto"
-              >
-                <ArrowLeft className="h-3 w-3" />
-                Voltar para o login
-              </button>
-            </div>
-          </Card>
-        )}
+          <div className="h-8" />
+        </div>
       </div>
     </div>
   );

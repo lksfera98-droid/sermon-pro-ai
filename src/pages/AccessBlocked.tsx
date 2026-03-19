@@ -14,17 +14,19 @@ const AccessBlocked = () => {
   const navigate = useNavigate();
   const [isRechecking, setIsRechecking] = useState(false);
 
-  // Auto-revalidate on mount
   useEffect(() => {
+    if (!user) return;
+
     let active = true;
-    checkAccess().then((granted) => {
+    checkAccess(user.email ?? undefined).then((granted) => {
       if (active && granted) {
         console.log('redirecting from /acesso-bloqueado');
         navigate('/', { replace: true });
       }
     });
+
     return () => { active = false; };
-  }, [checkAccess, navigate]);
+  }, [user, checkAccess, navigate]);
 
   if (!user) return <Navigate to="/auth" replace />;
 
@@ -40,7 +42,7 @@ const AccessBlocked = () => {
 
   const handleRecheck = async () => {
     setIsRechecking(true);
-    const granted = await checkAccess();
+    const granted = await checkAccess(user.email ?? undefined);
     if (granted) {
       toast.success('Acesso liberado! Redirecionando...');
       navigate('/', { replace: true });

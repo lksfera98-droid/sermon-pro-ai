@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
-import { Navigate, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useAccessCheck } from '@/hooks/useAccessCheck';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -22,8 +22,31 @@ const Auth = () => {
   const [fullName, setFullName] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isValidatingAccess, setIsValidatingAccess] = useState(false);
 
-  if (loading) {
+  useEffect(() => {
+    let active = true;
+
+    const validateExistingSession = async () => {
+      if (!user || isSubmitting) return;
+
+      setIsValidatingAccess(true);
+      const granted = await checkAccess(user.email ?? undefined);
+
+      if (!active) return;
+
+      setIsValidatingAccess(false);
+      navigate(granted ? '/' : '/acesso-bloqueado', { replace: true });
+    };
+
+    validateExistingSession();
+
+    return () => {
+      active = false;
+    };
+  }, [user, isSubmitting, checkAccess, navigate]);
+
+  if (loading || isValidatingAccess) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <Loader2 className="h-10 w-10 animate-spin text-primary" />
@@ -31,26 +54,27 @@ const Auth = () => {
     );
   }
 
-  if (user) return <Navigate to="/" replace />;
-
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email.trim() || !password.trim()) { toast.error('Preencha todos os campos'); return; }
+
     setIsSubmitting(true);
     const { error } = await signIn(email, password);
+
     if (error) {
       setIsSubmitting(false);
       toast.error(error.message?.includes('Invalid login credentials') ? 'Email ou senha incorretos.' : (error.message || 'Erro ao fazer login'));
       return;
     }
-    console.log('login success');
-    const granted = await checkAccess();
+
+    setIsValidatingAccess(true);
+    const granted = await checkAccess(email);
+    setIsValidatingAccess(false);
     setIsSubmitting(false);
+
     if (granted) {
-      console.log('redirecting to app');
       navigate('/', { replace: true });
     } else {
-      console.log('redirecting to /acesso-bloqueado');
       navigate('/acesso-bloqueado', { replace: true });
     }
   };
@@ -59,19 +83,28 @@ const Auth = () => {
     e.preventDefault();
     if (!fullName.trim() || !email.trim() || !password.trim()) { toast.error('Preencha todos os campos'); return; }
     if (password.length < 6) { toast.error('A senha deve ter pelo menos 6 caracteres'); return; }
+
     setIsSubmitting(true);
     const { error } = await signUp(email, password, fullName);
+
     if (error) {
       setIsSubmitting(false);
       toast.error(error.message?.includes('already registered') ? 'Este email já está cadastrado. Tente fazer login.' : (error.message || 'Erro ao criar conta'));
       return;
     }
-    // Auto-login after signup
+
     const { error: loginErr } = await signIn(email, password);
-    if (loginErr) { setIsSubmitting(false); toast.error(loginErr.message); return; }
-    console.log('login success');
-    const granted = await checkAccess();
+    if (loginErr) {
+      setIsSubmitting(false);
+      toast.error(loginErr.message || 'Erro ao fazer login após cadastro');
+      return;
+    }
+
+    setIsValidatingAccess(true);
+    const granted = await checkAccess(email);
+    setIsValidatingAccess(false);
     setIsSubmitting(false);
+
     if (granted) {
       navigate('/', { replace: true });
     } else {
@@ -133,8 +166,10 @@ const Auth = () => {
                     </button>
                   </div>
                 </div>
-                <Button type="submit" variant="outline" className="w-full h-12 text-base font-semibold border-2 gap-2" disabled={isSubmitting}>
-                  {isSubmitting ? <><Loader2 className="mr-2 h-5 w-5 animate-spin" />Entrando...</> : <><LogIn className="h-5 w-5" />Entrar</>}
+                <Button type="submit" variant="outline" className="w-full h-12 text-base font-semibold border-2 gap-2" disabled={isSubmitting || isValidatingAccess}>
+                  {(isSubmitting || isValidatingAccess)
+                    ? <><Loader2 className="mr-2 h-5 w-5 animate-spin" />Entrando...</>
+                    : <><LogIn className="h-5 w-5" />Entrar</>}
                 </Button>
               </form>
             </Card>
@@ -180,8 +215,10 @@ const Auth = () => {
                       </button>
                     </div>
                   </div>
-                  <Button type="submit" className="w-full h-14 text-lg font-bold gap-2" disabled={isSubmitting}>
-                    {isSubmitting ? <><Loader2 className="mr-2 h-5 w-5 animate-spin" />Criando conta...</> : <><UserPlus className="h-5 w-5" />Criar Minha Conta</>}
+                  <Button type="submit" className="w-full h-14 text-lg font-bold gap-2" disabled={isSubmitting || isValidatingAccess}>
+                    {(isSubmitting || isValidatingAccess)
+                      ? <><Loader2 className="mr-2 h-5 w-5 animate-spin" />Criando conta...</>
+                      : <><UserPlus className="h-5 w-5" />Criar Minha Conta</>}
                   </Button>
                 </form>
                 <div className="mt-6 pt-4 border-t text-center">

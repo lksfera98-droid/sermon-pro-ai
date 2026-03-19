@@ -4,26 +4,33 @@ import { supabase } from '@/integrations/supabase/client';
 export const useAccessCheck = () => {
   const [hasAccess, setHasAccess] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [checked, setChecked] = useState(false);
 
-  const checkAccess = useCallback(async (): Promise<boolean> => {
+  const checkAccess = useCallback(async (emailOverride?: string): Promise<boolean> => {
     setLoading(true);
+    setChecked(false);
+
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user?.email) {
+      let normalizedEmail = emailOverride?.trim().toLowerCase() ?? '';
+
+      if (!normalizedEmail) {
+        const { data: { session } } = await supabase.auth.getSession();
+        normalizedEmail = session?.user?.email?.trim().toLowerCase() ?? '';
+      }
+
+      if (!normalizedEmail) {
         setHasAccess(false);
         return false;
       }
 
-      const normalizedEmail = user.email.trim().toLowerCase();
       console.log('checking paid_users by email:', normalizedEmail);
 
       const { data, error } = await supabase
         .from('paid_users')
-        .select('id, status_pagamento')
+        .select('id')
         .ilike('email', normalizedEmail)
         .eq('status_pagamento', 'COMPRA_APROVADA')
-        .limit(1)
-        .maybeSingle();
+        .limit(1);
 
       if (error) {
         console.error('error checking paid_users:', error);
@@ -31,7 +38,7 @@ export const useAccessCheck = () => {
         return false;
       }
 
-      const granted = !!data;
+      const granted = (data?.length ?? 0) > 0;
       console.log(granted ? 'access released' : 'no active access found');
       setHasAccess(granted);
       return granted;
@@ -40,9 +47,10 @@ export const useAccessCheck = () => {
       setHasAccess(false);
       return false;
     } finally {
+      setChecked(true);
       setLoading(false);
     }
   }, []);
 
-  return { hasAccess, loading, checkAccess };
+  return { hasAccess, loading, checked, checkAccess };
 };

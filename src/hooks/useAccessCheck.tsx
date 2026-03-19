@@ -30,11 +30,51 @@ const hasValidPurchase = (row: DirectAccessRow) => {
   return normalizedPlanStatus === 'active' || row.access_granted === true;
 };
 
+const mapReasonFromStatus = (status?: string | null) => {
+  const normalized = normalizeStatus(status);
+
+  if (normalized === 'approved' || normalized === 'active') return 'approved';
+  if (normalized === 'cancelled' || normalized === 'canceled') return 'cancelled';
+  if (normalized === 'expired') return 'expired';
+  if (normalized === 'refunded' || normalized === 'chargeback' || normalized === 'chargedback') return 'refunded';
+  return normalized || 'pending';
+};
+
+const blockedState: AccessState = {
+  allowed: false,
+  access_status: 'blocked',
+  payment_status: 'pending',
+  reason: 'pending',
+};
+
 export const useAccessCheck = () => {
   const { user } = useAuth();
   const [hasAccess, setHasAccess] = useState<boolean>(false);
   const [accessState, setAccessState] = useState<AccessState | null>(null);
   const [loading, setLoading] = useState(true);
+
+  const applyState = useCallback((state: AccessState | null): AccessCheckResult => {
+    const granted = state?.allowed === true;
+    setAccessState(state);
+    setHasAccess(granted);
+    return { granted, state };
+  }, []);
+
+  const logDirectRowInsights = (row: DirectAccessRow) => {
+    const activePlan = normalizeStatus(row.plan_status) === 'active';
+
+    if (activePlan) {
+      console.log('active plan found');
+    }
+
+    if (activePlan && !row.access_granted) {
+      console.log('reconciling access_granted=true');
+    }
+
+    if (!row.user_id) {
+      console.log('reconciling user_id');
+    }
+  };
 
   const fetchDirectAccess = useCallback(async (userId: string, normalizedEmail: string) => {
     console.log('checking access by user_id');
@@ -48,14 +88,19 @@ export const useAccessCheck = () => {
       .maybeSingle();
 
     if (byUserId) {
-      return byUserId as DirectAccessRow;
+      const directByUser = byUserId as DirectAccessRow;
+      logDirectRowInsights(directByUser);
+      return directByUser;
     }
 
     if (!normalizedEmail) {
+      console.log('no active access found');
       return null;
     }
 
     console.log('fallback to email lookup');
+    console.log('checking user_access by normalized email');
+
     const { data: byEmail } = await supabase
       .from('user_access')
       .select('id, user_id, email, plan_status, access_granted')
@@ -64,17 +109,17 @@ export const useAccessCheck = () => {
       .limit(1)
       .maybeSingle();
 
-    return (byEmail as DirectAccessRow | null) ?? null;
+    if (!byEmail) {
+      console.log('no active access found');
+      return null;
+    }
+
+    const directByEmail = byEmail as DirectAccessRow;
+    logDirectRowInsights(directByEmail);
+    return directByEmail;
   }, []);
 
-  const applyState = useCallback((state: AccessState | null): AccessCheckResult => {
-    const granted = state?.allowed === true;
-    setAccessState(state);
-    setHasAccess(granted);
-    return { granted, state };
-  }, []);
-
-  const checkAccess = useCallback(async ({ forceDirect = false }: { forceDirect?: boolean } = {}): Promise<AccessCheckResult> => {
+  const checkAccess = useCallback(async (): Promise<AccessCheckResult> => {
     if (!user?.id) {
       setHasAccess(false);
       setAccessState(null);
@@ -95,22 +140,8 @@ export const useAccessCheck = () => {
       }
 
       const normalizedEmail = normalizeEmail(currentUser.email);
-      let directAccessRow: DirectAccessRow | null = null;
-
-      if (forceDirect) {
-        directAccessRow = await fetchDirectAccess(currentUser.id, normalizedEmail);
-
-        if (directAccessRow && normalizeStatus(directAccessRow.plan_status) === 'active') {
-          console.log('active plan found');
-          if (!directAccessRow.access_granted) {
-            console.log('reconciling access_granted=true');
-          }
-        }
-
-        if (!directAccessRow) {
-          console.log('no active access found');
-        }
-      }
+      const directAccessRow = await fetchDirectAccess(currentUser.id, normalizedEmail);
+      const directValid = directAccessRow ? hasValidPurchase(directAccessRow) : false;
 
       const { data, error } = await supabase.rpc('get_current_user_access_state');
 
@@ -126,61 +157,48 @@ export const useAccessCheck = () => {
           };
 
           if (state.allowed) {
-            console.log('user access released');
-          } else {
-            console.log('no active access found');
+            console.log('access released');
+            return applyState(state);
           }
 
+          if (directValid) {
+            console.log('access released');
+            return applyState({
+              allowed: true,
+              access_status: 'allowed',
+              payment_status: 'approved',
+              reason: 'approved',
+            });
+          }
+
+          console.log('no active access found');
           return applyState(state);
         }
       } else {
         console.error('Erro ao verificar acesso (get_current_user_access_state):', error);
       }
 
-      if (directAccessRow && hasValidPurchase(directAccessRow)) {
-        const state: AccessState = {
-          allowed: true,
-          access_status: 'allowed',
-          payment_status: normalizeStatus(directAccessRow.plan_status) === 'active' ? 'approved' : 'approved',
-          reason: 'approved',
-        };
-        console.log('user access released');
-        return applyState(state);
-      }
-
-      const { data: boolData, error: boolError } = await supabase.rpc('can_current_user_access');
-      if (!boolError && boolData === true) {
-        const state: AccessState = {
+      if (directValid) {
+        console.log('access released');
+        return applyState({
           allowed: true,
           access_status: 'allowed',
           payment_status: 'approved',
-          reason: 'approved',
-        };
-        console.log('user access released');
-        return applyState(state);
+          reason: mapReasonFromStatus(directAccessRow?.plan_status),
+        });
       }
 
       console.log('no active access found');
-      return applyState({
-        allowed: false,
-        access_status: 'blocked',
-        payment_status: 'pending',
-        reason: 'pending',
-      });
+      return applyState(blockedState);
     } catch (err) {
       console.error('Falha na verificação de acesso:', err);
-      return applyState({
-        allowed: false,
-        access_status: 'blocked',
-        payment_status: 'pending',
-        reason: 'pending',
-      });
+      return applyState(blockedState);
     } finally {
       setLoading(false);
     }
   }, [applyState, fetchDirectAccess, user]);
 
-  const recheckAccess = useCallback(() => checkAccess({ forceDirect: true }), [checkAccess]);
+  const recheckAccess = useCallback(() => checkAccess(), [checkAccess]);
 
   useEffect(() => {
     void checkAccess();

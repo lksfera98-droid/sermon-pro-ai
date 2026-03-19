@@ -299,16 +299,35 @@ Deno.serve(async (req) => {
             ? "EXPIRADA"
             : "PENDENTE";
 
-    const { error: paidUsersError } = await supabase
+    // Check if record exists, then update or insert
+    const { data: existingPaidUser } = await supabase
       .from("paid_users")
-      .upsert(
-        {
+      .select("id")
+      .ilike("email", email)
+      .limit(1)
+      .maybeSingle();
+
+    let paidUsersError: unknown = null;
+
+    if (existingPaidUser) {
+      const { error } = await supabase
+        .from("paid_users")
+        .update({
+          status_pagamento: paidUserStatus,
+          paid_at: mapped.accessGranted ? nowIso : null,
+        })
+        .eq("id", existingPaidUser.id);
+      paidUsersError = error;
+    } else {
+      const { error } = await supabase
+        .from("paid_users")
+        .insert({
           email,
           status_pagamento: paidUserStatus,
           paid_at: mapped.accessGranted ? nowIso : null,
-        },
-        { onConflict: "email", ignoreDuplicates: false },
-      );
+        });
+      paidUsersError = error;
+    }
 
     if (paidUsersError) {
       console.error("Error upserting paid_users:", paidUsersError);

@@ -68,6 +68,33 @@ export type Database = {
         }
         Relationships: []
       }
+      paid_users: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          paid_at: string | null
+          produto: string | null
+          status_pagamento: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          paid_at?: string | null
+          produto?: string | null
+          status_pagamento?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          paid_at?: string | null
+          produto?: string | null
+          status_pagamento?: string
+        }
+        Relationships: []
+      }
       prayer_requests: {
         Row: {
           author_name: string | null

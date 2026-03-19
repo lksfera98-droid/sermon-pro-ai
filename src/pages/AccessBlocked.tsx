@@ -8,48 +8,23 @@ import { Loader2, ShieldX, RefreshCw, LogOut, Crown, Zap, CheckCircle2 } from 'l
 import { toast } from 'sonner';
 import preacherLogo from '@/assets/preacher-logo.png';
 
-const statusMessages: Record<string, string> = {
-  approved: 'Seu pagamento foi aprovado! Verificando liberação...',
-  pending: 'Pagamento ainda pendente. Conclua o pagamento para liberar o acesso.',
-  cancelled: 'Seu pagamento foi cancelado. Escolha um plano abaixo para reativar.',
-  expired: 'Seu acesso expirou. Renove escolhendo um plano abaixo.',
-  refunded: 'Seu pagamento foi reembolsado. O acesso foi revogado.',
-  not_found: 'Conta não encontrada. Tente sair e entrar novamente.',
-  not_authenticated: 'Sessão inválida. Faça login novamente.',
-};
-
 const AccessBlocked = () => {
   const { user, signOut } = useAuth();
-  const { hasAccess, accessState, loading, recheckAccess } = useAccessCheck();
+  const { hasAccess, loading, checkAccess } = useAccessCheck();
   const navigate = useNavigate();
-
   const [isRechecking, setIsRechecking] = useState(false);
-  const [isSwitchingAccount, setIsSwitchingAccount] = useState(false);
 
-  const redirectToApp = () => {
-    console.log('redirecting from /acesso-bloqueado');
-    console.log('redirecting to app');
-    navigate('/', { replace: true });
-  };
-
+  // Auto-revalidate on mount
   useEffect(() => {
     let active = true;
-
-    const runRevalidation = async () => {
-      const result = await recheckAccess();
-      if (!active) return;
-
-      if (result.granted) {
-        redirectToApp();
+    checkAccess().then((granted) => {
+      if (active && granted) {
+        console.log('redirecting from /acesso-bloqueado');
+        navigate('/', { replace: true });
       }
-    };
-
-    void runRevalidation();
-
-    return () => {
-      active = false;
-    };
-  }, [recheckAccess]);
+    });
+    return () => { active = false; };
+  }, [checkAccess, navigate]);
 
   if (!user) return <Navigate to="/auth" replace />;
 
@@ -61,37 +36,24 @@ const AccessBlocked = () => {
     );
   }
 
-  if (hasAccess) {
-    console.log('redirecting from /acesso-bloqueado');
-    console.log('redirecting to app');
-    return <Navigate to="/" replace />;
-  }
+  if (hasAccess) return <Navigate to="/" replace />;
 
   const handleRecheck = async () => {
     setIsRechecking(true);
-
-    const result = await recheckAccess();
-
-    if (result.granted) {
+    const granted = await checkAccess();
+    if (granted) {
       toast.success('Acesso liberado! Redirecionando...');
-      redirectToApp();
-      setIsRechecking(false);
-      return;
+      navigate('/', { replace: true });
+    } else {
+      toast.error('Acesso ainda não encontrado. Verifique se usou o mesmo email da compra.');
     }
-
-    const reason = result.state?.reason || 'pending';
-    const msg = statusMessages[reason] || 'Acesso ainda bloqueado. Escolha um dos planos abaixo.';
-    toast.error(msg);
     setIsRechecking(false);
   };
 
-  const handleSwitchAccount = async () => {
-    setIsSwitchingAccount(true);
+  const handleLogout = async () => {
     await signOut();
-    setIsSwitchingAccount(false);
+    navigate('/auth', { replace: true });
   };
-
-  const reason = accessState?.reason || 'pending';
 
   return (
     <div className="h-[100svh] overflow-y-auto overscroll-contain bg-background" style={{ touchAction: 'pan-y' }}>
@@ -105,31 +67,15 @@ const AccessBlocked = () => {
           <div className="space-y-2">
             <h1 className="text-xl font-bold text-foreground">Seu acesso ainda não está ativo</h1>
             <p className="text-sm text-muted-foreground leading-relaxed max-w-md mx-auto">
-              {statusMessages[reason] || 'Se a compra foi feita com outro e-mail, troque de conta abaixo. Se este for o e-mail correto e ainda estiver sem acesso, escolha um dos planos para liberar imediatamente.'}
+              O app é exclusivo para usuários com plano pago. Se você já comprou, certifique-se de usar o <strong>mesmo email da compra</strong>.
             </p>
           </div>
 
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-2">
-            <div className="bg-muted/50 rounded-lg px-3 py-2 text-xs text-muted-foreground">
-              Email: <span className="font-medium text-foreground">{user.email}</span>
-            </div>
-            <Button
-              onClick={handleSwitchAccount}
-              disabled={isSwitchingAccount}
-              variant="outline"
-              className="h-9 px-3 text-xs font-semibold"
-            >
-              {isSwitchingAccount ? <Loader2 className="h-4 w-4 animate-spin" /> : <LogOut className="h-4 w-4" />}
-              Trocar e-mail
-            </Button>
+          <div className="bg-muted/50 rounded-lg px-3 py-2 text-xs text-muted-foreground">
+            Email atual: <span className="font-medium text-foreground">{user.email}</span>
           </div>
 
-          <Button
-            onClick={handleRecheck}
-            disabled={isRechecking}
-            variant="outline"
-            className="w-full max-w-xs h-11 text-sm font-semibold mx-auto"
-          >
+          <Button onClick={handleRecheck} disabled={isRechecking} variant="outline" className="w-full max-w-xs h-11 text-sm font-semibold mx-auto">
             {isRechecking ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
             Já comprei, verificar novamente
           </Button>
@@ -142,31 +88,19 @@ const AccessBlocked = () => {
             </p>
           </Card>
 
-          <div className="text-center space-y-2">
-            <h2 className="text-lg font-bold text-foreground">Escolha como deseja liberar seu acesso</h2>
-            <p className="text-sm text-muted-foreground">Pagamento rápido e liberação imediata após confirmação.</p>
-          </div>
-
           <Card className="p-5 space-y-4 border-border/60 bg-card">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-xl bg-secondary/30 flex items-center justify-center shrink-0">
                 <Zap className="h-5 w-5 text-foreground/70" />
               </div>
-              <div>
-                <h3 className="text-base font-bold text-foreground">Acesso por mais 1 mês</h3>
-              </div>
+              <h3 className="text-base font-bold text-foreground">Acesso por mais 1 mês</h3>
             </div>
-            <p className="text-sm text-muted-foreground leading-relaxed">
-              Ideal para quem deseja renovar rapidamente e continuar usando todos os recursos do app por mais 30 dias.
-            </p>
             <ul className="space-y-1.5">
               <li className="flex items-center gap-2 text-xs text-muted-foreground">
-                <CheckCircle2 className="h-3.5 w-3.5 text-primary shrink-0" />
-                Todos os recursos por 30 dias
+                <CheckCircle2 className="h-3.5 w-3.5 text-primary shrink-0" /> Todos os recursos por 30 dias
               </li>
               <li className="flex items-center gap-2 text-xs text-muted-foreground">
-                <CheckCircle2 className="h-3.5 w-3.5 text-primary shrink-0" />
-                Acesso imediato após pagamento
+                <CheckCircle2 className="h-3.5 w-3.5 text-primary shrink-0" /> Acesso imediato após pagamento
               </li>
             </ul>
             <Button className="w-full h-11 text-sm font-semibold" variant="secondary" asChild>
@@ -174,7 +108,6 @@ const AccessBlocked = () => {
                 Liberar por 1 mês
               </a>
             </Button>
-            <p className="text-[11px] text-muted-foreground text-center">Renovação por 30 dias</p>
           </Card>
 
           <div className="relative">
@@ -182,34 +115,24 @@ const AccessBlocked = () => {
             <Card className="relative p-5 space-y-4 border-primary/50 bg-card ring-1 ring-primary/20">
               <div className="absolute -top-3 left-1/2 -translate-x-1/2">
                 <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-[11px] font-bold bg-primary text-primary-foreground shadow-lg">
-                  <Crown className="h-3 w-3" />
-                  MELHOR ESCOLHA
+                  <Crown className="h-3 w-3" /> MELHOR ESCOLHA
                 </span>
               </div>
-
               <div className="flex items-center gap-3 pt-2">
                 <div className="w-10 h-10 rounded-xl bg-primary/15 flex items-center justify-center shrink-0">
                   <Crown className="h-5 w-5 text-primary" />
                 </div>
-                <div>
-                  <h3 className="text-base font-bold text-foreground">Acesso vitalício</h3>
-                </div>
+                <h3 className="text-base font-bold text-foreground">Acesso vitalício</h3>
               </div>
-              <p className="text-sm text-muted-foreground leading-relaxed">
-                Pague uma única vez e tenha acesso permanente ao aplicativo, sem mensalidade e sem renovação.
-              </p>
               <ul className="space-y-1.5">
                 <li className="flex items-center gap-2 text-xs text-muted-foreground">
-                  <CheckCircle2 className="h-3.5 w-3.5 text-primary shrink-0" />
-                  Acesso permanente e ilimitado
+                  <CheckCircle2 className="h-3.5 w-3.5 text-primary shrink-0" /> Acesso permanente e ilimitado
                 </li>
                 <li className="flex items-center gap-2 text-xs text-muted-foreground">
-                  <CheckCircle2 className="h-3.5 w-3.5 text-primary shrink-0" />
-                  Sem mensalidade, sem renovação
+                  <CheckCircle2 className="h-3.5 w-3.5 text-primary shrink-0" /> Sem mensalidade, sem renovação
                 </li>
                 <li className="flex items-center gap-2 text-xs text-muted-foreground">
-                  <CheckCircle2 className="h-3.5 w-3.5 text-primary shrink-0" />
-                  Todas as atualizações futuras
+                  <CheckCircle2 className="h-3.5 w-3.5 text-primary shrink-0" /> Todas as atualizações futuras
                 </li>
               </ul>
               <Button className="w-full h-12 text-sm font-bold shadow-lg" asChild>
@@ -217,9 +140,12 @@ const AccessBlocked = () => {
                   Quero acesso para sempre
                 </a>
               </Button>
-              <p className="text-[11px] text-muted-foreground text-center font-medium">Pagamento único</p>
             </Card>
           </div>
+
+          <Button onClick={handleLogout} variant="ghost" className="w-full text-sm text-muted-foreground">
+            <LogOut className="h-4 w-4" /> Voltar para o login
+          </Button>
         </div>
       </div>
     </div>

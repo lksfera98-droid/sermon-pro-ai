@@ -20,19 +20,19 @@ export default defineConfig(({ mode }) => ({
         name: 'SermonPro - Criador de Sermões Bíblicos',
         short_name: 'SermonPro',
         description: 'Crie sermões bíblicos inspiradores com IA',
-        theme_color: '#1a2540',
-        background_color: '#1a2540',
+        theme_color: '#8B6F47',
+        background_color: '#F5F1EA',
         display: 'standalone',
         orientation: 'portrait',
         icons: [
           {
-            src: '/logo.png?v=2',
+            src: '/logo.png',
             sizes: '192x192',
             type: 'image/png',
             purpose: 'any maskable'
           },
           {
-            src: '/logo.png?v=2',
+            src: '/logo.png',
             sizes: '512x512',
             type: 'image/png',
             purpose: 'any maskable'

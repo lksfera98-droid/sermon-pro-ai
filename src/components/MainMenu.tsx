@@ -97,48 +97,6 @@ export const MainMenu = ({ onNavigate }: MainMenuProps) => {
 
   const menuItems = [
     { 
-      id: "new-sermon" as View, 
-      label: 'Crie seu novo sermão', 
-      icon: FileText,
-      color: "bg-blue-100 dark:bg-blue-900/30",
-      iconColor: "text-blue-600 dark:text-blue-400"
-    },
-    { 
-      id: "my-sermons" as View, 
-      label: 'Seus Sermões Criados', 
-      icon: BookOpen,
-      color: "bg-green-100 dark:bg-green-900/30",
-      iconColor: "text-green-600 dark:text-green-400"
-    },
-    { 
-      id: "bible-study" as View, 
-      label: 'Esmiuçar um versículo', 
-      icon: GraduationCap,
-      color: "bg-indigo-100 dark:bg-indigo-900/30",
-      iconColor: "text-indigo-600 dark:text-indigo-400"
-    },
-    { 
-      id: "daily-devotional" as View, 
-      label: 'Gerar Meu Devocional Diário', 
-      icon: BookHeart,
-      color: "bg-rose-100 dark:bg-rose-900/30",
-      iconColor: "text-rose-600 dark:text-rose-400"
-    },
-    { 
-      id: "translator" as View, 
-      label: 'Significado de Nomes Bíblicos', 
-      icon: Languages,
-      color: "bg-orange-100 dark:bg-orange-900/30",
-      iconColor: "text-orange-600 dark:text-orange-400"
-    },
-    { 
-      id: "verse-search" as View, 
-      label: 'Pesquisar Versículos', 
-      icon: Search,
-      color: "bg-purple-100 dark:bg-purple-900/30",
-      iconColor: "text-purple-600 dark:text-purple-400"
-    },
-    { 
       id: "prayer-requests" as View, 
       label: 'Fazer um Pedido de Oração', 
       icon: Heart,
@@ -160,12 +118,54 @@ export const MainMenu = ({ onNavigate }: MainMenuProps) => {
       iconColor: "text-teal-600 dark:text-teal-400"
     },
     { 
+      id: "daily-devotional" as View, 
+      label: 'Gerar Meu Devocional Diário', 
+      icon: BookHeart,
+      color: "bg-rose-100 dark:bg-rose-900/30",
+      iconColor: "text-rose-600 dark:text-rose-400"
+    },
+    { 
+      id: "bible-study" as View, 
+      label: 'Esmiuçar um versiculo', 
+      icon: GraduationCap,
+      color: "bg-indigo-100 dark:bg-indigo-900/30",
+      iconColor: "text-indigo-600 dark:text-indigo-400"
+    },
+    { 
+      id: "translator" as View, 
+      label: 'Significado de Nomes Bíblicos', 
+      icon: Languages,
+      color: "bg-orange-100 dark:bg-orange-900/30",
+      iconColor: "text-orange-600 dark:text-orange-400"
+    },
+    { 
+      id: "new-sermon" as View, 
+      label: 'Crie seu novo sermão', 
+      icon: FileText,
+      color: "bg-blue-100 dark:bg-blue-900/30",
+      iconColor: "text-blue-600 dark:text-blue-400"
+    },
+    { 
+      id: "my-sermons" as View, 
+      label: 'Seus Sermões Criados', 
+      icon: BookOpen,
+      color: "bg-green-100 dark:bg-green-900/30",
+      iconColor: "text-green-600 dark:text-green-400"
+    },
+    { 
       id: "public-gallery" as View, 
       label: 'Sermões criados pelos irmãos', 
       icon: Sparkles,
       color: "bg-amber-100 dark:bg-amber-900/30",
       iconColor: "text-amber-600 dark:text-amber-400"
     },
+    { 
+      id: "verse-search" as View, 
+      label: 'Pesquisar Versículos', 
+      icon: Search,
+      color: "bg-purple-100 dark:bg-purple-900/30",
+      iconColor: "text-purple-600 dark:text-purple-400"
+    }
   ];
 
   return (

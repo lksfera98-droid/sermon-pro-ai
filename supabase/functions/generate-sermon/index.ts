@@ -102,17 +102,11 @@ ${tempo > 60 ? '- Ilustração final impactante' : ''}
 ORAÇÃO FINAL
 Escreva uma ${tempo > 40 ? 'oração detalhada e temática' : 'oração relacionada ao tema'}.
 
-CITAÇÕES DE TEÓLOGOS:
-Inclua ao longo do sermão citações relevantes de grandes teólogos e pensadores cristãos que estejam em conformidade com o tema abordado. Escolha algumas (não precisa usar todas) dentre estes nomes:
-- Clássicos: Agostinho de Hipona, Tomás de Aquino, Martinho Lutero, João Calvino, Orígenes, Irineu de Lyon
-- Modernos/Contemporâneos: Karl Barth, Dietrich Bonhoeffer, C.S. Lewis, John Stott, Billy Graham, R.C. Sproul, John Piper, Wayne Grudem, Tim Keller, T.D. Jakes
-As citações devem ser inseridas naturalmente no texto, entre aspas, com o nome do autor. Escolha apenas as que se encaixam no tema.
-
 REGRAS IMPORTANTES:
 1. NÃO use asteriscos ou símbolos de formatação como ** ou *
 2. NÃO escreva instruções de formatação no texto (como "negrito", "itálico", etc.)
 3. Escreva o conteúdo de forma natural e limpa
-4. Use aspas normais para citações bíblicas e de teólogos
+4. Use aspas normais para citações bíblicas
 5. Seja profundo, inspirador e prático
 6. O sermão deve tocar o coração e transformar vidas
 7. Escreva TUDO em português brasileiro
@@ -151,16 +145,21 @@ Gere o sermão completo agora.`;
     const data = await response.json();
     let sermao = data.choices[0].message.content;
 
-    // Limpar qualquer formatação markdown, HTML e classes CSS residuais
+    // Limpar qualquer formatação markdown e HTML residual
     sermao = sermao
-      .replace(/<[^>]*class="[^"]*"[^>]*>/gi, '') // Remove tags with CSS classes
-      .replace(/<\/?\w+[^>]*>/gi, '')              // Remove ALL HTML tags
-      .replace(/\*{1,3}/g, '')
-      .replace(/#{1,6}\s/g, '')
-      .replace(/`/g, '')
-      .replace(/\[|\]/g, '')
-      .replace(/_{2,}/g, '')
-      .replace(/~{2,}/g, '')
+      .replace(/\*\*\*/g, '')  // Remove ***
+      .replace(/\*\*/g, '')    // Remove **
+      .replace(/\*/g, '')      // Remove *
+      .replace(/#{1,6}\s/g, '') // Remove # headers
+      .replace(/`/g, '')       // Remove backticks
+      .replace(/\[|\]/g, '')   // Remove brackets
+      .replace(/<\/?b>/gi, '') // Remove <b> tags
+      .replace(/<\/?strong>/gi, '') // Remove <strong> tags
+      .replace(/<\/?em>/gi, '') // Remove <em> tags
+      .replace(/<\/?i>/gi, '') // Remove <i> tags
+      .replace(/<\/?u>/gi, '') // Remove <u> tags
+      .replace(/_{2,}/g, '')   // Remove __ underscores
+      .replace(/~{2,}/g, '')   // Remove ~~ strikethrough
       .trim();
 
     console.log('Sermão gerado com sucesso');

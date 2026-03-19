@@ -139,10 +139,9 @@ export const SermonDisplay = ({ content, title }: SermonDisplayProps) => {
       .map((line, index) => {
         // Clean any residual formatting
         const cleanLine = line
-          .replace(/<[^>]*class="[^"]*"[^>]*>/gi, '')
-          .replace(/<\/?\w+[^>]*>/gi, '')
           .replace(/\*{1,3}/g, '')
           .replace(/#{1,6}\s/g, '')
+          .replace(/<\/?(?:b|strong|em|i|u)>/gi, '')
           .replace(/_{2,}/g, '')
           .replace(/~{2,}/g, '');
 

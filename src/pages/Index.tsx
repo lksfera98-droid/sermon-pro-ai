@@ -151,7 +151,7 @@ const Index = () => {
       {isLoading && <LoadingProgress />}
       
       <div className="h-[100svh] flex flex-col">
-        <div ref={scrollContainerRef} className="flex-1 overflow-y-auto overscroll-contain pb-[88px] md:pb-0" style={{ overscrollBehavior: 'contain', touchAction: 'pan-y' }}>
+        <div ref={scrollContainerRef} className="flex-1 overflow-y-auto overscroll-contain pb-[88px] md:pb-0" style={{ WebkitOverflowScrolling: 'touch' }}>
           {currentView === 'dashboard' && <MainMenu onNavigate={setCurrentView} />}
           
           {currentView === 'new-sermon' && (

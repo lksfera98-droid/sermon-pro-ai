@@ -109,17 +109,6 @@ Seja profundo, claro e espiritual. Use linguagem acessível mas teologicamente p
       }
     }
 
-    // Clean any HTML tags with attributes (Tailwind classes), markdown, etc.
-    study = study
-      .replace(/<[^>]*class="[^"]*"[^>]*>/gi, '')
-      .replace(/<\/?\w+[^>]*>/gi, '')
-      .replace(/\*{1,3}/g, '')
-      .replace(/#{1,6}\s/g, '')
-      .replace(/`/g, '')
-      .replace(/\[|\]/g, '')
-      .replace(/_{2,}/g, '')
-      .replace(/~{2,}/g, '');
-
     console.log("Bible study generated successfully");
 
     return new Response(

@@ -288,6 +288,34 @@ Deno.serve(async (req) => {
       }
     }
 
+    // Upsert into paid_users (source of truth for frontend access check)
+    const paidUserStatus = mapped.accessGranted
+      ? "COMPRA_APROVADA"
+      : mapped.planStatus === "cancelled"
+        ? "CANCELADA"
+        : mapped.planStatus === "refunded"
+          ? "REEMBOLSADA"
+          : mapped.planStatus === "expired"
+            ? "EXPIRADA"
+            : "PENDENTE";
+
+    const { error: paidUsersError } = await supabase
+      .from("paid_users")
+      .upsert(
+        {
+          email,
+          status_pagamento: paidUserStatus,
+          paid_at: mapped.accessGranted ? nowIso : null,
+        },
+        { onConflict: "email", ignoreDuplicates: false },
+      );
+
+    if (paidUsersError) {
+      console.error("Error upserting paid_users:", paidUsersError);
+    } else {
+      console.log(`paid_users upserted: email=${email}, status=${paidUserStatus}`);
+    }
+
     if (mapped.accessGranted) {
       console.log("access released");
     } else {

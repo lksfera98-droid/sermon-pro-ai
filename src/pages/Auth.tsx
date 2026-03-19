@@ -99,8 +99,8 @@ const Auth = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background overflow-y-auto">
-      <div className="min-h-screen flex flex-col items-center justify-start py-8 px-4">
+    <div className="h-[100svh] bg-background overflow-y-auto overscroll-contain touch-pan-y">
+      <div className="min-h-[100svh] flex flex-col items-center justify-start py-8 px-4">
         <div className="w-full max-w-md space-y-5">
           {/* Logo */}
           <div className="text-center space-y-2">

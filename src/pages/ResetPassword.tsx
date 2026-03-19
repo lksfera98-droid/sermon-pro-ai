@@ -19,7 +19,6 @@ const ResetPassword = () => {
   const [isValidLink, setIsValidLink] = useState(false);
 
   useEffect(() => {
-    // Check for recovery token in URL hash
     const hash = window.location.hash;
     if (hash && hash.includes('type=recovery')) {
       setIsValidLink(true);
@@ -51,10 +50,14 @@ const ResetPassword = () => {
 
   if (!isValidLink) {
     return (
-      <div className="min-h-screen bg-background flex flex-col items-center justify-center p-4">
-        <div className="w-full max-w-md text-center space-y-6">
-          <img src={preacherLogo} alt="ProSermon" className="w-24 h-24 object-contain mx-auto rounded-lg" />
-          <Card className="p-6">
+      <div className="h-[100svh] bg-background overflow-y-auto overscroll-contain touch-pan-y">
+        <div className="min-h-[100svh] w-full max-w-md mx-auto flex flex-col items-center justify-start py-10 px-4 text-center space-y-6">
+          <img
+            src={preacherLogo}
+            alt="ProSermon"
+            className="w-24 h-24 object-contain mx-auto rounded-lg"
+          />
+          <Card className="p-6 w-full">
             <h2 className="text-xl font-bold mb-3">Link Inválido</h2>
             <p className="text-muted-foreground mb-4">
               Este link de recuperação é inválido ou já expirou. Solicite um novo link na tela de login.
@@ -69,14 +72,18 @@ const ResetPassword = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background flex flex-col items-center justify-center p-4">
-      <div className="w-full max-w-md space-y-6">
+    <div className="h-[100svh] bg-background overflow-y-auto overscroll-contain touch-pan-y">
+      <div className="min-h-[100svh] w-full max-w-md mx-auto flex flex-col items-center justify-start py-10 px-4 space-y-6">
         <div className="text-center">
-          <img src={preacherLogo} alt="ProSermon" className="w-24 h-24 object-contain mx-auto rounded-lg mb-3" />
+          <img
+            src={preacherLogo}
+            alt="ProSermon"
+            className="w-24 h-24 object-contain mx-auto rounded-lg mb-3"
+          />
           <h1 className="text-2xl font-bold text-primary">Nova Senha</h1>
         </div>
 
-        <Card className="p-6 shadow-lg">
+        <Card className="p-6 shadow-lg w-full">
           <form onSubmit={handleSubmit} className="space-y-4">
             <p className="text-sm text-muted-foreground text-center">
               Defina sua nova senha abaixo.

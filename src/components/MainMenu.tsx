@@ -28,6 +28,7 @@ type View = "dashboard" | "new-sermon" | "translator" | "my-sermons" | "verse-se
 
 interface MainMenuProps {
   onNavigate: (view: View) => void;
+  onSignOut?: () => void;
 }
 
 export const MainMenu = ({ onNavigate }: MainMenuProps) => {

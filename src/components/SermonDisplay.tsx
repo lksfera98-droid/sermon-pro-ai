@@ -132,30 +132,23 @@ export const SermonDisplay = ({ content, title }: SermonDisplayProps) => {
     toast.success(t('downloadPDF') + " ✅");
   };
 
-  // Format sermon content with styled sections (no dangerouslySetInnerHTML)
+  // Format sermon content with bold and colored highlights
   const formatSermon = (text: string) => {
     return text
       .split('\n')
       .map((line, index) => {
-        // Clean any residual formatting
-        const cleanLine = line
-          .replace(/\*{1,3}/g, '')
-          .replace(/#{1,6}\s/g, '')
-          .replace(/<\/?(?:b|strong|em|i|u)>/gi, '')
-          .replace(/_{2,}/g, '')
-          .replace(/~{2,}/g, '');
-
         // Main title (all uppercase)
-        if (cleanLine === cleanLine.toUpperCase() && cleanLine.trim() && cleanLine.length > 5 && cleanLine.length < 100) {
+        if (line === line.toUpperCase() && line.trim() && line.length > 5 && line.length < 100 && !line.startsWith('*')) {
           return (
             <h2 key={index} className="text-2xl md:text-3xl font-extrabold text-primary mt-8 mb-4 border-b-2 border-primary/30 pb-2">
-              {cleanLine}
+              {line}
             </h2>
           );
         }
         
-        // Section headers (ending with :)
-        if (cleanLine.match(/^[A-ZÁÉÍÓÚÂÊÔÃÕ][^:]*:$/) && cleanLine.length < 100) {
+        // Section headers (starting with ** or ### or ending with :)
+        if (line.startsWith('**') || line.startsWith('###') || (line.match(/^[A-ZÁÉÍÓÚÂÊÔÃÕ][^:]*:$/) && line.length < 100)) {
+          const cleanLine = line.replace(/^(###|\*\*)\s*/g, '').replace(/\*\*$/g, '');
           return (
             <h3 key={index} className="text-xl md:text-2xl font-bold text-primary mt-6 mb-3 bg-primary/5 p-3 rounded-lg">
               {cleanLine}
@@ -164,31 +157,44 @@ export const SermonDisplay = ({ content, title }: SermonDisplayProps) => {
         }
         
         // Numbered points (1., 2., etc)
-        if (cleanLine.match(/^\d+\.\s/)) {
+        if (line.match(/^\d+\.\s/)) {
+          // Extract bold text within **
+          const processedLine = line.replace(/\*\*([^*]+)\*\*/g, '<strong class="text-primary font-extrabold text-lg">$1</strong>');
           return (
             <div key={index} className="my-4 p-4 bg-muted/30 rounded-lg border-l-4 border-primary">
-              <p className="font-semibold text-base md:text-lg text-foreground leading-relaxed">
-                {cleanLine}
-              </p>
+              <p 
+                className="font-semibold text-base md:text-lg text-foreground leading-relaxed"
+                dangerouslySetInnerHTML={{ __html: processedLine }}
+              />
             </div>
           );
         }
         
         // Sub-points (starting with - or •)
-        if (cleanLine.match(/^\s*[-•]/)) {
+        if (line.match(/^\s*[-•]/)) {
+          const processedLine = line.replace(/\*\*([^*]+)\*\*/g, '<strong class="text-primary font-bold">$1</strong>');
           return (
-            <p key={index} className="ml-6 my-2 text-foreground leading-relaxed">
-              {cleanLine}
-            </p>
+            <p 
+              key={index} 
+              className="ml-6 my-2 text-foreground leading-relaxed"
+              dangerouslySetInnerHTML={{ __html: processedLine }}
+            />
           );
         }
         
         // Regular paragraphs
-        if (cleanLine.trim()) {
+        if (line.trim()) {
+          // Highlight words in quotes or between **
+          const highlightedLine = line
+            .replace(/\*\*([^*]+)\*\*/g, '<strong class="text-primary font-bold text-lg bg-primary/10 px-1 rounded">$1</strong>')
+            .replace(/"([^"]+)"|"([^"]+)"|'([^']+)'/g, '<em class="text-primary font-semibold italic">$1$2$3</em>');
+          
           return (
-            <p key={index} className="my-3 text-foreground leading-relaxed text-base">
-              {cleanLine}
-            </p>
+            <p 
+              key={index} 
+              className="my-3 text-foreground leading-relaxed text-base"
+              dangerouslySetInnerHTML={{ __html: highlightedLine }}
+            />
           );
         }
         

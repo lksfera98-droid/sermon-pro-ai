@@ -145,21 +145,20 @@ Gere o sermão completo agora.`;
     const data = await response.json();
     let sermao = data.choices[0].message.content;
 
-    // Limpar qualquer formatação markdown e HTML residual
+    // Limpeza agressiva de TODA formatação markdown e HTML
     sermao = sermao
-      .replace(/\*\*\*/g, '')  // Remove ***
-      .replace(/\*\*/g, '')    // Remove **
-      .replace(/\*/g, '')      // Remove *
-      .replace(/#{1,6}\s/g, '') // Remove # headers
-      .replace(/`/g, '')       // Remove backticks
-      .replace(/\[|\]/g, '')   // Remove brackets
-      .replace(/<\/?b>/gi, '') // Remove <b> tags
-      .replace(/<\/?strong>/gi, '') // Remove <strong> tags
-      .replace(/<\/?em>/gi, '') // Remove <em> tags
-      .replace(/<\/?i>/gi, '') // Remove <i> tags
-      .replace(/<\/?u>/gi, '') // Remove <u> tags
-      .replace(/_{2,}/g, '')   // Remove __ underscores
-      .replace(/~{2,}/g, '')   // Remove ~~ strikethrough
+      .replace(/\*{1,3}/g, '')           // Remove *, **, ***
+      .replace(/#{1,6}\s?/g, '')         // Remove # headers
+      .replace(/`{1,3}/g, '')            // Remove backticks
+      .replace(/\[([^\]]*)\]\([^)]*\)/g, '$1') // Links → text only
+      .replace(/\[|\]/g, '')             // Remove remaining brackets
+      .replace(/<[^>]+>/g, '')           // Remove ALL HTML tags
+      .replace(/_{2,}/g, '')             // Remove __ underscores
+      .replace(/~{2,}/g, '')             // Remove ~~ strikethrough
+      .replace(/\u200b/g, '')            // Remove zero-width spaces
+      .replace(/^\s*>\s?/gm, '')         // Remove blockquotes
+      .replace(/\|/g, '')               // Remove table pipes
+      .replace(/---+/g, '')             // Remove horizontal rules
       .trim();
 
     console.log('Sermão gerado com sucesso');

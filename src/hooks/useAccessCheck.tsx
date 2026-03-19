@@ -16,21 +16,13 @@ export const useAccessCheck = () => {
 
     setLoading(true);
     try {
-      const normalizedEmail = user.email.trim();
-
-      const { data, error } = await supabase
-        .from('user_access')
-        .select('access_granted')
-        .ilike('email', normalizedEmail)
-        .order('updated_at', { ascending: false })
-        .limit(1)
-        .maybeSingle();
+      const { data, error } = await supabase.rpc('can_current_user_access');
 
       if (error) {
         console.error('Error checking access:', error);
         setHasAccess(false);
       } else {
-        setHasAccess(data?.access_granted === true);
+        setHasAccess(data === true);
       }
     } catch (err) {
       console.error('Access check failed:', err);

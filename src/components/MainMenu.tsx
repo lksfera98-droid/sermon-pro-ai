@@ -31,7 +31,7 @@ interface MainMenuProps {
   onSignOut?: () => void;
 }
 
-export const MainMenu = ({ onNavigate }: MainMenuProps) => {
+export const MainMenu = ({ onNavigate, onSignOut }: MainMenuProps) => {
   const [showIOSInstructions, setShowIOSInstructions] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
   const { isInstallable, installPWA } = usePWAInstall();

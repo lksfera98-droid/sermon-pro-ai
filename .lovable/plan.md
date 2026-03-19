@@ -1,70 +1,47 @@
-
-Diagnóstico do erro (com base no código + banco atual):
-1) O app libera acesso usando `can_current_user_access()` -> hoje essa função consulta `public.app_users.access_status = 'allowed'`.
-2) O fluxo de pagamento ainda está populando/alterando `public.user_access` (ou até outro projeto de banco), e não atualiza `app_users` de forma garantida.
-3) Resultado: usuário pode ter pagamento aprovado em outro lugar, mas no backend do app continua `app_users.access_status = 'blocked'`, então o botão “Já comprei” sempre retorna bloqueado.
-4) Evidência adicional: não existe função de webhook de pagamento no repositório atual; então não há atualização oficial e centralizada do status de pagamento neste backend.
+Diagnóstico confirmado (com base no código, logs e dados atuais):
+1) O app está bloqueando por `get_current_user_access_state()` (retorna `blocked/pending`) e esse RPC hoje não aplica fallback completo da tabela `user_access`.
+2) Há inconsistência entre fontes de verdade: `can_current_user_access()` tem fallback, mas o frontend usa primeiro o RPC detalhado; então usuário pode continuar bloqueado mesmo com pagamento marcado em `user_access`.
+3) Não há evidência de eventos reais de pagamento chegando ao webhook deste backend (logs só mostram teste manual), então a liberação automática não está sendo acionada para os compradores.
+4) Seu print mostra dados em outro projeto/tabela (estrutura diferente), indicando provável atualização fora do backend que o app realmente consulta.
 
 Plano de correção definitiva (implementação):
-1) Unificar a regra de acesso no backend (sem depender do frontend)
-- Criar nova função SQL `public.get_current_user_access_state()` (security definer) que retorna:
-  - `allowed` (boolean)
-  - `access_status`
-  - `payment_status`
-  - `reason` (`approved`, `pending`, `cancelled`, `expired`, `refunded`, `not_found`)
-- Atualizar `public.can_current_user_access()` para usar a mesma lógica de verdade (fonte única).
+1) Unificar regra de acesso em UMA função
+- Reescrever `public.get_current_user_access_state()` para:
+  - ler `app_users` por `auth.uid()`;
+  - fazer fallback por email em `user_access` (`access_granted=true` OU `plan_status='active'`);
+  - reconciliar automaticamente `app_users` para `allowed/approved` quando fallback indicar pago;
+  - retornar `reason` consistente (`approved|pending|cancelled|expired|refunded|not_found`).
+- Reescrever `public.can_current_user_access()` para delegar à função acima (fonte única).
 
-2) Sincronização automática entre tabelas para compatibilidade imediata
-- Criar função SQL `public.sync_app_users_from_user_access()` + trigger `AFTER INSERT OR UPDATE` em `public.user_access`.
-- Regra:
-  - `plan_status='active'` ou `access_granted=true` -> `app_users.access_status='allowed'` e `payment_status='approved'`
-  - demais estados -> `access_status='blocked'` + `payment_status` correspondente.
-- Isso garante que, se o pagamento continuar escrevendo em `user_access`, o acesso no app será liberado automaticamente.
+2) Blindar sincronização entre tabelas
+- Ajustar trigger `sync_user_access_to_app_users` para mapear status de forma determinística (approved=>allowed; demais=>blocked).
+- Garantir atualização case-insensitive por email normalizado em ambos os lados.
 
-3) Backfill de dados já pagos
-- Rodar SQL de reconciliação para atualizar `app_users` a partir de `user_access` já existente (por email normalizado com `lower(trim(email))`).
-- Corrigir qualquer divergência histórica em lote.
+3) Corrigir webhook para liberação real
+- Fortalecer parser do webhook para payloads reais do gateway (campos aninhados e variações de evento/status).
+- Atualizar `app_users` e `user_access` por email normalizado.
+- Logar claramente:
+  - payload recebido,
+  - email/status normalizados,
+  - usuário encontrado/não encontrado,
+  - resultado final de acesso.
+- Não criar usuário por pagamento.
 
-4) Webhook oficial de pagamento no backend do app (obrigatório para não quebrar de novo)
-- Criar função backend `payment-webhook`:
-  - recebe evento do gateway de pagamento,
-  - normaliza email do comprador,
-  - procura usuário em `app_users`,
-  - atualiza `payment_status` e `access_status`,
-  - espelha em `user_access` (compatibilidade),
-  - gera logs claros.
-- Se não encontrar email cadastrado, registrar log de erro explícito (não criar usuário por pagamento).
-- Resultado: pagamento só libera/bloqueia acesso; nunca cria conta.
+4) Ajustar frontend de rechecagem
+- `useAccessCheck` deve depender do RPC unificado (já reconciliado), sem divergência de lógica.
+- Em `AccessBlocked`, `recheck` deve usar o estado retornado na mesma chamada (evitar estado stale para mensagem).
+- Mensagem de bloqueio deve refletir o `reason` real do backend.
 
-5) Frontend: botão “Já comprei, verificar novamente” com diagnóstico real
-- `useAccessCheck` passa a chamar `get_current_user_access_state()` (não só booleano).
-- Na tela `/acesso-bloqueado`:
-  - se `allowed=true`, redireciona para `/`;
-  - se bloqueado, mostrar motivo real (`pagamento pendente/cancelado/etc`) em mensagem amigável.
-- Adicionar logs no console:
-  - “Status de acesso consultado”
-  - “Usuário bloqueado aguardando pagamento”
-  - “Acesso liberado após confirmação de pagamento”
+5) Validação end-to-end obrigatória
+- Caso A: cadastro novo => usuário criado no Auth + linha em `app_users` (`blocked/pending`).
+- Caso B: webhook aprovado (mesmo email) => `app_users.allowed` + `payment_status=approved`.
+- Caso C: clicar “Já comprei” => redireciona e libera acesso.
+- Caso D: novo login após pagamento => entra direto.
+- Caso E: cancelado/expirado/reembolsado => volta a bloqueado.
+- Caso F: webhook com email inexistente => log explícito, sem criar conta.
 
-6) Ponto crítico que precisa ser corrigido no fluxo externo
-- Garantir que o gateway de pagamento esteja apontando para o webhook deste backend (Lovable Cloud deste projeto), não para outro projeto.
-- Sem isso, o pagamento continuará sendo confirmado fora do backend do app e o acesso nunca será liberado aqui.
-
-Detalhes técnicos (o que vou alterar):
-- Nova migration SQL:
-  - criar/ajustar funções: `get_current_user_access_state`, `can_current_user_access`, `sync_app_users_from_user_access`
-  - criar trigger de sync em `user_access`
-  - executar backfill de reconciliação
-- Novo backend function:
-  - `supabase/functions/payment-webhook/index.ts` (handler robusto com logs + update por email)
-- Frontend:
-  - `src/hooks/useAccessCheck.tsx` (status detalhado, não só boolean)
-  - `src/pages/AccessBlocked.tsx` (mensagens de status reais no recheck)
-
-Critérios de aceite (validação final):
-1) Usuário cadastra -> aparece em Authentication e em `public.app_users` com `blocked/pending`.
-2) Evento de pagamento aprovado para email existente -> `app_users` vira `allowed/approved`.
-3) Clique em “Já comprei, verificar novamente” -> acesso liberado imediatamente.
-4) Novo login após pagamento -> entra direto no app.
-5) Cancelado/expirado/reembolsado -> volta para bloqueado.
-6) Caso email não encontrado no webhook -> log explícito de erro, sem criar usuário automático.
+Arquivos/áreas que serão alterados:
+- Migration SQL nova (funções + triggers + reconciliação).
+- `supabase/functions/payment-webhook/index.ts`.
+- `src/hooks/useAccessCheck.tsx`.
+- `src/pages/AccessBlocked.tsx`.

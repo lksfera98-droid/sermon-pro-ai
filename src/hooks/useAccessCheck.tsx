@@ -44,7 +44,7 @@ export const useAccessCheck = () => {
       }
 
       const granted = (data?.length ?? 0) > 0;
-      console.log(granted ? 'access released' : 'no active access found');
+      console.log('[AccessCheck] decision:', granted ? 'ACCESS GRANTED ✅' : 'ACCESS DENIED ❌');
       setHasAccess(granted);
       return granted;
     } catch (err) {

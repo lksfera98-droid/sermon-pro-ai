@@ -22,7 +22,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 type View = "dashboard" | "new-sermon" | "translator" | "my-sermons" | "verse-search" | "public-gallery" | "prayer-requests" | "prayer-gallery" | "hear-god-speak" | "bible-study" | "daily-devotional";
 
 const Index = () => {
-  const { signOut } = useAuth();
+  
   const [isLoading, setIsLoading] = useState(false);
   const [sermon, setSermon] = useState<string | null>(null);
   const [currentSermonTitle, setCurrentSermonTitle] = useState<string>("");

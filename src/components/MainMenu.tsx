@@ -14,7 +14,8 @@ import {
   Ear,
   BookHeart,
   Search,
-  RefreshCw
+  RefreshCw,
+  LogOut
 } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useState } from "react";

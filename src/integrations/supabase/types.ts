@@ -137,6 +137,30 @@ export type Database = {
         }
         Relationships: []
       }
+      user_access: {
+        Row: {
+          access_granted: boolean
+          created_at: string
+          email: string
+          id: string
+          updated_at: string
+        }
+        Insert: {
+          access_granted?: boolean
+          created_at?: string
+          email: string
+          id?: string
+          updated_at?: string
+        }
+        Update: {
+          access_granted?: boolean
+          created_at?: string
+          email?: string
+          id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

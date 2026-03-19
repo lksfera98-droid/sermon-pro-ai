@@ -1,7 +1,7 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useAccessCheck } from '@/hooks/useAccessCheck';
-import { Navigate } from 'react-router-dom';
+import { Navigate, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Loader2, ShieldX, RefreshCw, LogOut, Crown, Zap, CheckCircle2 } from 'lucide-react';
@@ -15,15 +15,39 @@ const statusMessages: Record<string, string> = {
   expired: 'Seu acesso expirou. Renove escolhendo um plano abaixo.',
   refunded: 'Seu pagamento foi reembolsado. O acesso foi revogado.',
   not_found: 'Conta não encontrada. Tente sair e entrar novamente.',
+  not_authenticated: 'Sessão inválida. Faça login novamente.',
 };
 
 const AccessBlocked = () => {
   const { user, signOut } = useAuth();
   const { hasAccess, accessState, loading, recheckAccess } = useAccessCheck();
+  const navigate = useNavigate();
+
   const [isRechecking, setIsRechecking] = useState(false);
   const [isSwitchingAccount, setIsSwitchingAccount] = useState(false);
 
+  useEffect(() => {
+    let active = true;
+
+    const runRevalidation = async () => {
+      const result = await recheckAccess();
+      if (!active) return;
+
+      if (result.granted) {
+        console.log('redirecting from /acesso-bloqueado');
+        navigate('/', { replace: true });
+      }
+    };
+
+    void runRevalidation();
+
+    return () => {
+      active = false;
+    };
+  }, [navigate, recheckAccess]);
+
   if (!user) return <Navigate to="/auth" replace />;
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
@@ -31,18 +55,28 @@ const AccessBlocked = () => {
       </div>
     );
   }
-  if (hasAccess) return <Navigate to="/" replace />;
+
+  if (hasAccess) {
+    console.log('redirecting from /acesso-bloqueado');
+    return <Navigate to="/" replace />;
+  }
 
   const handleRecheck = async () => {
     setIsRechecking(true);
-    const granted = await recheckAccess();
-    if (granted) {
+
+    const result = await recheckAccess();
+
+    if (result.granted) {
       toast.success('Acesso liberado! Redirecionando...');
-    } else {
-      const reason = accessState?.reason || 'pending';
-      const msg = statusMessages[reason] || 'Acesso ainda bloqueado. Escolha um dos planos abaixo.';
-      toast.error(msg);
+      console.log('redirecting from /acesso-bloqueado');
+      navigate('/', { replace: true });
+      setIsRechecking(false);
+      return;
     }
+
+    const reason = result.state?.reason || 'pending';
+    const msg = statusMessages[reason] || 'Acesso ainda bloqueado. Escolha um dos planos abaixo.';
+    toast.error(msg);
     setIsRechecking(false);
   };
 

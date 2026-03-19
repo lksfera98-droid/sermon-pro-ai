@@ -7,26 +7,28 @@ export const useAccessCheck = () => {
   const [hasAccess, setHasAccess] = useState<boolean>(false);
   const [loading, setLoading] = useState(true);
 
-  const checkAccess = useCallback(async () => {
+  const checkAccess = useCallback(async (): Promise<boolean> => {
     if (!user?.email) {
       setHasAccess(false);
       setLoading(false);
-      return;
+      return false;
     }
 
     setLoading(true);
     try {
       const { data, error } = await supabase.rpc('can_current_user_access');
+      const access = !error && data === true;
 
       if (error) {
         console.error('Error checking access:', error);
-        setHasAccess(false);
-      } else {
-        setHasAccess(data === true);
       }
+
+      setHasAccess(access);
+      return access;
     } catch (err) {
       console.error('Access check failed:', err);
       setHasAccess(false);
+      return false;
     } finally {
       setLoading(false);
     }

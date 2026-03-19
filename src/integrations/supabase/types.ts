@@ -215,6 +215,15 @@ export type Database = {
     }
     Functions: {
       can_current_user_access: { Args: never; Returns: boolean }
+      get_current_user_access_state: {
+        Args: never
+        Returns: {
+          access_status: string
+          allowed: boolean
+          payment_status: string
+          reason: string
+        }[]
+      }
     }
     Enums: {
       [_ in never]: never

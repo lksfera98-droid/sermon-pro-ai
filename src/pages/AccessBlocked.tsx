@@ -161,15 +161,17 @@ const AccessBlocked = () => {
           </div>
         </div>
 
-        {/* Logout */}
-        <Button
-          variant="ghost"
-          className="mt-8 text-muted-foreground text-sm"
-          onClick={signOut}
-        >
-          <LogOut className="h-4 w-4" />
-          Sair da conta
-        </Button>
+        {/* Footer actions */}
+        <div className="mt-8 flex flex-col items-center gap-2">
+          <Button
+            variant="outline"
+            className="text-sm"
+            onClick={signOut}
+          >
+            <LogOut className="h-4 w-4" />
+            Voltar para o login
+          </Button>
+        </div>
       </div>
     </div>
   );

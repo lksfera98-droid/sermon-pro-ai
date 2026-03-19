@@ -137,16 +137,13 @@ export const SermonDisplay = ({ content, title }: SermonDisplayProps) => {
     return text
       .split('\n')
       .map((line, index) => {
-        // Clean any residual formatting aggressively
+        // Clean any residual formatting
         const cleanLine = line
           .replace(/\*{1,3}/g, '')
-          .replace(/#{1,6}\s?/g, '')
-          .replace(/<[^>]+>/g, '')
-          .replace(/`{1,3}/g, '')
+          .replace(/#{1,6}\s/g, '')
+          .replace(/<\/?(?:b|strong|em|i|u)>/gi, '')
           .replace(/_{2,}/g, '')
-          .replace(/~{2,}/g, '')
-          .replace(/\[([^\]]*)\]\([^)]*\)/g, '$1')
-          .replace(/\[|\]/g, '');
+          .replace(/~{2,}/g, '');
 
         // Main title (all uppercase)
         if (cleanLine === cleanLine.toUpperCase() && cleanLine.trim() && cleanLine.length > 5 && cleanLine.length < 100) {

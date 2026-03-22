@@ -1,4 +1,6 @@
 import { useState, useEffect, useRef } from "react";
+import { useAuth } from "@/contexts/AuthContext";
+import { useNavigate } from "react-router-dom";
 import { MainMenu } from "@/components/MainMenu";
 import { SermonForm } from "@/components/SermonForm";
 import { SermonDisplay } from "@/components/SermonDisplay";

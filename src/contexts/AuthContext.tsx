@@ -49,7 +49,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const signOut = async () => {
-    await supabase.auth.signOut();
+    try {
+      await supabase.auth.signOut();
+    } catch (e) {
+      console.warn('SignOut API error (ignored):', e);
+    }
+    // Force clear local state regardless of API result
+    setSession(null);
+    setUser(null);
   };
 
   return (

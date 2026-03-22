@@ -1,5 +1,6 @@
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
+import { useAccessCheck } from '@/hooks/useAccessCheck';
 import { LoadingProgress } from '@/components/LoadingProgress';
 
 interface ProtectedRouteProps {
@@ -8,9 +9,11 @@ interface ProtectedRouteProps {
 
 export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
   const { user, loading } = useAuth();
+  const { hasAccess, loading: accessLoading } = useAccessCheck(user?.email);
 
-  if (loading) return <LoadingProgress />;
+  if (loading || accessLoading) return <LoadingProgress />;
   if (!user) return <Navigate to="/auth" replace />;
+  if (!hasAccess) return <Navigate to="/acesso-restrito" replace />;
 
   return <>{children}</>;
 };

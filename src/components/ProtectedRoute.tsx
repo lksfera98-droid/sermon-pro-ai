@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
-import { supabase } from '@/integrations/supabase/client';
+import { useAccessCheck } from '@/hooks/useAccessCheck';
 import { LoadingProgress } from '@/components/LoadingProgress';
 
 interface ProtectedRouteProps {
@@ -10,51 +10,9 @@ interface ProtectedRouteProps {
 
 export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
   const { user, loading: authLoading } = useAuth();
-  const [isPaid, setIsPaid] = useState<boolean | null>(null);
-  const [checking, setChecking] = useState(true);
-  const checkedRef = useRef<string | null>(null);
+  const { hasAccess, loading: accessLoading } = useAccessCheck(user?.email);
 
-  useEffect(() => {
-    if (authLoading) return;
-    if (!user) {
-      setChecking(false);
-      return;
-    }
-
-    // Skip if already checked for this user
-    if (checkedRef.current === user.id) return;
-
-    const checkAccess = async () => {
-      try {
-        // Try both user_id and email lookup in parallel for speed
-        const userEmail = user.email?.trim().toLowerCase() || '';
-        
-        const { data, error } = await supabase
-          .from('profiles')
-          .select('is_paid')
-          .or(`user_id.eq.${user.id},email.ilike.${userEmail}`)
-          .limit(1)
-          .maybeSingle();
-
-        if (error) {
-          console.error('Error checking profile:', error);
-          setIsPaid(false);
-        } else {
-          setIsPaid(data?.is_paid === true);
-        }
-        checkedRef.current = user.id;
-      } catch (err) {
-        console.error('Exception checking profile:', err);
-        setIsPaid(false);
-      } finally {
-        setChecking(false);
-      }
-    };
-
-    checkAccess();
-  }, [user, authLoading]);
-
-  if (authLoading || checking) {
+  if (authLoading || accessLoading) {
     return <LoadingProgress />;
   }
 
@@ -62,7 +20,7 @@ export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
     return <Navigate to="/auth" replace />;
   }
 
-  if (!isPaid) {
+  if (!hasAccess) {
     return <Navigate to="/acesso-restrito" replace />;
   }
 

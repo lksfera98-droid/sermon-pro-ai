@@ -22,7 +22,10 @@ export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
 
     const checkAccess = async () => {
       const email = user.email?.trim().toLowerCase();
+      console.log('[ProtectedRoute] Verificando acesso para:', email);
+
       if (!email) {
+        console.log('[ProtectedRoute] Email vazio, bloqueando acesso');
         setIsPaid(false);
         setChecking(false);
         return;
@@ -31,13 +34,14 @@ export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
       const { data, error } = await supabase
         .from('profiles')
         .select('is_paid')
-        .eq('user_id', user.id)
+        .ilike('email', email)
         .maybeSingle();
 
       if (error) {
-        console.error('Error checking is_paid:', error);
+        console.error('[ProtectedRoute] Erro ao verificar is_paid:', error);
         setIsPaid(false);
       } else {
+        console.log('[ProtectedRoute] Resultado is_paid:', data?.is_paid);
         setIsPaid(data?.is_paid ?? false);
       }
       setChecking(false);

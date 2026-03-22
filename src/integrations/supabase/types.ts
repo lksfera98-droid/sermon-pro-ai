@@ -155,6 +155,7 @@ export type Database = {
           email: string | null
           full_name: string | null
           id: string
+          is_paid: boolean
           subscription_checked_at: string | null
           subscription_status: string | null
           updated_at: string
@@ -165,6 +166,7 @@ export type Database = {
           email?: string | null
           full_name?: string | null
           id?: string
+          is_paid?: boolean
           subscription_checked_at?: string | null
           subscription_status?: string | null
           updated_at?: string
@@ -175,6 +177,7 @@ export type Database = {
           email?: string | null
           full_name?: string | null
           id?: string
+          is_paid?: boolean
           subscription_checked_at?: string | null
           subscription_status?: string | null
           updated_at?: string

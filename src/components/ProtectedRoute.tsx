@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -12,6 +12,7 @@ export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
   const { user, loading: authLoading } = useAuth();
   const [isPaid, setIsPaid] = useState<boolean | null>(null);
   const [checking, setChecking] = useState(true);
+  const checkedRef = useRef<string | null>(null);
 
   useEffect(() => {
     if (authLoading) return;
@@ -20,12 +21,19 @@ export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
       return;
     }
 
+    // Skip if already checked for this user
+    if (checkedRef.current === user.id) return;
+
     const checkAccess = async () => {
       try {
+        // Try both user_id and email lookup in parallel for speed
+        const userEmail = user.email?.trim().toLowerCase() || '';
+        
         const { data, error } = await supabase
           .from('profiles')
           .select('is_paid')
-          .eq('user_id', user.id)
+          .or(`user_id.eq.${user.id},email.ilike.${userEmail}`)
+          .limit(1)
           .maybeSingle();
 
         if (error) {
@@ -34,6 +42,7 @@ export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
         } else {
           setIsPaid(data?.is_paid === true);
         }
+        checkedRef.current = user.id;
       } catch (err) {
         console.error('Exception checking profile:', err);
         setIsPaid(false);

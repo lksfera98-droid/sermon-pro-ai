@@ -82,7 +82,7 @@ export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
     return () => {
       cancelled = true;
     };
-  }, [user?.id, user?.email, authLoading, user]);
+  }, [user?.id, user?.email, authLoading]);
 
   if (authLoading || checking) {
     return <LoadingProgress />;

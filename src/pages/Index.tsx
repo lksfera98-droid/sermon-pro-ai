@@ -1,4 +1,6 @@
 import { useState, useEffect, useRef } from "react";
+import { useAuth } from "@/contexts/AuthContext";
+import { useNavigate } from "react-router-dom";
 import { MainMenu } from "@/components/MainMenu";
 import { SermonForm } from "@/components/SermonForm";
 import { SermonDisplay } from "@/components/SermonDisplay";
@@ -22,7 +24,9 @@ import { useLanguage } from "@/contexts/LanguageContext";
 type View = "dashboard" | "new-sermon" | "translator" | "my-sermons" | "verse-search" | "public-gallery" | "prayer-requests" | "prayer-gallery" | "hear-god-speak" | "bible-study" | "daily-devotional";
 
 const Index = () => {
-  
+  const { signOut } = useAuth();
+  const navigate = useNavigate();
+
   const [isLoading, setIsLoading] = useState(false);
   const [sermon, setSermon] = useState<string | null>(null);
   const [currentSermonTitle, setCurrentSermonTitle] = useState<string>("");
@@ -154,7 +158,7 @@ const Index = () => {
       
       <div className="h-[100svh] flex flex-col">
         <div ref={scrollContainerRef} className="flex-1 overflow-y-auto overscroll-contain pb-[88px] md:pb-0" style={{ WebkitOverflowScrolling: 'touch' }}>
-          {currentView === 'dashboard' && <MainMenu onNavigate={setCurrentView} />}
+          {currentView === 'dashboard' && <MainMenu onNavigate={setCurrentView} onSignOut={async () => { await signOut(); navigate('/auth'); }} />}
           
           {currentView === 'new-sermon' && (
             <div className="container max-w-4xl mx-auto p-4">

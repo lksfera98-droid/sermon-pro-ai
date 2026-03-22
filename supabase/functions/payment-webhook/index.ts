@@ -335,6 +335,48 @@ Deno.serve(async (req) => {
       console.log(`paid_users upserted: email=${email}, status=${paidUserStatus}`);
     }
 
+    // Sync profiles.is_paid (source of truth for frontend AuthGuard)
+    const profilePayload = {
+      is_paid: mapped.accessGranted,
+      subscription_status: mapped.accessGranted ? "active" : mapped.planStatus,
+      subscription_checked_at: nowIso,
+      updated_at: nowIso,
+    };
+
+    const { data: existingProfile } = await supabase
+      .from("profiles")
+      .select("id")
+      .ilike("email", email)
+      .limit(1)
+      .maybeSingle();
+
+    if (existingProfile) {
+      const { error: profileUpdateError } = await supabase
+        .from("profiles")
+        .update(profilePayload)
+        .eq("id", existingProfile.id);
+      if (profileUpdateError) {
+        console.error("Error updating profiles.is_paid:", profileUpdateError);
+      } else {
+        console.log(`profiles updated: email=${email}, is_paid=${mapped.accessGranted}`);
+      }
+    } else {
+      const { error: profileInsertError } = await supabase
+        .from("profiles")
+        .insert({
+          email,
+          user_id: linkedUserId ?? "00000000-0000-0000-0000-000000000000",
+          is_paid: mapped.accessGranted,
+          subscription_status: mapped.accessGranted ? "active" : mapped.planStatus,
+          subscription_checked_at: nowIso,
+        });
+      if (profileInsertError) {
+        console.error("Error inserting profiles:", profileInsertError);
+      } else {
+        console.log(`profiles inserted: email=${email}, is_paid=${mapped.accessGranted}`);
+      }
+    }
+
     // Insert into compradores table (source of truth for new access logic)
     if (mapped.accessGranted) {
       const { error: compradoresError } = await supabase

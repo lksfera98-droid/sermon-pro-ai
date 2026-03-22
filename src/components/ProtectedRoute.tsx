@@ -31,6 +31,7 @@ export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
         return;
       }
 
+      // Query profiles by email
       const { data, error } = await supabase
         .from('profiles')
         .select('is_paid')
@@ -39,11 +40,31 @@ export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
 
       if (error) {
         console.error('[ProtectedRoute] Erro ao verificar is_paid:', error);
-        setIsPaid(false);
-      } else {
-        console.log('[ProtectedRoute] Resultado is_paid:', data?.is_paid);
-        setIsPaid(data?.is_paid ?? false);
       }
+
+      console.log('[ProtectedRoute] Resultado da query:', data);
+      console.log('[ProtectedRoute] is_paid:', data?.is_paid);
+
+      if (data) {
+        setIsPaid(data.is_paid ?? false);
+      } else {
+        // Profile doesn't exist — auto-create with is_paid=false
+        console.log('[ProtectedRoute] Perfil não encontrado, criando perfil mínimo');
+        const { error: insertError } = await supabase
+          .from('profiles')
+          .insert({
+            user_id: user.id,
+            email: email,
+            full_name: user.user_metadata?.full_name || '',
+            is_paid: false,
+          });
+
+        if (insertError) {
+          console.error('[ProtectedRoute] Erro ao criar perfil:', insertError);
+        }
+        setIsPaid(false);
+      }
+
       setChecking(false);
     };
 

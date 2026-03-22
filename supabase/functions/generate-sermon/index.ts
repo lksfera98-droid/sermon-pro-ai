@@ -27,10 +27,10 @@ serve(async (req) => {
     
     console.log('Gerando sermão com:', { tema, versiculo, tempo });
 
-    const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
+    const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
     
-    if (!openAIApiKey) {
-      throw new Error('OPENAI_API_KEY não configurada');
+    if (!LOVABLE_API_KEY) {
+      throw new Error('LOVABLE_API_KEY não configurada');
     }
 
     // Determine the level of detail based on sermon duration
@@ -113,45 +113,74 @@ REGRAS IMPORTANTES:
 
 Gere o sermão completo agora.`;
 
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+    const systemMessage = 'Você é SermonPro, um assistente especializado em criar sermões bíblicos completos e estruturados para pregadores cristãos. Escreva sempre em português brasileiro de forma clara e natural, sem usar formatação markdown como asteriscos ou símbolos especiais.';
+
+    let response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${openAIApiKey}`,
+        'Authorization': `Bearer ${LOVABLE_API_KEY}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-4o-mini',
+        model: 'google/gemini-2.5-flash',
         messages: [
-          {
-            role: 'system',
-            content: 'Você é SermonPro, um assistente especializado em criar sermões bíblicos completos e estruturados para pregadores cristãos. Escreva sempre em português brasileiro de forma clara e natural, sem usar formatação markdown como asteriscos ou símbolos especiais.'
-          },
-          {
-            role: 'user',
-            content: prompt
-          }
+          { role: 'system', content: systemMessage },
+          { role: 'user', content: prompt }
         ],
-        temperature: 0.7,
-        max_tokens: maxTokens
       }),
     });
 
-    if (!response.ok) {
-      const errorData = await response.text();
-      console.error('Erro da OpenAI:', errorData);
-      throw new Error(`Erro da OpenAI: ${response.status}`);
-    }
+    let sermao = "";
 
-    const data = await response.json();
-    let sermao = data.choices[0].message.content;
+    // Check if Lovable AI failed with 402 or 429 - use OpenAI fallback
+    if (!response.ok && (response.status === 402 || response.status === 429)) {
+      console.log(`Lovable AI returned ${response.status}, using OpenAI fallback...`);
+      
+      const OPENAI_API_KEY = Deno.env.get("OPENAI_API_KEY");
+      if (!OPENAI_API_KEY) {
+        throw new Error(response.status === 429 ? "Rate limits exceeded, please try again later." : "Payment required, please add funds to your Lovable AI workspace.");
+      }
+
+      const openaiResponse = await fetch("https://api.openai.com/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${OPENAI_API_KEY}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          model: "gpt-4o-mini",
+          messages: [
+            { role: 'system', content: systemMessage },
+            { role: 'user', content: prompt }
+          ],
+          temperature: 0.7,
+          max_tokens: maxTokens,
+        }),
+      });
+
+      if (!openaiResponse.ok) {
+        throw new Error(`OpenAI fallback error: ${openaiResponse.status}`);
+      }
+
+      const openaiData = await openaiResponse.json();
+      sermao = openaiData.choices[0].message.content;
+      console.log("Using OpenAI fallback response");
+    } else if (!response.ok) {
+      const errorData = await response.text();
+      console.error('Erro da API:', response.status, errorData);
+      throw new Error(`Erro da API: ${response.status}`);
+    } else {
+      const data = await response.json();
+      sermao = data.choices[0].message.content;
+    }
 
     // Limpar qualquer formatação markdown residual
     sermao = sermao
-      .replace(/\*\*/g, '')  // Remove **
-      .replace(/\*/g, '')    // Remove *
-      .replace(/#{1,6}\s/g, '') // Remove # headers
-      .replace(/`/g, '')     // Remove backticks
-      .replace(/\[|\]/g, '') // Remove brackets
+      .replace(/\*\*/g, '')
+      .replace(/\*/g, '')
+      .replace(/#{1,6}\s/g, '')
+      .replace(/`/g, '')
+      .replace(/\[|\]/g, '')
       .trim();
 
     console.log('Sermão gerado com sucesso');

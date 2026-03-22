@@ -2,19 +2,29 @@
 
 ## Problema
 
-A função `generate-sermon` chama a API da OpenAI diretamente com uma chave inválida (erro 401). As outras funções do app (como `hear-god-speak`) já foram migradas para usar o Lovable AI Gateway, mas `generate-sermon` ficou para trás.
+Quando alguém compra, o email vai para `compradores` ou `paid_users`, mas o `profiles.is_paid` não é atualizado automaticamente. O `ProtectedRoute` só verifica `profiles.is_paid`, então o acesso fica bloqueado.
 
 ## Solução
 
-Migrar `generate-sermon` para usar o Lovable AI Gateway (que tem `LOVABLE_API_KEY` já configurada) como provedor principal, com fallback para OpenAI caso retorne 402/429.
+Criar triggers no banco que sincronizam `profiles.is_paid = true` automaticamente quando um registro é inserido em `compradores` ou `paid_users`.
 
-### Arquivo alterado
+### Alterações
 
-**`supabase/functions/generate-sermon/index.ts`**
+**1. Migration SQL — dois triggers de sincronização**
 
-- Trocar a chamada de `https://api.openai.com/v1/chat/completions` para `https://ai.gateway.lovable.dev/v1/chat/completions`
-- Usar `LOVABLE_API_KEY` como autenticacao principal
-- Manter fallback para OpenAI (`OPENAI_API_KEY`) em caso de erro 402/429
-- Usar modelo `google/gemini-2.5-flash` (principal) e `gpt-4o-mini` (fallback)
-- Manter toda a logica de prompt, limpeza de markdown e validacao existente
+- Trigger `on INSERT` na tabela `compradores`: busca o perfil pelo email normalizado e seta `is_paid = true`
+- Trigger `on INSERT` na tabela `paid_users`: mesma lógica, mas só quando `status_pagamento` não está em lista de bloqueio (CANCELADA, REEMBOLSADA, etc.)
+- Ambos usam `SECURITY DEFINER` para bypassar RLS
+
+**2. Migration SQL — atualizar perfis existentes agora**
+
+- UPDATE em `profiles` setando `is_paid = true` para todos os emails que já existem em `compradores` ou `paid_users` (com status válido)
+
+**3. Atualizar `ProtectedRoute.tsx`**
+
+- Simplificar a lógica: como os triggers mantêm `profiles.is_paid` sincronizado, a consulta atual já funciona corretamente. Nenhuma mudança necessária no frontend.
+
+### Resultado
+
+Qualquer compra futura libera o acesso automaticamente. Compradores antigos que já estão nas tabelas serão liberados imediatamente pelo UPDATE inicial.
 

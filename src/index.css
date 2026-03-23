@@ -97,7 +97,6 @@ All colors MUST be HSL.
     -moz-osx-font-smoothing: grayscale;
     overscroll-behavior: none;
     touch-action: pan-y;
-    overflow: hidden;
   }
 }
 

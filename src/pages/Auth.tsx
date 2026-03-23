@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card } from '@/components/ui/card';
 import { toast } from 'sonner';
-import { BookOpen, LogIn, KeyRound } from 'lucide-react';
+import { BookOpen, LogIn, KeyRound, UserPlus } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 
 const Auth = () => {
@@ -57,110 +57,127 @@ const Auth = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background p-4">
-      <Card className="w-full max-w-md p-8 space-y-6 shadow-lg border-border/50">
-        <div className="text-center space-y-2">
-          <div className="mx-auto w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center">
-            <BookOpen className="w-8 h-8 text-primary" />
+      <div className="w-full max-w-md space-y-5">
+        {/* DESTAQUE - PRIMEIRO ACESSO */}
+        <Card className="p-6 border-2 border-primary bg-primary/5 shadow-xl">
+          <div className="text-center space-y-3">
+            <div className="mx-auto w-14 h-14 rounded-2xl bg-primary/20 flex items-center justify-center">
+              <UserPlus className="w-7 h-7 text-primary" />
+            </div>
+            <h2 className="text-xl font-bold text-foreground">🆕 Primeira vez aqui?</h2>
+            <p className="text-sm text-muted-foreground">
+              Se você <strong>já comprou</strong> mas ainda <strong>não criou sua senha</strong>, clique abaixo para configurar seu acesso.
+            </p>
+            <Button asChild className="w-full text-base font-semibold py-5" size="lg">
+              <Link to="/primeiro-acesso">
+                <UserPlus className="w-5 h-5 mr-2" />
+                Criar minha conta agora
+              </Link>
+            </Button>
           </div>
-          <h1 className="text-2xl font-bold text-foreground">Entrar no Sermon Pro AI</h1>
-          <p className="text-muted-foreground text-sm">
-            {forgotMode
-              ? 'Digite seu e-mail para receber o link de redefinição'
-              : 'Coloque seu e-mail e sua senha para acessar'}
-          </p>
-        </div>
+        </Card>
 
-        {forgotMode ? (
-          resetSent ? (
-            <div className="text-center space-y-4">
-              <p className="text-sm text-foreground">
-                📧 Enviamos um link para <strong>{email}</strong>. Verifique sua caixa de entrada e spam.
-              </p>
-              <Button variant="outline" className="w-full" onClick={() => { setForgotMode(false); setResetSent(false); }}>
-                Voltar ao login
-              </Button>
+        {/* LOGIN */}
+        <Card className="p-8 space-y-6 shadow-lg border-border/50">
+          <div className="text-center space-y-2">
+            <div className="mx-auto w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center">
+              <BookOpen className="w-8 h-8 text-primary" />
             </div>
+            <h1 className="text-2xl font-bold text-foreground">Já tem conta? Entre aqui</h1>
+            <p className="text-muted-foreground text-sm">
+              {forgotMode
+                ? 'Digite seu e-mail para receber o link de redefinição'
+                : 'Coloque seu e-mail e sua senha para acessar'}
+            </p>
+          </div>
+
+          {forgotMode ? (
+            resetSent ? (
+              <div className="text-center space-y-4">
+                <p className="text-sm text-foreground">
+                  📧 Enviamos um link para <strong>{email}</strong>. Verifique sua caixa de entrada e spam.
+                </p>
+                <Button variant="outline" className="w-full" onClick={() => { setForgotMode(false); setResetSent(false); }}>
+                  Voltar ao login
+                </Button>
+              </div>
+            ) : (
+              <form onSubmit={handleForgotPassword} className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="email">Seu e-mail</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="seu@email.com"
+                    required
+                  />
+                </div>
+                <Button type="submit" className="w-full" disabled={submitting}>
+                  {submitting ? 'Enviando...' : (
+                    <>
+                      <KeyRound className="w-4 h-4" />
+                      Enviar link de redefinição
+                    </>
+                  )}
+                </Button>
+                <Button variant="ghost" className="w-full" type="button" onClick={() => setForgotMode(false)}>
+                  Voltar ao login
+                </Button>
+              </form>
+            )
           ) : (
-            <form onSubmit={handleForgotPassword} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="email">Seu e-mail</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="seu@email.com"
-                  required
-                />
-              </div>
-              <Button type="submit" className="w-full" disabled={submitting}>
-                {submitting ? 'Enviando...' : (
-                  <>
-                    <KeyRound className="w-4 h-4" />
-                    Enviar link de redefinição
-                  </>
-                )}
-              </Button>
-              <Button variant="ghost" className="w-full" type="button" onClick={() => setForgotMode(false)}>
-                Voltar ao login
-              </Button>
-            </form>
-          )
-        ) : (
-          <>
-            <form onSubmit={handleLogin} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="email">E-mail</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="seu@email.com"
-                  required
-                />
-              </div>
+            <>
+              <form onSubmit={handleLogin} className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="email">E-mail</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="seu@email.com"
+                    required
+                  />
+                </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="password">Senha</Label>
-                <Input
-                  id="password"
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="••••••••"
-                  required
-                  minLength={6}
-                />
-              </div>
+                <div className="space-y-2">
+                  <Label htmlFor="password">Senha</Label>
+                  <Input
+                    id="password"
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="••••••••"
+                    required
+                    minLength={6}
+                  />
+                </div>
 
-              <Button type="submit" className="w-full" disabled={submitting}>
-                {submitting ? 'Entrando...' : (
-                  <>
-                    <LogIn className="w-4 h-4" />
-                    Entrar
-                  </>
-                )}
-              </Button>
-            </form>
+                <Button type="submit" className="w-full" disabled={submitting}>
+                  {submitting ? 'Entrando...' : (
+                    <>
+                      <LogIn className="w-4 h-4" />
+                      Entrar
+                    </>
+                  )}
+                </Button>
+              </form>
 
-            <div className="space-y-2 text-center">
-              <button
-                type="button"
-                onClick={() => setForgotMode(true)}
-                className="text-sm text-muted-foreground hover:text-primary hover:underline"
-              >
-                Esqueci minha senha
-              </button>
-              <div>
-                <Link to="/primeiro-acesso" className="text-sm text-primary font-medium hover:underline">
-                  🆕 Primeiro acesso? Clique aqui para criar sua senha
-                </Link>
+              <div className="text-center">
+                <button
+                  type="button"
+                  onClick={() => setForgotMode(true)}
+                  className="text-sm text-muted-foreground hover:text-primary hover:underline"
+                >
+                  Esqueci minha senha
+                </button>
               </div>
-            </div>
-          </>
-        )}
-      </Card>
+            </>
+          )}
+        </Card>
+      </div>
     </div>
   );
 };

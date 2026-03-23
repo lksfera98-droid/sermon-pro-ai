@@ -66,7 +66,7 @@ const Auth = () => {
           <h1 className="text-2xl font-extrabold text-foreground tracking-tight">
             Sermon<span className="text-primary">Pro</span> AI
           </h1>
-          <p className="text-xs text-muted-foreground">Sua plataforma de sermões com inteligência artificial</p>
+          <p className="text-xs text-muted-foreground">A ferramenta definitiva para pregadores e líderes</p>
         </div>
         {/* DESTAQUE - PRIMEIRO ACESSO */}
         <Card className="p-6 border-2 border-primary bg-primary/5 shadow-xl">

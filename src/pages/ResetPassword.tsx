@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card } from '@/components/ui/card';
 import { toast } from 'sonner';
-import { BookOpen, KeyRound } from 'lucide-react';
+import { BookOpen, KeyRound, Loader2 } from 'lucide-react';
 
 const ResetPassword = () => {
   const navigate = useNavigate();
@@ -14,20 +14,37 @@ const ResetPassword = () => {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [ready, setReady] = useState(false);
+  const [checking, setChecking] = useState(true);
 
   useEffect(() => {
-    // Check for recovery event
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
-      if (event === 'PASSWORD_RECOVERY') {
-        setReady(true);
+    let resolved = false;
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (resolved) return;
+      if (event === 'PASSWORD_RECOVERY' || event === 'SIGNED_IN') {
+        if (session) {
+          resolved = true;
+          setReady(true);
+          setChecking(false);
+        }
       }
     });
 
-    // Also check hash for type=recovery
-    const hash = window.location.hash;
-    if (hash.includes('type=recovery')) {
-      setReady(true);
-    }
+    // Also check if we already have a session (user clicked link and was auto-signed in)
+    const checkSession = async () => {
+      // Give the auth listener a moment to process the URL hash
+      await new Promise(r => setTimeout(r, 1500));
+      if (resolved) return;
+      
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) {
+        resolved = true;
+        setReady(true);
+      }
+      setChecking(false);
+    };
+
+    checkSession();
 
     return () => subscription.unsubscribe();
   }, []);
@@ -49,7 +66,7 @@ const ResetPassword = () => {
       if (error) {
         toast.error(error.message || 'Erro ao redefinir senha');
       } else {
-        toast.success('Senha redefinida com sucesso!');
+        toast.success('Senha redefinida com sucesso! Você já pode acessar.');
         navigate('/', { replace: true });
       }
     } finally {
@@ -57,14 +74,25 @@ const ResetPassword = () => {
     }
   };
 
+  if (checking) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background p-4">
+        <Card className="w-full max-w-md p-8 text-center space-y-4">
+          <Loader2 className="w-10 h-10 text-primary mx-auto animate-spin" />
+          <p className="text-muted-foreground text-sm">Verificando seu link...</p>
+        </Card>
+      </div>
+    );
+  }
+
   if (!ready) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background p-4">
         <Card className="w-full max-w-md p-8 text-center space-y-4">
           <BookOpen className="w-12 h-12 text-primary mx-auto" />
-          <h1 className="text-xl font-bold text-foreground">Redefinir Senha</h1>
+          <h1 className="text-xl font-bold text-foreground">Link expirado ou inválido</h1>
           <p className="text-muted-foreground text-sm">
-            Clique no link enviado ao seu e-mail para redefinir sua senha.
+            O link de redefinição pode ter expirado. Solicite um novo link na tela de login.
           </p>
           <Button variant="outline" onClick={() => navigate('/auth')}>
             Voltar ao login
@@ -81,8 +109,8 @@ const ResetPassword = () => {
           <div className="mx-auto w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center">
             <KeyRound className="w-8 h-8 text-primary" />
           </div>
-          <h1 className="text-2xl font-bold text-foreground">Nova Senha</h1>
-          <p className="text-muted-foreground text-sm">Crie sua nova senha abaixo</p>
+          <h1 className="text-2xl font-bold text-foreground">Criar Nova Senha</h1>
+          <p className="text-muted-foreground text-sm">Digite sua nova senha abaixo e confirme</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -100,7 +128,7 @@ const ResetPassword = () => {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="confirmPassword">Confirme a nova senha</Label>
+            <Label htmlFor="confirmPassword">Repita a nova senha</Label>
             <Input
               id="confirmPassword"
               type="password"
@@ -113,7 +141,7 @@ const ResetPassword = () => {
           </div>
 
           <Button type="submit" className="w-full" disabled={submitting}>
-            {submitting ? 'Salvando...' : 'Salvar nova senha'}
+            {submitting ? 'Salvando...' : 'Salvar nova senha e acessar'}
           </Button>
         </form>
       </Card>

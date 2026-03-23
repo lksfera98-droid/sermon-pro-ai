@@ -58,6 +58,16 @@ const Auth = () => {
   return (
     <div className="min-h-screen flex items-center justify-center bg-background p-4">
       <div className="w-full max-w-md space-y-5">
+        {/* Brand Header */}
+        <div className="text-center space-y-2">
+          <div className="mx-auto w-16 h-16 rounded-2xl bg-gradient-to-br from-primary to-accent flex items-center justify-center shadow-lg">
+            <BookOpen className="w-8 h-8 text-primary-foreground" />
+          </div>
+          <h1 className="text-2xl font-extrabold text-foreground tracking-tight">
+            Sermon<span className="text-primary">Pro</span> AI
+          </h1>
+          <p className="text-xs text-muted-foreground">Sua plataforma de sermões com inteligência artificial</p>
+        </div>
         {/* DESTAQUE - PRIMEIRO ACESSO */}
         <Card className="p-6 border-2 border-primary bg-primary/5 shadow-xl">
           <div className="text-center space-y-3">

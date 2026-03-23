@@ -8,6 +8,8 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
+import FirstAccess from "./pages/FirstAccess";
+import ResetPassword from "./pages/ResetPassword";
 import AccessBlocked from "./pages/AccessBlocked";
 import NotFound from "./pages/NotFound";
 
@@ -23,6 +25,8 @@ const App = () => (
         <AuthProvider>
           <Routes>
             <Route path="/auth" element={<Auth />} />
+            <Route path="/primeiro-acesso" element={<FirstAccess />} />
+            <Route path="/redefinir-senha" element={<ResetPassword />} />
             <Route path="/acesso-restrito" element={<AccessBlocked />} />
             <Route
               path="/"

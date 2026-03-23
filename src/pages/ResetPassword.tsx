@@ -17,44 +17,95 @@ const ResetPassword = () => {
   const [checking, setChecking] = useState(true);
 
   useEffect(() => {
-    let resolved = false;
+    let mounted = true;
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (resolved) return;
-      if (event === 'PASSWORD_RECOVERY' || event === 'SIGNED_IN') {
-        if (session) {
-          resolved = true;
-          setReady(true);
-          setChecking(false);
-        }
-      }
-    });
-
-    // Also check if we already have a session (user clicked link and was auto-signed in)
-    const checkSession = async () => {
-      // Give the auth listener a moment to process the URL hash
-      await new Promise(r => setTimeout(r, 1500));
-      if (resolved) return;
-      
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session) {
-        resolved = true;
-        setReady(true);
-      }
+    const markReady = () => {
+      if (!mounted) return;
+      setReady(true);
       setChecking(false);
     };
 
-    checkSession();
+    const markBlocked = () => {
+      if (!mounted) return;
+      setReady(false);
+      setChecking(false);
+    };
 
-    return () => subscription.unsubscribe();
+    const clearSensitiveUrlParams = () => {
+      window.history.replaceState({}, document.title, '/redefinir-senha');
+    };
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if ((event === 'PASSWORD_RECOVERY' || event === 'SIGNED_IN') && session) {
+        markReady();
+      }
+    });
+
+    const resolveRecoverySession = async () => {
+      try {
+        const queryParams = new URLSearchParams(window.location.search);
+        const hashParams = new URLSearchParams(window.location.hash.replace('#', ''));
+
+        const type = queryParams.get('type') || hashParams.get('type');
+        const code = queryParams.get('code');
+        const tokenHash = queryParams.get('token_hash');
+
+        if (code) {
+          const { error } = await supabase.auth.exchangeCodeForSession(code);
+          if (!error) {
+            clearSensitiveUrlParams();
+            markReady();
+            return;
+          }
+        }
+
+        if (tokenHash && type === 'recovery') {
+          const { error } = await supabase.auth.verifyOtp({
+            token_hash: tokenHash,
+            type: 'recovery',
+          });
+
+          if (!error) {
+            clearSensitiveUrlParams();
+            markReady();
+            return;
+          }
+        }
+
+        // Hash-based flow fallback (access_token in URL hash)
+        if (hashParams.get('access_token') && type === 'recovery') {
+          await new Promise((resolve) => setTimeout(resolve, 400));
+        }
+
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session) {
+          clearSensitiveUrlParams();
+          markReady();
+          return;
+        }
+
+        markBlocked();
+      } catch {
+        markBlocked();
+      }
+    };
+
+    resolveRecoverySession();
+
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
+    };
   }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
     if (password !== confirmPassword) {
       toast.error('As senhas não coincidem');
       return;
     }
+
     if (password.length < 6) {
       toast.error('A senha deve ter pelo menos 6 caracteres');
       return;
@@ -65,10 +116,11 @@ const ResetPassword = () => {
       const { error } = await supabase.auth.updateUser({ password });
       if (error) {
         toast.error(error.message || 'Erro ao redefinir senha');
-      } else {
-        toast.success('Senha redefinida com sucesso! Você já pode acessar.');
-        navigate('/', { replace: true });
+        return;
       }
+
+      toast.success('Senha redefinida com sucesso!');
+      navigate('/', { replace: true });
     } finally {
       setSubmitting(false);
     }
@@ -79,7 +131,7 @@ const ResetPassword = () => {
       <div className="min-h-screen flex items-center justify-center bg-background p-4">
         <Card className="w-full max-w-md p-8 text-center space-y-4">
           <Loader2 className="w-10 h-10 text-primary mx-auto animate-spin" />
-          <p className="text-muted-foreground text-sm">Verificando seu link...</p>
+          <p className="text-muted-foreground text-sm">Validando seu link de redefinição...</p>
         </Card>
       </div>
     );
@@ -110,7 +162,7 @@ const ResetPassword = () => {
             <KeyRound className="w-8 h-8 text-primary" />
           </div>
           <h1 className="text-2xl font-bold text-foreground">Criar Nova Senha</h1>
-          <p className="text-muted-foreground text-sm">Digite sua nova senha abaixo e confirme</p>
+          <p className="text-muted-foreground text-sm">Digite sua nova senha e confirme para acessar</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -141,7 +193,7 @@ const ResetPassword = () => {
           </div>
 
           <Button type="submit" className="w-full" disabled={submitting}>
-            {submitting ? 'Salvando...' : 'Salvar nova senha e acessar'}
+            {submitting ? 'Salvando...' : 'Salvar nova senha'}
           </Button>
         </form>
       </Card>

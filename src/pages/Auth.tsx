@@ -90,10 +90,7 @@ const Auth = () => {
         {/* LOGIN */}
         <Card className="p-8 space-y-6 shadow-lg border-border/50">
           <div className="text-center space-y-2">
-            <div className="mx-auto w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center">
-              <BookOpen className="w-8 h-8 text-primary" />
-            </div>
-            <h1 className="text-2xl font-bold text-foreground">Já tem conta? Entre aqui</h1>
+            <h2 className="text-xl font-bold text-foreground">Já tem conta? Entre aqui</h2>
             <p className="text-muted-foreground text-sm">
               {forgotMode
                 ? 'Digite seu e-mail para receber o link de redefinição'

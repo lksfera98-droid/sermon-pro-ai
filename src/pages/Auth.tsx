@@ -26,7 +26,11 @@ const Auth = () => {
     try {
       const { error } = await signIn(email, password);
       if (error) {
-        toast.error(error.message || 'E-mail ou senha incorretos');
+        if (error.message?.includes('Invalid login credentials')) {
+          toast.error('E-mail ou senha incorretos. Se você ainda não criou sua senha, clique em "Criar minha conta agora" acima.', { duration: 6000 });
+        } else {
+          toast.error(error.message || 'Erro ao fazer login. Tente novamente.');
+        }
       }
     } finally {
       setSubmitting(false);

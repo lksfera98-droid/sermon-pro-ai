@@ -42,6 +42,18 @@ const FirstAccess = () => {
       });
 
       if (response.error) {
+        const errBody = response.error;
+        // Edge function may return non-2xx which supabase client treats as error
+        // Try to parse the error context
+        const errMsg = typeof errBody === 'object' && errBody?.context?.body 
+          ? JSON.parse(errBody.context.body)?.error 
+          : null;
+        
+        if (errMsg === 'not_a_buyer') {
+          toast.error('Este e-mail não foi encontrado como comprador. Verifique se usou o e-mail correto da compra.', { duration: 6000 });
+          return;
+        }
+        
         toast.error('Erro ao processar. Tente novamente.');
         return;
       }
@@ -49,7 +61,7 @@ const FirstAccess = () => {
       const data = response.data;
 
       if (data?.error === 'not_a_buyer') {
-        toast.error('Este e-mail não foi encontrado como comprador. Verifique se usou o e-mail correto da compra.');
+        toast.error('Este e-mail não foi encontrado como comprador. Verifique se usou o e-mail correto da compra.', { duration: 6000 });
         return;
       }
 

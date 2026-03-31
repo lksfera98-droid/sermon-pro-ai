@@ -179,7 +179,7 @@ const AccessBlocked = () => {
             <p className="text-xs text-muted-foreground">Ideal para experimentar o poder da plataforma</p>
             <Button className="w-full" variant="outline" size="lg" asChild>
               <a
-                href="https://pay.sermonpro.online/checkout/200533452:1"
+                href="https://pay.sermonpro.online/checkout/209180349:1"
                 target="_blank"
                 rel="noopener noreferrer"
               >

@@ -17,8 +17,9 @@ const Auth = () => {
   const [forgotMode, setForgotMode] = useState(false);
   const [resetSent, setResetSent] = useState(false);
 
+  return <Navigate to="/" replace />;
+  // eslint-disable-next-line no-unreachable
   if (loading) return null;
-  if (user) return <Navigate to="/" replace />;
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();

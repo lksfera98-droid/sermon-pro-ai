@@ -27,7 +27,7 @@ const App = () => (
             <Route path="/auth" element={<Auth />} />
             <Route path="/primeiro-acesso" element={<FirstAccess />} />
             <Route path="/redefinir-senha" element={<ResetPassword />} />
-            <Route path="/acesso-restrito" element={<AccessBlocked />} />
+            
             <Route
               path="/"
               element={

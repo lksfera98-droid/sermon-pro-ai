@@ -10,7 +10,7 @@ import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import FirstAccess from "./pages/FirstAccess";
 import ResetPassword from "./pages/ResetPassword";
-import AccessBlocked from "./pages/AccessBlocked";
+
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();

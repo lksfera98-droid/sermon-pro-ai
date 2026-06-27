@@ -20,19 +20,17 @@ serve(async (req) => {
 
     console.log('📖 Gerando devocional...');
 
-    // Buscar devocionais anteriores globalmente para evitar repetição
     const { data: previousDevotionals } = await supabaseClient
       .from('devotionals')
       .select('content')
       .order('created_at', { ascending: false })
       .limit(10);
 
-    const lovableApiKey = Deno.env.get('LOVABLE_API_KEY');
-    if (!lovableApiKey) {
-      throw new Error('LOVABLE_API_KEY not configured');
+    const OPENAI_API_KEY = Deno.env.get('OPENAI_API_KEY');
+    if (!OPENAI_API_KEY) {
+      throw new Error('OPENAI_API_KEY not configured');
     }
 
-    // Extrair versículos dos devocionais anteriores
     const previousVerses = previousDevotionals?.map(dev => {
       const verseMatch = dev.content.match(/\*\*Versículo do Dia:\*\*.*?(?:\*\*|$)/s);
       return verseMatch ? verseMatch[0].substring(0, 150) : '';
@@ -56,101 +54,41 @@ Seja caloroso, encorajador e relevante para a vida moderna.${previousVerses.leng
 
     const userPrompt = 'Gere um devocional diário para hoje.';
 
-    console.log('Calling Lovable AI for devotional generation...');
-    
-    let response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${lovableApiKey}`,
+        Authorization: `Bearer ${OPENAI_API_KEY}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'google/gemini-2.5-flash',
+        model: 'gpt-4o-mini',
         messages: [
           { role: 'system', content: systemPrompt },
           { role: 'user', content: userPrompt }
         ],
-        stream: false,
       }),
     });
 
-    let devotionalContent = "";
-    
-    // Check if Lovable AI failed with 402 or 429 - use OpenAI fallback
-    if (!response.ok && (response.status === 402 || response.status === 429)) {
-      console.log(`Lovable AI returned ${response.status}, using OpenAI fallback...`);
-      
-      const OPENAI_API_KEY = Deno.env.get("OPENAI_API_KEY");
-      if (!OPENAI_API_KEY) {
-        throw new Error(response.status === 429 ? "Rate limits exceeded, please try again later." : "Payment required, please add funds to your Lovable AI workspace.");
-      }
-
-      const openaiResponse = await fetch("https://api.openai.com/v1/chat/completions", {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${OPENAI_API_KEY}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          model: "gpt-4o-mini",
-          messages: [
-            { role: 'system', content: systemPrompt },
-            { role: 'user', content: userPrompt }
-          ],
-        }),
-      });
-
-      if (!openaiResponse.ok) {
-        throw new Error(`OpenAI fallback error: ${openaiResponse.status}`);
-      }
-
-      const openaiData = await openaiResponse.json();
-      devotionalContent = openaiData.choices[0].message.content;
-      console.log("Using OpenAI fallback response");
-    } else if (!response.ok) {
+    if (!response.ok) {
       const errorText = await response.text();
-      console.error('Lovable AI error:', response.status, errorText);
-      throw new Error(`AI service error: ${response.status}`);
-    } else {
-      const rawText = await response.text();
-      console.log('Raw AI response:', rawText);
-
-      let data;
-      try {
-        data = JSON.parse(rawText);
-      } catch (parseError) {
-        console.error('JSON parse error:', parseError, 'Raw text:', rawText);
-        throw new Error('Failed to parse AI response');
-      }
-
-      devotionalContent = data.choices?.[0]?.message?.content;
-      if (!devotionalContent) {
-        throw new Error('No content in AI response');
-      }
+      console.error('OpenAI error:', response.status, errorText);
+      throw new Error(`OpenAI error: ${response.status}`);
     }
 
-    // Save devotional to database without user_id (anonymous)
+    const data = await response.json();
+    const devotionalContent = data.choices?.[0]?.message?.content;
+    if (!devotionalContent) throw new Error('No content in AI response');
+
     const { error: insertError } = await supabaseClient
       .from('devotionals')
-      .insert({
-        user_id: null,
-        content: devotionalContent
-      });
+      .insert({ user_id: null, content: devotionalContent });
 
-    if (insertError) {
-      console.error('Error saving devotional:', insertError);
-      // Continue even if save fails - return content to user
-    } else {
-      console.log('Devotional saved successfully');
-    }
-
-    console.log('Devotional generated successfully');
+    if (insertError) console.error('Error saving devotional:', insertError);
 
     return new Response(
       JSON.stringify({ content: devotionalContent }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
-
   } catch (error) {
     console.error('Error in generate-devotional function:', error);
     return new Response(
